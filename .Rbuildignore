@@ -1,0 +1,7 @@
+^Figures$
+^test$
+^INPUT$
+^OUTPUT$
+^TSF$
+^.*\.Rproj$
+^\.Rproj\.user$

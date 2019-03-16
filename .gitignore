@@ -1,0 +1,14 @@
+.Rproj.user
+.RData
+.Rhistory
+*.log
+
+# TIMESAT
+TSF/
+# data/
+
+# Figures
+*.pdf
+*.csv
+*.rda
+*.RDS
