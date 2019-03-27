@@ -3,11 +3,6 @@ library(Ipaper)
 library(foreach)
 library(iterators)
 
-which_max <- function(x) {
-    I <- which.max(abs(x))
-    c(value = x[I], pos = I)
-}
-
 # source("../phenofit/test/load_pkgs.R")
 # load("INPUT/phenology_TP_AVHRR_multi-annual.rda")
 # colnames(df_pheno_avg)[1] <- "row"
@@ -127,11 +122,21 @@ if (s3_preseason) {
         # return
         list(pcor.max = pcor_max[1, ], preseason = pcor_max[2, ], data = d)
     } 
-    mat_preseason <- r %>% purrr::transpose() # %>% map(~do.call(rbind, .))
+    mat_preseason <- r %>% purrr::transpose() # 
+    mat_preseason[1:2] %<>% map(~do.call(rbind, .))
     save(mat_preseason, file = "OUTPUT/TP_010deg_preseason.rda")
     
-    # 2. prepare input
-    gridclip2_10@data <- as.data.frame(mat_preseason$value)
+    ## 2. Autumn phenology model -----------------------------------------------
+    load("data/00basement_TP.rda")
+    load('OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda')
+    load("OUTPUT/TP_010deg_preseason.rda")
+    
+    I_rem <- which(!(is.na(d_SOS_avg) | is.na(d_EOS_avg))) # about 2/3
+    gridclip2_10 <- gridclip_10[I_rem, ]
+    ngrid <- length(gridclip2_10)
+    
+    # 2.1 max_pcor
+    gridclip2_10@data <- as.data.frame(mat_preseason$pcor.max)
     brks <- critical_pcor(32, 3) %>% c(1) %>% c(-rev(.), 0, .) %>% round(3)
 
     g <- spplot_grid(gridclip2_10, colors = colors$corr, brks = brks, layout = c(2, 3), 
@@ -139,4 +144,110 @@ if (s3_preseason) {
             title = list(x=76.5, y=39, cex=1.5),
             hist = list(origin.x=77, origin.y=27, A=15, by = 0.5, axis.x.text = FALSE, ylab.offset = 2.5)))
     write_fig(g, "Figure_s2_max_pcor.pdf", 10, 7.1)
+    
+    # 2.2 preseason pcor
+    mat_pcor <- foreach(d = mat_preseason$data, i = icount(),.combine = "rbind") %do% {
+            phenofit::runningId(i, 1000, ngrid)
+            I_nona <- is.na(d) %>% rowSums2(na.rm=TRUE) %>% {which(. == 0)}
+            d <- d[I_nona, ]
+            res <- pcor(d)$estimate
+            res <- res[-nrow(res), "EOS"]
+        } %>% set_rownames(NULL)
+    
+    gridclip2_10@data <- as.data.frame(mat_pcor)
+    brks <- critical_pcor(32, 3) %>% c(1) %>% c(-rev(.), 0, .) %>% round(3)
+    
+    g <- spplot_grid(gridclip2_10, colors = colors$corr, brks = brks, layout = c(2, 3), 
+                     pars = list(
+                         title = list(x=76.5, y=39, cex=1.5),
+                         hist = list(origin.x=77, origin.y=27, A=15, by = 0.5, axis.x.text = FALSE, ylab.offset = 2.5)))
+    write_fig(g, "Figure_preseason_pcor.pdf", 10, 7.1)
+    
+    # result indicates spring phenology has a weak influence on autumn phenology.
+    d <- mat_pcor %>% data.table() %>% cbind(row = 1:nrow(.), .) %>% melt("row", variable.name="varname")
+
+    ## 2.3 PLSR coefficient and contribution
+    InitCluster(6)
+    lst_pls <- foreach(d = mat_preseason$data, i = icount(),.combine = , 
+                       .packages = c("magrittr", "phenology")) %dopar% {
+            phenofit::runningId(i, 100, ngrid)
+            I_nona <- is.na(d) %>% matrixStats::rowSums2(na.rm=TRUE) %>% {which(. == 0)}
+            d <- d[I_nona, ] %>% as.matrix()
+            
+            X <- d[, 1:5] # METE + SOS
+            Y <- d[, 6, drop=FALSE]   # EOS 
+            
+            plsreg1_adj(X, Y, comps = 2, autoVars = TRUE, nminVar = 2, minVIP = 0.8)
+            # m_opls <- opls(X %>% as.matrix(), Y %>% as.matrix(), predI = 2, plotL = FALSE, printL=FALSE) # 32 times slower 
+        } %>% 
+        purrr::transpose() # %>% map(~do.call(rbind, .))
+    
+    tidy_init <- . %>% map(~.[1, -1]) %>% do.call(rbind, .)
+    tidy_last <- . %>% map(~.[2, -1]) %>% do.call(rbind, .)
+
+    pls_init <- map(lst_pls, tidy_init)
+    pls_last <- map(lst_pls, tidy_last)
+    
+    save(pls_init, pls_last, file = "OUTPUT/TP_010deg_pls_preseason_OUTPUT.rda")
+
+    ## 2.4 The difference of considering SOS or not
+    InitCluster(6)
+    lst_pls <- foreach(d = mat_preseason$data, i = icount(),.combine = , 
+                       .packages = c("magrittr", "phenology")) %dopar% {
+            phenofit::runningId(i, 100, ngrid)
+            I_nona <- is.na(d) %>% matrixStats::rowSums2(na.rm=TRUE) %>% {which(. == 0)}
+            d <- d[I_nona, ] %>% as.matrix()
+            
+            X <- d[, 1:5] # METE + SOS
+            Y <- d[, 6, drop=FALSE]   # EOS 
+            
+            m        <-plsreg1_adj(X, Y, comps = 2, autoVars = FALSE)$init       # 
+            m_nonSOS <-plsreg1_adj(X[, -5], Y, comps = 2, autoVars = FALSE)$init # drop SOS
+            list(SOS = m, nonSOS = m_nonSOS)
+        } %>% 
+        purrr::transpose() %>% map(function(l){
+            transpose(l) %>% map(~do.call(rbind, .))
+        })
+    
+    tidy_init <- . %>% map(~.[1, -1]) %>% do.call(rbind, .)
+    tidy_last <- . %>% map(~.[2, -1]) %>% do.call(rbind, .)
+
+    pls_init <- map(lst_pls, tidy_init)
+    pls_last <- map(lst_pls, tidy_last)
 }
+
+{
+    # load("OUTPUT/TP_010deg_pls_preseason_OUTPUT.rda")
+    basesize <- 15
+    g1 <- pls_show(pls_init, basesize)
+    g2 <- pls_show(pls_last, basesize)
+    
+    write_fig(g2, "Figure4_PLSR_last.pdf", 12, 7)
+    write_fig(g1, "Figure4_PLSR_init.pdf", 12, 7)
+    write_fig(g1, "Figure4_PLSR_init.tif", 12, 7)
+}
+
+
+theme_set( theme_bw(base_size = 14))
+
+d <- data.table(row = 1:ngrid, init = pls_init$Q2$PRESS, last = pls_last$Q2$PRESS) %>% 
+    melt("row")
+ggplot(d, aes(variable, value, fill = variable)) + 
+    stat_boxplot(geom ='errorbar', width = 0.5) +
+    geom_boxplot2() + 
+    scale_x_discrete(labels = c("PLSR with all variables", "Stepwise PLSR")) +
+    labs(x = NULL, y = "PRESS") + 
+    theme(legend.position = "none")
+
+ggplot(d, aes(init, last)) + 
+    geom_hex() + 
+    geom_density2d() + 
+    geom_abline(color = "red", size = 1) + 
+    coord_equal() + 
+    scale_color_manual(values = RColorBrewer::brewer.pal(9, "Blues"))
+
+plot(,); abline(a = 0, b = 1, col = "red")
+hist(pls_init$Q2$PRESS - pls_last$Q2$PRESS)
+
+##下一步测试包含和未包含SOS时模型的预测差别： PRMSE and Trend
+# 圈出SOS显著地区域

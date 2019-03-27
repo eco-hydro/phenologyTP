@@ -24,3 +24,5 @@ library(ropls)
 library(RColorBrewer)
 
 # library(plsdepot)#already rewrite its PLSREG1 function
+library(matrixStats)
+library(ppcor)

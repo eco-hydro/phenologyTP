@@ -20,19 +20,20 @@ VIP_pls <- function(object) {
   #     stop("Only implemented for orthogonal scores algorithm.  Refit with 'method = \"oscorespls\"'")
   # if (nrow(object$Yloadings) > 1)
   #     stop("Only implemented for single-response models")
-  SS <- c(object$Yloadings)^2 * colSums(object$scores^2)
+  SS <- c(object$Yloadings)^2 * colSums(object$scores^2) # sd_y?
   Wnorm2 <- colSums(object$loading.weights^2)
   SSW <- sweep(object$loading.weights^2, 2, SS / Wnorm2, "*")
   sqrt(nrow(SSW) * apply(SSW, 1, cumsum) / cumsum(SS))
 }
+
 ## 对于plsdepot package, 返回的plsr model计算VIP
-VIP_plsreg <- function(object){
-  # Writed By Dongdong kong, 2016-05-30
-  SS <- c(object$y.loads)^2 * colSums(object$x.scores^2)
-  Wnorm2 <- colSums(object$raw.wgs^2)
-  SSW <- sweep(object$raw.wgs^2, 2, SS / Wnorm2, "*")
-  sqrt(nrow(SSW) * apply(SSW, 1, cumsum) / cumsum(SS))
-}
+# VIP_plsreg <- function(object){
+#   # Writed By Dongdong kong, 2016-05-30
+#   SS <- c(object$y.loads)^2 * colSums(object$x.scores^2)
+#   Wnorm2 <- colSums(object$raw.wgs^2)
+#   SSW <- sweep(object$raw.wgs^2, 2, SS / Wnorm2, "*")
+#   sqrt(nrow(SSW) * apply(SSW, 1, cumsum) / cumsum(SS))
+# }
 
 ## calculate each variables SSE, 2017-01-14
 SSX_plsreg1 <- function(fit, X){

@@ -2,7 +2,7 @@
 #  Writed By Dongdong Kong, 2017-01-07
 #  ------------------------------------
 #  origin limq2 = 0.0975, 2017-01-15
-#  
+
 #' plsreg1
 #' 
 #' @param crosval Logical indicating whether 10 fold cross-validation should be 
