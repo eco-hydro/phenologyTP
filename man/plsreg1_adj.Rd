@@ -5,7 +5,7 @@
 \title{plsreg1_adj}
 \usage{
 plsreg1_adj(X, Y, comps = 2, autoVars = TRUE, nminVar = 2,
-  minVIP = 0.8)
+  minVIP = 0.8, include.fitted = FALSE, ...)
 }
 \description{
 plsreg1_adj

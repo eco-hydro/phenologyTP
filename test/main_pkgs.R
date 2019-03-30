@@ -12,9 +12,9 @@ library(plyr)
 library(tidyverse)
 library(magrittr)
 
-library(parallel)
-# library(foreach)
-# library(iterators)
+# library(parallel)
+library(foreach)
+library(iterators)
 
 library(maptools)
 library(sf)
@@ -26,3 +26,12 @@ library(RColorBrewer)
 # library(plsdepot)#already rewrite its PLSREG1 function
 library(matrixStats)
 library(ppcor)
+
+library(Rcmip5)
+library(Ipaper)
+library(data.table)
+library(matrixStats)
+
+theme_set( theme_bw(base_size = 14) + 
+    theme(panel.grid.minor = element_blank()))
+

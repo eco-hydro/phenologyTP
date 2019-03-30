@@ -1,12 +1,12 @@
-# middle and std
-boxplot_data2 <- function(x){
+#' @export
+boxplot_sd <- function(x){
     x <- x[!is.na(x)]
     y <- mean(x)
     sd <- sd(x)
     list(y = y, ymin = y-sd, ymax = y+sd, sd = sd)
 }
 
-boxplot_data <- function(x) {
+boxplot_5p <- function(x) {
     tryCatch({
         boxplot.stats(x)$stats    
     }, error = function(){

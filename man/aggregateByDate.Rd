@@ -4,10 +4,10 @@
 \alias{aggregateByDate}
 \title{aggregateByDate}
 \usage{
-aggregateByDate(mat, dates, format = "\%m")
+aggregateByDate(mat, dates, format)
 }
 \arguments{
-\item{format}{"%Y-%m-%d": year, month, daty}
+\item{format}{'\%Y-\%m-\%d': year, month, day}
 }
 \description{
 aggregateByDate

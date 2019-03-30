@@ -1,8 +1,4 @@
-library(Rcmip5)
-library(Ipaper)
-library(foreach)
-library(iterators)
-
+source("test/main_pkgs.R")
 # source("../phenofit/test/load_pkgs.R")
 # load("INPUT/phenology_TP_AVHRR_multi-annual.rda")
 # colnames(df_pheno_avg)[1] <- "row"
@@ -192,30 +188,77 @@ if (s3_preseason) {
 
     ## 2.4 The difference of considering SOS or not
     InitCluster(6)
-    lst_pls <- foreach(d = mat_preseason$data, i = icount(),.combine = , 
+    lst_pls <- foreach(d = mat_preseason$data, 
+                       i = icount(),.combine = , 
                        .packages = c("magrittr", "phenology")) %dopar% {
             phenofit::runningId(i, 100, ngrid)
+            I      <- 1:nrow(d)
             I_nona <- is.na(d) %>% matrixStats::rowSums2(na.rm=TRUE) %>% {which(. == 0)}
             d <- d[I_nona, ] %>% as.matrix()
+            d <- d %>% as.matrix()
             
-            X <- d[, 1:5] # METE + SOS
+            X <- d[, 1:5]             # METE + SOS
             Y <- d[, 6, drop=FALSE]   # EOS 
             
-            m        <-plsreg1_adj(X, Y, comps = 2, autoVars = FALSE)$init       # 
-            m_nonSOS <-plsreg1_adj(X[, -5], Y, comps = 2, autoVars = FALSE)$init # drop SOS
+            m <-plsreg1_adj(X, Y, comps = 2, autoVars = FALSE, include.fitted = TRUE)$init %>% 
+                plsr_fix_ypred(I, I_nona)
+            # drop SOS
+            m_nonSOS <-plsreg1_adj(X[, -5], Y, comps = 2, autoVars = FALSE, include.fitted = TRUE)$init %>% 
+                plsr_fix_ypred(I, I_nona)
+
             list(SOS = m, nonSOS = m_nonSOS)
+            # need predictions
         } %>% 
         purrr::transpose() %>% map(function(l){
-            transpose(l) %>% map(~do.call(rbind, .))
+            ans <- transpose(l) 
+            ans %>% map(~do.call(rbind, .))
         })
+    
+    save(lst_pls, file = "OUTPUT/TP_010deg_PLSR_SOS and nonSOS.rda")
+    
+    # 可能还需要置信区间
+    load("OUTPUT/TP_010deg_PLSR_SOS and nonSOS.rda")
+    
+    {
+        Cairo::CairoPDF("FIgure5_SOS and non-SOS model.pdf", 7, 3)
+        par(mar = c(3, 3, 1, 1), mgp = c(1.8, 0.6, 0))
+        
+        lwd <- 1.5
+        Year <- 1982:2015
+        df_EOS_10deg %>% as.matrix() %>% colMeans2(na.rm = T) %>% 
+            plot(Year, ., col = "black", type = "b", pch = 21, bg = "grey80", lwd = lwd, 
+                 ylab = "EOS (day of year)", font.lab = 2, cex.axis = 1, cex.lab=1); grid()
+        lst_pls$SOS$ypred %>% colMeans2(na.rm = T) %>% lines(Year, ., col = "blue", lwd = lwd); grid()
+        lst_pls$nonSOS$ypred %>% colMeans2(na.rm = T) %>% lines(Year, ., col = "red", lwd = lwd); grid()
+        legend("topleft", c("Observation", "SOS model", "non-SOS model"), lty = 1, 
+               col = c("black", "blue", "red"), pch = c(1, NA, NA))
+        dev.off()
+    }
+    
+    ## over all prmse
+    d <- map(lst_pls, ~.$Q2[, "PRESS"]) %>% as.data.frame() %>% cbind(row = 1:ngrid, .) %>% 
+        melt("row") %>% data.table()
+    ggplot(d, aes(variable, value, fill = variable)) + 
+        stat_boxplot(geom = "errorbar", width = 0.5)  + 
+        geom_boxplot2()
     
     tidy_init <- . %>% map(~.[1, -1]) %>% do.call(rbind, .)
     tidy_last <- . %>% map(~.[2, -1]) %>% do.call(rbind, .)
-
+    
     pls_init <- map(lst_pls, tidy_init)
     pls_last <- map(lst_pls, tidy_last)
 }
 
+
+g_diff <-
+    ggplot(d, aes(variable, value, fill = variable)) +
+    stat_boxplot(geom = "errorbar", width = 0.5) + 
+    geom_boxplot2() + 
+    stat_summary(fun.data = label_sd, colour = "black", size = 4, geom = "text", vjust = -0.5) + 
+    theme(legend.position = "none") + 
+    labs(x = NULL, y = "PRESS")
+write_fig(g_diff, "Figure5a_diff of sos and non-sos.pdf", 4, 4)
+# 3.1 CHECK PLSR stepwise RESULT
 {
     # load("OUTPUT/TP_010deg_pls_preseason_OUTPUT.rda")
     basesize <- 15
@@ -225,29 +268,24 @@ if (s3_preseason) {
     write_fig(g2, "Figure4_PLSR_last.pdf", 12, 7)
     write_fig(g1, "Figure4_PLSR_init.pdf", 12, 7)
     write_fig(g1, "Figure4_PLSR_init.tif", 12, 7)
+
+    d <- data.table(row = 1:ngrid, init = pls_init$Q2$PRESS, last = pls_last$Q2$PRESS) %>% 
+        melt("row")
+    ggplot(d, aes(variable, value, fill = variable)) + 
+        stat_boxplot(geom ='errorbar', width = 0.5) +
+        geom_boxplot2() + 
+        scale_x_discrete(labels = c("PLSR with all variables", "Stepwise PLSR")) +
+        labs(x = NULL, y = "PRESS") + 
+        theme(legend.position = "none")
+    # ggplot(d, aes(init, last)) + 
+    #     geom_hex() + 
+    #     geom_density2d() + 
+    #     geom_abline(color = "red", size = 1) + 
+    #     coord_equal() + 
+    #     scale_color_manual(values = RColorBrewer::brewer.pal(9, "Blues"))
+    # plot(,); abline(a = 0, b = 1, col = "red")
+    # hist(pls_init$Q2$PRESS - pls_last$Q2$PRESS)
 }
-
-
-theme_set( theme_bw(base_size = 14))
-
-d <- data.table(row = 1:ngrid, init = pls_init$Q2$PRESS, last = pls_last$Q2$PRESS) %>% 
-    melt("row")
-ggplot(d, aes(variable, value, fill = variable)) + 
-    stat_boxplot(geom ='errorbar', width = 0.5) +
-    geom_boxplot2() + 
-    scale_x_discrete(labels = c("PLSR with all variables", "Stepwise PLSR")) +
-    labs(x = NULL, y = "PRESS") + 
-    theme(legend.position = "none")
-
-ggplot(d, aes(init, last)) + 
-    geom_hex() + 
-    geom_density2d() + 
-    geom_abline(color = "red", size = 1) + 
-    coord_equal() + 
-    scale_color_manual(values = RColorBrewer::brewer.pal(9, "Blues"))
-
-plot(,); abline(a = 0, b = 1, col = "red")
-hist(pls_init$Q2$PRESS - pls_last$Q2$PRESS)
 
 ##下一步测试包含和未包含SOS时模型的预测差别： PRMSE and Trend
 # 圈出SOS显著地区域
