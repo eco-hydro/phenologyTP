@@ -4,10 +4,12 @@
 \alias{piecewise}
 \title{PieceWise Regression}
 \usage{
-piecewise(y)
+piecewise(y, year.origin = 1, predict = FALSE)
 }
 \arguments{
-\item{y}{}
+\item{y}{Numeric vector}
+
+\item{year.origin}{first year of y}
 }
 \description{
 PieceWise Regression

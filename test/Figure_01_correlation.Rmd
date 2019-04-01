@@ -1,0 +1,40 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+d_corr <- melt_list(l_corr, "type")
+d_corr[, level := cut(pvalue, c(-Inf, 0.05, 0.1, 0.2, 1),
+                      labels=c("P ≤ 0.05", "0.05 < P ≤ 0.1", "0.1 < P ≤ 0.2", "0.2 < P"))]
+# rm VIP_pheno
+d_corr <- d_corr[type != "VIP_pheno", ]
+d_corr_avg <- d_corr[, .(R = mean(R, na.rm = T)), .(type)][, label := sprintf("'(%s) %s'", letters[1:2], type)]
+d_corr_avg$label[1] <- "'(a) GIMMS'[3*g]"
+p <- ggplot(d_corr[!is.na(R)], aes(R, fill = level)) + 
+    geom_histogram(aes(y = ..count../sum(..count..) * 100)) + 
+    geom_vline(data = d_corr_avg, aes(xintercept = R), color = "red", linetype = 2) + 
+    geom_vline(xintercept = 0, color = "grey30", linetype = 1) + 
+    geom_text(data = d_corr_avg, aes(x = -Inf, y = Inf, label = label, fill = NULL), 
+              hjust = -0.1, vjust = 2, size = 5, parse = T) + 
+    facet_wrap(~type, nrow = 1) + 
+    labs(x = "Correlation (r)", y = "Percentage of pixels (%)", fill = "pvalue") + 
+    theme(panel.grid = element_blank(), 
+          strip.text = element_blank(), 
+          legend.position = c(1.01, 1.02), 
+          legend.justification = c(1, 1),
+          legend.background = element_blank()
+          )
+write_fig(p, "Figure1_corr_v2.pdf", 8, 3.5)
+d_corr[pvalue < 0.1, .N/ngrid*100, .(sign(R), type)]
+```
+
+```{r}
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

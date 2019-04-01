@@ -9,7 +9,7 @@ get_colorkey <- function(breaks, space = "bottom", is_factor = FALSE){
         labels = list(cex = 1.3, fontfamily = "Times", fontface = 2),
         axis.line = list(col = 'black'),
         rect = list(col = "white", lwd = 0.2), 
-        # tri.upper = TRUE,  tri.lower = TRUE, 
+        tri.upper = TRUE,  tri.lower = TRUE, 
         height = 1, space = space, tck = 1
     )
 

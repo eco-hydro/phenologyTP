@@ -7,12 +7,14 @@ check_turnpoint <- function(x, nyear = 34, min = 5) {
 
 #' PieceWise Regression
 #' 
-#' @param y
+#' @param y Numeric vector
+#' @param year.origin first year of y
 #' 
 #' @import segmented
 #' @export
-piecewise <- function(y){
-    n = length(y)
+piecewise <- function(y, year.origin = 1, predict = FALSE){
+    n <- length(y)
+    middle <- floor(n/2)
     brk <- NA
     pvalue <- NA
     
@@ -23,7 +25,7 @@ piecewise <- function(y){
         dtest <- davies.test(lm_fit, ~x, k = 10)
         pvalue <- dtest$p.value#pvalue越小越好
         #如果dtest返回的有brk，则将此brk作为segmented的起始值
-        brk_init <- tryCatch(floor(dtest$statistic[[1]]), error = function(e) 16)
+        brk_init <- tryCatch(floor(dtest$statistic[[1]]), error = function(e) middle)
         piece_fit <- segmented(lm_fit, seg.Z = ~x, brk = brk_init, 
                              control = seg.control(stop.if.error = FALSE, n.boot = 0, it.max = 100))
     
@@ -36,12 +38,35 @@ piecewise <- function(y){
         }
     }
 
-    brk %<>% check_turnpoint()
+    brk %<>% check_turnpoint(n, min = 5)
 
-    y_before <- y[1:brk]
-    y_after  <- y[(brk+1):length(x)]
+    y_a  <- y[1:brk]
+    y_b  <- y[(brk+1):length(x)]
 
-    trend <- rbind(mkTrend(y_before), mkTrend(y_after), mkTrend(y)) %>% 
+    trend_a   <- mkTrend(y_a)
+    trend_b   <- mkTrend(y_b)
+    trend_all <- mkTrend(y)
+
+    trend <- rbind(trend_a, trend_b, trend_all) %>% 
         data.table(period = c("before", "after", "whole"), .)
-    list(trend = trend, turnpoint = data.frame(brk = brk, pvalue = pvalue))
+    ans <- list(trend = trend, turnpoint = data.frame(brk = brk+year.origin-1, pvalue = pvalue))
+    
+    if (predict) {
+        ans$pred <- predict_mk(n, brk, trend_a, trend_b, year.origin)
+    }
+    ans
 }
+
+predict_mk <- function(n, brk, trend_a, trend_b, year.origin = 1){
+    x_a = (1:brk)
+    x_b = ((brk+1)):n
+    y_a = trend_a['slp']*x_a + trend_a['intercept']
+    y_b = trend_b['slp']*x_b + trend_b['intercept']
+
+    d <- rbind(data.table(x = x_a , y = y_a, period = "before"), 
+        data.table(x = x_b, y = y_b, period = "after"))
+
+    d$x <- d$x + year.origin - 1
+    d
+}
+

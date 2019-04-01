@@ -1,6 +1,6 @@
 #' @importFrom raster raster resample
 #' @export
-resample2_10deg <- function(gridclip, df){
+resample2_10deg <- function(gridclip, df, range){
     cellsize_10 <- 1/10
     lat_10 <- seq(range[1]+cellsize_10/2, range[2], cellsize_10)
     lon_10 <- seq(range[3]+cellsize_10/2, range[4], cellsize_10)

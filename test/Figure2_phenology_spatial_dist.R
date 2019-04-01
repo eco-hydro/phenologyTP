@@ -14,14 +14,10 @@ colnames(df_pheno_avg)[1] <- "row"
     
     sp_layout <- list("sp.polygons", poly_veg, first = FALSE)
     
-    A = 20
+    A     = 20
     ntick = 2
-    by = 0.6
-    
-    brks_SOS  <- c(-Inf, seq(120, 170, 5), Inf)
-    # brks_SOS  <- c(-Inf, seq(100, 150, 10), Inf)
-    a <- 265; b <- 275
-    brks_EOS <- c(-Inf, seq(255, a-1, 5), seq(a, b-1, 5), seq(b, 290, 5), Inf)
+    by    = 0.6
+        
     # ps <- foreach(d_avg = lst_avg, meth = names(lst_avg)) %do% {
         # gridclip <- fill_grid(gridclip, d_avg)
         gridclip <- fill_grid(gridclip, df_pheno_avg)
@@ -29,11 +25,10 @@ colnames(df_pheno_avg)[1] <- "row"
         
         p_SOS <- spplot_grid(gridclip, metric_spring[2], #[-c(7, 9)], 
                                panel.title = "(a) SOS", 
-                               brks = brks_SOS, colors = colors$SOS)
+                               brks = brks$SOS, colors = colors$SOS)
         p_EOS <- spplot_grid(gridclip,  metric_autumn[2], #[-c(6, 7, 9)], 
                                panel.title = "(b) EOS",
-                               brks = brks_EOS, colors = colors$EOS, 
-                               by = 0.6)
+                               brks = brks$EOS, colors = colors$EOS)
         
         g <- arrangeGrob(p_SOS, p_EOS, nrow = 1)
     # }

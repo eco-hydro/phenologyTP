@@ -32,6 +32,14 @@ library(Ipaper)
 library(data.table)
 library(matrixStats)
 
+
+file_pheno_010    <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
+file_pheno_010_3s <- "OUTPUT/phenology_TP_phenology_010deg_3s.rda"
+
+## 
 theme_set( theme_bw(base_size = 14) + 
     theme(panel.grid.minor = element_blank()))
 
+A     = 20
+ntick = 2
+by    = 0.6

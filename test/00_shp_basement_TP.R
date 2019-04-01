@@ -40,7 +40,6 @@ baesdata <- function(outfile = 'data/00basement_TP.rda'){
     st <- st[I_rem, ]
     sp <- sp[I_rem, ]
 
-    range <- c(25, 40, 73, 104)
     cellsize <- 0.1
     grid_10 <- get_grid(range, cellsize)
 

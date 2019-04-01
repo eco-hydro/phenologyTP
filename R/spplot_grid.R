@@ -82,6 +82,7 @@ spplot_grid <- function(
         grid, zcols, 
         panel.title = NULL, 
         brks, colors, col.rev = FALSE, 
+        toFactor = TRUE, 
         sub.hist = TRUE, 
         grob = NULL, bbox = c(0, 0.5, 0.5, 1),
         xlim = c(73.5049, 104.9725), ylim = c(25.99376, 40.12632),
@@ -103,7 +104,10 @@ spplot_grid <- function(
 
         # cut into factor
         df <- grid[, zcols]@data
-        df <- lapply(df, cut, brks) %>% as.data.frame()
+        if (toFactor) {
+            # drawkey can't support factor well
+            df <- lapply(df, cut, brks) %>% as.data.frame()
+        }
         levels <- cut(1, brks) %>% levels()
         grid@data <- df
     }

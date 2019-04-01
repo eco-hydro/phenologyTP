@@ -16,9 +16,13 @@ colors <- list(
 )
 
 a <- 4500; b <- 5500 # dem
+a_EOS <- 265; b_EOS <- 275
+
 brks <- list(
     dem  = c(seq(3000, a-1, 250), seq(a, b-1, 125), seq(b, 7000, 250)),
     Tavg = c(seq(-10, 5, 1)), 
     Prec = c(seq(100, 400, 50),500, 600, 700, 800), 
-    Srad = c(seq(150, 270, 10)) 
+    Srad = c(seq(150, 270, 10)), 
+    SOS  = seq(120, 170, 5), 
+    EOS  = c(seq(255, a_EOS-1, 5), seq(a_EOS, b_EOS-1, 5), seq(b_EOS, 290, 5))
 ) %>% map(~c(-Inf, ., Inf))
