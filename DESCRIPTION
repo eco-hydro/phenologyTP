@@ -2,7 +2,7 @@ Package: phenology
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
-Author: Who wrote it
+Author: Dongdong Kong
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
@@ -16,14 +16,12 @@ Imports:
     Rcpp, 
     tibble, dplyr, purrr, stringr, tidyr, ggplot2, lubridate, 
     data.table, 
-    spam, 
     grid, gridExtra, 
     magrittr, plyr, reshape2, zoo, 
-    optimx, ucminf,
-    numDeriv, 
     grDevices, utils, stats,
-    shiny, jsonlite, DT,
-    matrixStats
+    matrixStats, 
+    ppcor,
+    foreach
 Suggests: knitr,
     rmarkdown,
     testthat

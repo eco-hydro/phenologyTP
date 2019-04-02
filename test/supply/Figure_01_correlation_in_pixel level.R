@@ -1,3 +1,4 @@
+source("test/main_pkgs.R")
 load(file_pheno_010_3s)
 
 ## 1. correlation 
@@ -23,19 +24,19 @@ if (Figure1) {
         geom_text(data = d_corr_avg, aes(x = -Inf, y = Inf, label = label, fill = NULL), 
                   hjust = -0.1, vjust = 2, size = 5, parse = T) + 
         facet_wrap(~type, nrow = 1) + 
-        labs(x = "Correlation (r)", y = "Percentage of pixels (%)", fill = "pvalue") + 
+        labs(x = "Correlation (r)", y = "Percentage of pixels (%)", fill = "p-value") + 
         theme(panel.grid = element_blank(), 
               strip.text = element_blank(), 
               legend.position = c(1.01, 1.02), 
               legend.justification = c(1, 1),
               legend.background = element_blank()
               )
-    write_fig(p, "Figure1_corr_v2.pdf", 8, 3.5)
+    write_fig(p, "Figure2_corr_v2.pdf", 8, 3.5)
     d_corr[pvalue < 0.1, .N/ngrid*100, .(sign(R), type)]
 }
 
 ## 2. inter-annual variation ---------------------------------------------------
-Figure2 = TRUE # TURE
+Figure2 = FALSE # TURE
 if (Figure2) {
 
     d <- foreach(l = lst_pheno) %do% {
@@ -59,7 +60,7 @@ if (Figure2) {
     
     trend <- t_sos$GIMMS
     
-    offset <- 120
+    offset <- 110
     lwd <- 0.95
     # confirmed that VIP phenology is wrong
     p <- ggplot(d[type != "'(c) VIP_pheno'"], aes(year, SOS)) + 
@@ -77,14 +78,18 @@ if (Figure2) {
               axis.title = element_text(size = 16)) + 
         geom_text(data = d_lab, aes(x = 1985, y = Inf, label = type), 
                   vjust = 1.5, hjust = 0, size = 5, parse = TRUE) +
-        facet_wrap(~type, ncol = 1, labeller = "label_parsed") + 
+        facet_wrap(~type, ncol = 1, labeller = "label_parsed", scale = "free_y") + 
         labs(x = "Year")
     # p + geom_line(data = trend$pred, aes(x, y))
     
-    write_fig(p, "Figure2_annual_variation.pdf", 9, 6)
+    write_fig(p, "Figure1_annual_variation.pdf", 9, 6)
 }
 # d <- d[type == "GIMMS"]
 # ggplot(d, aes(year, SOS)) + geom_line() + 
 #     geom_abline(data = t_sos$trend[type == "GIMMS"], slope = slp, intercept = intercept)
 
-
+## 3. PLSR result
+Figure3 = TRUE
+if (Figure3) {
+    
+}

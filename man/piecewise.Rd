@@ -4,12 +4,16 @@
 \alias{piecewise}
 \title{PieceWise Regression}
 \usage{
-piecewise(y, year.origin = 1, predict = FALSE)
+piecewise(y, year.origin = 1, predict = FALSE, brk = NULL)
 }
 \arguments{
 \item{y}{Numeric vector}
 
 \item{year.origin}{first year of y}
+
+\item{predict}{If true, returned predicted data of piecewise regression.}
+
+\item{brk}{If provide, changing point detected will not applied.}
 }
 \description{
 PieceWise Regression

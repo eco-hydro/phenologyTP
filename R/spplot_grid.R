@@ -82,7 +82,7 @@ spplot_grid <- function(
         grid, zcols, 
         panel.title = NULL, 
         brks, colors, col.rev = FALSE, 
-        toFactor = TRUE, 
+        toFactor = FALSE, 
         sub.hist = TRUE, 
         grob = NULL, bbox = c(0, 0.5, 0.5, 1),
         xlim = c(73.5049, 104.9725), ylim = c(25.99376, 40.12632),
@@ -103,7 +103,10 @@ spplot_grid <- function(
         cols <- colfun(ncolor) #%>% rev()    
 
         # cut into factor
-        df <- grid[, zcols]@data
+        
+        df <- grid@data[, zcols, drop = FALSE]
+        # browser()
+        # 
         if (toFactor) {
             # drawkey can't support factor well
             df <- lapply(df, cut, brks) %>% as.data.frame()
@@ -128,7 +131,7 @@ spplot_grid <- function(
         pars = pars
     )
     
-    is_factor <- is.factor(grid[, zcols]@data[[1]])
+    is_factor <- is.factor(grid@data[, zcols, drop = FALSE][[1]])
  
     if (!is_factor){ params$at <- brks }
     if (colorkey) {

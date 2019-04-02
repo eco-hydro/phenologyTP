@@ -42,7 +42,8 @@ get_perc.factor <- function(z){
 #' 
 #' @export
 panel.barchart2 <- function(z, subscripts, origin.x = 76, origin.y = 26.5, tck = 0.2, 
-    A = 15, by = 0.6, axis.x.text = TRUE, box.width = by*0.85, 
+    A = 15, by = 0.6, box.width = by*0.85, 
+    axis.x.text = TRUE, axis.x.text.angle = 90,
     col, 
     fontfamily = "Times", border = "transparent", ntick = 2, 
     ylab.offset = 2, 
@@ -119,9 +120,11 @@ panel.barchart2 <- function(z, subscripts, origin.x = 76, origin.y = 26.5, tck =
     )
 
     if (axis.x.text){
+        adj <- c(0.5, 1)
+        if (axis.x.text.angle == 90) adj <- c(1, 0.5)
         panel.text(x = tick_xpos[I], y = origin.y - tck*1.2, dots$brks[I],
-            fontfamily = fontfamily, 
-            cex = text.cex, adj = c(0.5, 1), font = 2, identifier = "xaxis.text")    
+            fontfamily = fontfamily, srt = axis.x.text.angle, 
+            cex = text.cex, adj = adj, font = 2, identifier = "xaxis.text")    
     }
     
     panel.text(tick_xpos[1] - ylab.offset, origin.y - tck, "Friction (%)", 

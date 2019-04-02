@@ -11,9 +11,12 @@ library(tidyverse)
 library(lubridate)
 library(oce)
 
+# 1. 计算积温生长季长度，并绘制空间图
+# 2. 为了核对物候指标提取的效果
+
 load("data/00basement_TP.rda")
 # source("../phenofit/test/load_pkgs.R")
-
+## 1. 计算积温生长季长度 --------------------------------------------------------
 system.time({
     killCluster()
     InitCluster(8)
@@ -80,7 +83,3 @@ gridclip_10@data <- df_pheno_avg[, 2:3] %>% as.data.frame()
     g <- arrangeGrob(p_SOS, p_EOS, nrow = 1)
     write_fig(g, "Figs1_thermal_growing season.pdf", 12, 3)
 }
-
-# multiple annual meteorological forcing
-files <- dir("G:/SciData/中国数据/Data_forcing_01dy_010deg", "*.nc$", full.names = T)
-varnames <- basename(files) %>% str_extract(".{4}(?=_)")

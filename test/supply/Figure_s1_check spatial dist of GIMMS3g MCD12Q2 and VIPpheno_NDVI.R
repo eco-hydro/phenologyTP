@@ -1,5 +1,7 @@
 source("test/main_pkgs.R")
 
+# Get spatial mean of 3 dataset.
+
 read_MCD12Q2 <- function(file){
     rgdal::readGDAL(file, silent = TRUE)[seq(1, 8, 2)]@data 
 }

@@ -1,60 +1,4 @@
-## post-process
-library(grid)
-library(matrixStats)
-
-file_pheno_012 <- "OUTPUT/phenology_TP_AVHRR_phenofit.rda"
-file_pheno_010 <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
-
-# MAIN script ------------------------------------------------------------------
-load("data/00basement_TP.rda")
-
-indir <- "D:/Documents/OneDrive - mail2.sysu.edu.cn/phenology/AVHRR_TP_v0.1.2"
-files <- dir(indir, pattern = "*.RDS", full.names = TRUE)
-# file <- "D:/Documents/OneDrive - mail2.sysu.edu.cn/phenofit_20267.RDS"
-
-lst_pheno <- llply(files, read_pheno, .progress = "text")
-df_pheno <- lst_pheno %>% set_names(str_extract(files, "\\d{5}")) %>% melt_list("row")
-df_pheno$row %<>% as.numeric()
-
-df_pheno_avg <- df_pheno[, lapply(.SD, median, na.rm = T), .(row), 
-                         .SDcols = colnames(df_pheno)[-c(1,ncol(df_pheno))]]
-
-save(df_pheno, df_pheno_avg, file = file_pheno_012)
-# source('F:/phenology/phenology/phenology_TP/test/Figure2_phenology_spatial_dist.R')
-
-Fig1_data = TRUE
-if (Fig1_data) {
-    load(file_pheno_012)
-    df_temp <- df_pheno[, .(row, year = year(origin), TRS2.sos, TRS6.eos)]
-    # mask outlier
-    df_temp[, `:=`(TRS2.sos = mask_outlier(TRS2.sos), TRS6.eos = mask_outlier(TRS6.eos)), .(row)]
-
-    df_SOS <- df_temp %>% dcast(row~year, value.var = "TRS2.sos")
-    df_EOS <- df_temp %>% dcast(row~year, value.var = "TRS6.eos")
-
-    df_SOS_10deg <- resample2_10deg(gridclip, df_SOS, range) 
-    df_EOS_10deg <- resample2_10deg(gridclip, df_EOS, range) 
-
-    gridclip_10@data <- df_SOS_10deg
-    gridclip_10@data <- df_EOS_10deg
-
-    d_SOS_avg <- rowMeans2(df_SOS_10deg %>% as.matrix(), na.rm = TRUE)
-    d_EOS_avg <- rowMeans2(df_EOS_10deg %>% as.matrix(), na.rm = TRUE)
-    
-    # rm all NA grids
-    I_rem <- which(!(is.na(d_SOS_avg) | is.na(d_EOS_avg))) # about 2/3
-    gridclip2_10 <- gridclip_10[I_rem, ]
-    
-    df_SOS_10deg %<>% .[I_rem, ] 
-    df_EOS_10deg %<>% .[I_rem, ]
-    d_SOS_avg %<>% .[I_rem]
-    d_EOS_avg %<>% .[I_rem]
-    I_grid2_10 <- I_grid_10[I_rem]
-    
-    save(df_SOS, df_EOS, df_SOS_10deg, df_EOS_10deg, d_EOS_avg, d_SOS_avg, 
-        gridclip2_10, I_grid2_10, 
-        file = file_pheno_010)    
-}
+source("test/step0_tidy_phenofit_phenology.R")
 
 ## 2 pearson correlation -------------------------------------------------------
 d_corr <- corr_matrix(df_SOS[, -1] %>% as.matrix() %>% t(), 
@@ -125,41 +69,6 @@ if (Fig3_trend) {
 }
 
 ## 4. Time series of phenology (spatial average) -------------------------------
-
-Fig4_multiYear_trend = TRUE
-if (Fig4_multiYear_trend) {
-    load('OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda')
-
-    y_SOS <- df_SOS[, -1] %>% as.matrix() %>% colMeans2(na.rm = T)
-    y_EOS <- df_EOS[, -1] %>% as.matrix() %>% colMeans2(na.rm = T)
-
-    sd_SOS <- df_SOS[, -1] %>% as.matrix() %>% colSds(na.rm = T)
-    sd_EOS <- df_EOS[, -1] %>% as.matrix() %>% colSds(na.rm = T)
-
-    d <- list(SOS = data.frame(year = 1982:2015, y = y_SOS, sd = sd_SOS), 
-              EOS = data.frame(year = 1982:2015, y = y_EOS, sd = sd_EOS)) %>% 
-        map(~mutate(., ymin = y - sd, ymax = y+sd))
-        # melt_list("phase")
-
-    info_trend <- list(
-        SOS = piecewise(y_SOS),
-        EOS = piecewise(y_EOS) 
-    ) %>% purrr::transpose()
-    # we argue that SOS has a week affect on autumn phenology.
-    
-   
-    ggplot(d$SOS, aes(year, y)) + 
-        geom_line(size = lwd) + 
-        geom_line(data = d$EOS, aes(year, y - offset), color = "red", size =lwd) + 
-        # geom_ribbon(aes(ymin = ymin, ymax = ymax), alpha = 0.5, fill = "grey60") + 
-        # facet_wrap(~phase, scales = "free_y", ncol = 1) + 
-        scale_y_continuous("SOS", sec.axis = sec_axis(~.+offset, name = "EOS")) + 
-        theme(axis.text.y.right = element_text(color = "red"), 
-              axis.ticks.y.right = element_line(color = "red"), 
-              axis.title.y.right = element_text(color = "red"), 
-              axis.text = element_text(size = 13), 
-              axis.title = element_text(size = 14))
-}
 
 ## 5. Autumn phenology model ---------------------------------------------------
 

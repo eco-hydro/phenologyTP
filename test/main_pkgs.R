@@ -33,8 +33,13 @@ library(data.table)
 library(matrixStats)
 
 
+file_pheno_012    <- "OUTPUT/phenology_TP_AVHRR_phenofit.rda"
+file_pheno_010    <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
+
 file_pheno_010    <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
 file_pheno_010_3s <- "OUTPUT/phenology_TP_phenology_010deg_3s.rda"
+
+file_preseason <- "OUTPUT/TP_010deg_preseason2.rda"
 
 ## 
 theme_set( theme_bw(base_size = 14) + 
