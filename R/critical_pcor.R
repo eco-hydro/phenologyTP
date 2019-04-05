@@ -43,3 +43,9 @@ critical_pcor2 <- function(n, gn, alpha = c(0.1, 0.05, 0.01)){
 critical_autor <- function(n, alpha = c(0.1, 0.05, 0.01)) {
     Rc_acf <- qnorm(1 - alpha/2)/sqrt(n)
 }
+
+#' @export
+brks_pcor <- function(n = 34){
+    brks <- critical_pcor(n, 3) %>% c(1) %>% c(-rev(.), 0, .) %>% round(3)
+    brks
+}

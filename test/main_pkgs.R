@@ -27,11 +27,14 @@ library(RColorBrewer)
 library(matrixStats)
 library(ppcor)
 
-library(Rcmip5)
-library(Ipaper)
 library(data.table)
 library(matrixStats)
 
+# Myself packages 
+library(Ipaper)
+library(phenology)
+library(phenofit)
+library(Rcmip5)
 
 file_pheno_012    <- "OUTPUT/phenology_TP_AVHRR_phenofit.rda"
 file_pheno_010    <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
@@ -40,10 +43,18 @@ file_pheno_010    <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
 file_pheno_010_3s <- "OUTPUT/phenology_TP_phenology_010deg_3s.rda"
 
 file_preseason <- "OUTPUT/TP_010deg_preseason2.rda"
+file_plsr      <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS.rda"
 
 ## 
 theme_set( theme_bw(base_size = 14) + 
-    theme(panel.grid.minor = element_blank()))
+    # theme(panel.grid.minor = element_blank()) 
+    theme(legend.position = "none", panel.grid = element_blank()))
+
+
+titles_a <- c(expression(bold("(a) "*GIMMS[3*g]*" SOS")), 
+                expression(bold("(b) "*GIMMS[3*g]*" EOS")))
+    titles_b <- c("MCD12Q2", "VIP_Pheno") %>% rep(each = 2) %>% paste(c("SOS", "EOS"), sep = " ") %>% 
+                    sprintf("(%s) %s", letters[3:6], .)
 
 A     = 20
 ntick = 2

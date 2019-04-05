@@ -63,8 +63,8 @@ PLS_performIndex <- function(obj, varnames0, include.fitted = FALSE, ...){
     ypred  <- obj$y.pred
     ypred2[as.numeric(names(ypred))] <- ypred
 
-    # slope need * nyear = delta 
-    # Note that: Xx and Yy has been scaled. 
+    # slope need * nyear = delta  (linear regression used here)
+    # Note that: Xx and Yy has been scaled.
     attribute_change <- c(
         slope(Yy)*sd.y, # EOS 
         fill_missingVar(slope(Xx)*sd.x*reg.coefs, varnames0)) 

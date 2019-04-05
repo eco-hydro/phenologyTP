@@ -10,7 +10,8 @@ colors <- list(
     SOS = c("green4", "grey80", "firebrick1"), 
     # EOS = c("firebrick1", "orange3", "darkgoldenrod2", "grey80", RColorBrewer::brewer.pal(9, "Greens")[c(2, 4)+2]) # "yellow4"
     # EOS = RColorBrewer::brewer.pal(11, "BrBG")[1:6]
-    EOS = c("green4", "grey80", "firebrick1") %>% rev()
+    EOS = c("green4", "grey80", "firebrick1") %>% rev(), 
+    Blues = RColorBrewer::brewer.pal(9, "Blues")
     # EOS = c("firebrick1","orange3", "darkgoldenrod2", "grey80", "green2")
     # EOS = brewer.pal(11, 'BrBG')
 )

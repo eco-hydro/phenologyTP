@@ -4,7 +4,8 @@
 \alias{pls_show}
 \title{pls_show}
 \usage{
-pls_show(pls_obj, base_size = 14)
+pls_show(pls_obj, nyear = 34, hjust = 2, vjust = 2.5,
+  base_size = 14)
 }
 \description{
 pls_show

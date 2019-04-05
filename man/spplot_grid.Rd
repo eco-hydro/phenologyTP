@@ -5,11 +5,12 @@
 \title{spplot_grid}
 \usage{
 spplot_grid(grid, zcols, panel.title = NULL, brks, colors,
-  col.rev = FALSE, toFactor = TRUE, sub.hist = TRUE, grob = NULL,
+  col.rev = FALSE, toFactor = FALSE, sub.hist = TRUE, grob = NULL,
   bbox = c(0, 0.5, 0.5, 1), xlim = c(73.5049, 104.9725),
   ylim = c(25.99376, 40.12632), pars = list(title = list(x = 77, y =
   39, cex = 1.5), hist = list(origin.x = 77, origin.y = 28, A = 15, by =
-  0.4)), legend.space = "right", colorkey = TRUE, ...)
+  0.4)), legend.space = "right", colorkey = TRUE, lgd.title = NULL,
+  ...)
 }
 \description{
 spplot_grid

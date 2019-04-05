@@ -57,10 +57,17 @@ panel_hist <- function(x, y, z, subscripts, ...,
     i <- ifelse(is.null(dot$order), panel.number(), dot$order)
     panel.title <- ifelse(is.null(dot$panel.title), 
                           paste0("(",letters[i], ") ", dot$panel.titles[i]), 
-                          dot$panel.title)
+                          dot$panel.title[i])
     # browser()
     panel.text(pars$title$x, pars$title$y, panel.title, #english name: New_names[i])
                fontfamily = "Times", cex = pars$title$cex, font = 2, adj = 0)
+
+    ## Only for contribution label
+    # # mu <- median(z[subscripts], na.rm = TRUE) %>% round(1)
+    # values = c(6.7, 10.8)
+    # label <- eval(substitute(expression(bolditalic(bar(RC)) == mu * " (%)"), list(mu = values[i])))
+    # panel.text(81.5, 26.5, label, fontfamily = "Times", cex = 1.2, adj = c(0,0))
+
     if (sub.hist) {
         params <- listk(z, subscripts, ntick = 3, ...) %>% 
             c(., pars$hist)
@@ -88,7 +95,9 @@ spplot_grid <- function(
         xlim = c(73.5049, 104.9725), ylim = c(25.99376, 40.12632),
         pars = list(title = list(x=77, y=39, cex=1.5), 
             hist = list(origin.x=77, origin.y=28, A=15, by = 0.4)),
-        legend.space = "right", colorkey = TRUE, ...)
+        legend.space = "right", 
+        colorkey = TRUE, 
+        lgd.title = NULL, ...)
 {
     if (missing(zcols)) { zcols <- names(grid) }
     zcols %<>% intersect(names(grid@data))
@@ -135,7 +144,7 @@ spplot_grid <- function(
  
     if (!is_factor){ params$at <- brks }
     if (colorkey) {
-        params$colorkey <- get_colorkey(brks, legend.space, is_factor)$colorkey
+        params$colorkey <- get_colorkey(brks, legend.space, lgd.title, is_factor)$colorkey
     } else {
         params$colorkey <- FALSE
     }

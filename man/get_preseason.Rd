@@ -4,14 +4,17 @@
 \alias{get_preseason}
 \title{get_preseason}
 \usage{
-get_preseason(Tmin, Tmax, Prec, Srad, SOS, EOS, info_date, maxDays = 150)
+get_preseason(Tmin, Tmax, Prec, Srad, SOS, EOS, dates_mete,
+  DateRange_pheno = NULL, maxDays = 150)
 }
 \arguments{
 \item{Tmin, }{Tmax Prec, Srad: daily time-series}
 
 \item{SOS, }{EOS: yearly phenological metrics}
 
-\item{info_date}{date info of mete forcing, i.e. (date, year, yday)}
+\item{dates_mete}{dates of mete}
+
+\item{DateRange_pheno}{range of phenology data}
 
 \item{maxDays}{max length of preseason。}
 }

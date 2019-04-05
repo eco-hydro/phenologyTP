@@ -5,9 +5,10 @@
 \title{panel.barchart2}
 \usage{
 panel.barchart2(z, subscripts, origin.x = 76, origin.y = 26.5,
-  tck = 0.2, A = 15, by = 0.6, axis.x.text = TRUE, box.width = by
-  * 0.85, col, fontfamily = "Times", border = "transparent",
-  ntick = 2, ylab.offset = 2, text.cex = 1, ...)
+  tck = 0.2, A = 15, by = 0.6, box.width = by * 0.85,
+  axis.x.text = TRUE, axis.x.text.angle = 90, col,
+  fontfamily = "Times", border = "transparent", ntick = 2,
+  ylab.offset = 2, text.cex = 1, ...)
 }
 \arguments{
 \item{{[type]}}{perc      [description]}

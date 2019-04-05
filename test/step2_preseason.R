@@ -9,6 +9,7 @@ if (s3_preseason) {
     source("test/main_pkgs.R")
     load("data/00basement_TP.rda") 
     load(file_pheno_010)
+    # load(file_preseason)
     # mete data are sampled according to I_grid_10
     I_rem <- match(I_grid2_10, I_grid_10)
     
@@ -23,71 +24,94 @@ if (s3_preseason) {
     
     load("INPUT/TP_010deg_srad.rda")
     lst_srad %<>% do.call(cbind, .) %>% FUN_tidy
-    
-    dates <- seq(ymd('19820101'), ymd('20151231'), by = "day")
-    info_date <- data.table(date = dates, year = year(dates), yday = yday(dates))
-    
+
     ngrid <- nrow(gridclip2_10)
+
+    dates_mete <- seq(ymd('19820101'), ymd('20151231'), by = "day") 
+    lst_dates <- list(
+        GIMMS = c(ymd('19820101'), ymd('20151231')), 
+        MCD12Q2 = c(ymd('20010101'), ymd('20141231')), 
+        VIPpheno = c(ymd('19820101'), ymd('20141231')))
     
+    load(file_pheno_010_3s)
+    
+    ## 1. preseason
     InitCluster(7)
-    r <- foreach(
-        Tmin = lst_temp$Tmin, 
-        Tmax = lst_temp$Tmax,
-        Prec = lst_prec, 
-        Srad = lst_srad,
-        d_sos = df_SOS_10deg %>% t(), 
-        d_eos = df_EOS_10deg %>% t(), 
-        i = icount(), 
-        .packages = c("magrittr", "ppcor", "data.table", "foreach", "matrixStats", "phenology")
-        # .export = c()
-        ) %dopar% {
-        phenofit::runningId(i, 100, ngrid)
-        get_preseason(Tmin, Tmax, Prec, Srad, d_sos[, 1], d_eos[, 1], info_date)
-    } 
-    
-    mat_preseason <- r %>% purrr::transpose() # 
-    mat_preseason[1:2] %<>% map(~do.call(rbind, .))
-    save(mat_preseason, file = file_preseason)
+    l_preseason <- foreach(l_pheno = lst_pheno, DateRange = lst_dates, j = icount(2)) %do% {
+        if (j == 1) { DateRange = NULL }
+        
+        r <- foreach(
+            Tmin = lst_temp$Tmin, 
+            Tmax = lst_temp$Tmax,
+            Prec = lst_prec, 
+            Srad = lst_srad,
+            d_sos = l_pheno$SOS %>% t(), 
+            d_eos = l_pheno$EOS %>% t(),
+            i = icount(), 
+            .packages = c("magrittr", "ppcor", "data.table", "foreach", "matrixStats", "phenology")
+            # .export = c()
+            ) %dopar% {
+            phenofit::runningId(i, 200, ngrid)
+            get_preseason(Tmin, Tmax, Prec, Srad, d_sos[, 1], d_eos[, 1], dates_mete, DateRange)
+        } 
+        mat_preseason <- purrr::transpose(r) # 
+        mat_preseason[1:2] %<>% map(~do.call(rbind, .))
+        mat_preseason
+    }
+    map(l_preseason, ~.$data[[1]])
+
+    save(l_preseason, file = file_preseason)
     
     ## 2. Autumn phenology model -----------------------------------------------
     load("data/00basement_TP.rda")
-    load('OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda')
-    
-    file_preseason <- "OUTPUT/TP_010deg_preseason2.rda"
     load(file_preseason)
-    
-    ngrid <- length(gridclip2_10)
-    
-    # 2.1 max_pcor
-    gridclip2_10@data <- as.data.frame(mat_preseason$pcor.max)
-    brks <- critical_pcor(32, 3) %>% c(1) %>% c(-rev(.), 0, .) %>% round(3)
+    ngrid <- l_preseason$GIMMS$pcor.max %>% nrow
+    # load(file_pheno_010_3s)
 
-    g <- spplot_grid(gridclip2_10, colors = colors$corr, brks = brks, layout = c(2, 3), 
-        pars = list(
-            title = list(x=76.5, y=39, cex=1.5),
+    mat_preseason <- l_preseason$MCD12Q2
+    # 2.1 preseason max_pcor
+    foreach(mat_preseason = l_preseason, varname = names(l_preseason), i = icount()) %do% {
+        n = ifelse(i == 1, 34, 14)
+        brks <- brks_pcor(n)
+        gridclip2_10@data <- as.data.frame(mat_preseason$pcor.max)
+
+        g <- spplot_grid(gridclip2_10, colors = colors$corr, 
+                     brks = brks, layout = c(2, 3), toFactor = TRUE,
+                     pars = list(
+            title = list(x=76.5, y=39, cex=1.5), 
             hist = list(origin.x=77, origin.y=27, A=15, by = 0.5, axis.x.text = FALSE, ylab.offset = 2.5)))
-    write_fig(g, "Figure_s2_max_pcor_v2.pdf", 10, 7.1)
+        outfile = sprintf('Figure_s2_max_pcor_%s.pdf', varname)
+        write_fig(g, outfile, 10, 7.1)
+    }
     
     # 2.2 preseason pcor
-    mat_pcor <- foreach(d = mat_preseason$data, i = icount(),.combine = "rbind") %do% {
+    l_pcor <- foreach(mat_preseason = l_preseason, j = icount()) %do% {
+        mat_pcor <- foreach(d = mat_preseason$data, i = icount(),.combine = "rbind") %do% {
             phenofit::runningId(i, 1000, ngrid)
             I_nona <- is.na(d) %>% rowSums2(na.rm=TRUE) %>% {which(. == 0)}
             d <- d[I_nona, ]
             res <- pcor(d)$estimate
             res <- res[-nrow(res), "EOS"]
-        } %>% set_rownames(NULL)
+        }
+    }
     
-    gridclip2_10@data <- as.data.frame(mat_pcor)
-    brks <- critical_pcor(32, 3) %>% c(1) %>% c(-rev(.), 0, .) %>% round(3)
-    
-    g <- spplot_grid(gridclip2_10, colors = colors$corr, brks = brks, layout = c(2, 3), 
+    foreach(mat_pcor = l_pcor, varname = names(l_pcor), i = icount()) %do% {
+        n = ifelse(i == 1, 34, 14)
+        brks <- brks_pcor(n)
+        gridclip2_10@data <- as.data.frame(mat_pcor)
+
+        g <- spplot_grid(gridclip2_10, colors = colors$corr, 
+                     brks = brks, layout = c(2, 3), toFactor = TRUE,
                      pars = list(
-                         title = list(x=76.5, y=39, cex=1.5),
-                         hist = list(origin.x=77, origin.y=27, A=15, by = 0.5, axis.x.text = FALSE, ylab.offset = 2.5)))
-    write_fig(g, "Figure_preseason_pcor.pdf", 10, 7.1)
+            title = list(x=76.5, y=39, cex=1.5), 
+            hist = list(origin.x=77, origin.y=27, A=15, by = 0.5, axis.x.text = FALSE, ylab.offset = 2.5)))
+        outfile = sprintf('Figure_s2_preseason_pcor_%s.pdf', varname)
+        write_fig(g, outfile, 10, 7.1)
+    }
     
     # result indicates spring phenology has a weak influence on autumn phenology.
-    d <- mat_pcor %>% data.table() %>% cbind(row = 1:nrow(.), .) %>% melt("row", variable.name="varname")
+    # Boxplot 
+    # d <- mat_pcor %>% data.table() %>% cbind(row = 1:nrow(.), .) %>% melt("row", variable.name="varname")
 
     ## 2.3 PLSR coefficient and contribution
     # InitCluster(6)
@@ -112,66 +136,33 @@ if (s3_preseason) {
     # 
     # save(pls_init, pls_last, file = "OUTPUT/TP_010deg_pls_preseason_OUTPUT.rda")
 
-    ## 2.4 The difference of considering SOS or not
-    InitCluster(6)
-    lst_pls <- foreach(d = mat_preseason$data, 
-                       i = icount(),.combine = , 
-                       .packages = c("magrittr", "phenology")) %dopar% {
-            phenofit::runningId(i, 100, ngrid)
-            plsr_attributable(d)
-            # need predictions
-        } %>% 
-        purrr::transpose() %>% map(function(l){
-            ans <- transpose(l) 
-            ans %>% map(~do.call(rbind, .))
-        })
+    ## over all PRESS
+    # d <- map(lst_plsr, ~.$Q2[, "PRESS"]) %>% as.data.frame() %>% cbind(row = 1:ngrid, .) %>% 
+    #     melt("row") %>% data.table()
+    # ggplot(d, aes(variable, value, fill = variable)) + 
+    #     stat_boxplot(geom = "errorbar", width = 0.5)  + 
+    #     geom_boxplot2()
     
-    save(lst_pls, file = "OUTPUT/TP_010deg_PLSR_SOS and nonSOS.rda")
+    # tidy_init <- . %>% map(~.[1, -1]) %>% do.call(rbind, .)
+    # tidy_last <- . %>% map(~.[2, -1]) %>% do.call(rbind, .)
     
-    # 可能还需要置信区间
-    load("OUTPUT/TP_010deg_PLSR_SOS and nonSOS.rda")
-    
-    {
-        Cairo::CairoPDF("FIgure5_SOS and non-SOS model.pdf", 7, 3)
-        par(mar = c(3, 3, 1, 1), mgp = c(1.8, 0.6, 0))
-        
-        lwd <- 1.5
-        Year <- 1982:2015
-        df_EOS_10deg %>% as.matrix() %>% colMeans2(na.rm = T) %>% 
-            plot(Year, ., col = "black", type = "b", pch = 21, bg = "grey80", lwd = lwd, 
-                 ylab = "EOS (day of year)", font.lab = 2, cex.axis = 1, cex.lab=1); grid()
-        lst_pls$SOS$ypred %>% colMeans2(na.rm = T) %>% lines(Year, ., col = "blue", lwd = lwd); grid()
-        lst_pls$nonSOS$ypred %>% colMeans2(na.rm = T) %>% lines(Year, ., col = "red", lwd = lwd); grid()
-        legend("topleft", c("Observation", "SOS model", "non-SOS model"), lty = 1, 
-               col = c("black", "blue", "red"), pch = c(1, NA, NA))
-        dev.off()
-    }
-    
-    ## over all prmse
-    d <- map(lst_pls, ~.$Q2[, "PRESS"]) %>% as.data.frame() %>% cbind(row = 1:ngrid, .) %>% 
-        melt("row") %>% data.table()
-    ggplot(d, aes(variable, value, fill = variable)) + 
-        stat_boxplot(geom = "errorbar", width = 0.5)  + 
-        geom_boxplot2()
-    
-    tidy_init <- . %>% map(~.[1, -1]) %>% do.call(rbind, .)
-    tidy_last <- . %>% map(~.[2, -1]) %>% do.call(rbind, .)
-    
-    pls_init <- map(lst_pls, tidy_init)
-    pls_last <- map(lst_pls, tidy_last)
+    # pls_init <- map(lst_pls, tidy_init)
+    # pls_last <- map(lst_pls, tidy_last)
 }
 
 
-g_diff <-
-    ggplot(d, aes(variable, value, fill = variable)) +
-    stat_boxplot(geom = "errorbar", width = 0.5) + 
-    geom_boxplot2() + 
-    stat_summary(fun.data = label_sd, colour = "black", size = 4, geom = "text", vjust = -0.5) + 
-    theme(legend.position = "none") + 
-    labs(x = NULL, y = "PRESS")
-write_fig(g_diff, "Figure5a_diff of sos and non-sos.pdf", 4, 4)
+# g_diff <-
+#     ggplot(d, aes(variable, value, fill = variable)) +
+#     stat_boxplot(geom = "errorbar", width = 0.5) + 
+#     geom_boxplot2() + 
+#     stat_summary(fun.data = label_sd, colour = "black", size = 4, geom = "text", vjust = -0.5) + 
+#     theme(legend.position = "none") + 
+#     labs(x = NULL, y = "PRESS")
+# write_fig(g_diff, "Figure5a_diff of sos and non-sos.pdf", 4, 4)
+
 # 3.1 CHECK PLSR stepwise RESULT
-{
+s_plsr_stepwise = FALSE
+if (s_plsr_stepwise) {
     # load("OUTPUT/TP_010deg_pls_preseason_OUTPUT.rda")
     basesize <- 15
     g1 <- pls_show(pls_init, basesize)

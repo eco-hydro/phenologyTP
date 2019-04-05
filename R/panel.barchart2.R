@@ -98,7 +98,8 @@ panel.barchart2 <- function(z, subscripts, origin.x = 76, origin.y = 26.5, tck =
         y1 = tick_ypos, identifier = "yaxis.tick"
     )
     # yaxis.text
-    panel.text(x = tick_xpos[1]-tck-0.25*by, y = tick_ypos, tick,
+    panel.text(x = tick_xpos[1]-tck-0.25*by, y = tick_ypos, 
+        tick*100,
         fontfamily = fontfamily, 
         cex = text.cex, adj = 1, font = 2, identifier = "yaxis.text")
 
@@ -111,7 +112,12 @@ panel.barchart2 <- function(z, subscripts, origin.x = 76, origin.y = 26.5, tck =
         y1 = origin.y - tck/2, identifier = "xaxis.tick.minor"
     )
     # xaxis.tick.major
-    I <- seq(2, length(tick_xpos)-1, 4)
+    if (length(tick_xpos) <= 5) {
+        I <- seq(1, length(tick_xpos)-1)
+    } else {
+        # I <- seq(2, length(tick_xpos)-1, 2)
+        I <- seq(2, length(tick_xpos)-1, 4)
+    }
     panel.segments(
         x0 = tick_xpos[I], 
         x1 = tick_xpos[I],

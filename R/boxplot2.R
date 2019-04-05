@@ -26,7 +26,7 @@ boxplot2 <- function(d, varname = "perc", ylab, include.EOS = FALSE) {
     if (!include.EOS) {
         d <- d[variable != "EOS"]
     }
-    eval(parse(text = sprintf('d_avg <- d[, boxplot_data(%s), .(variable)]', varname)))
+    eval(parse(text = sprintf('d_avg <- d[, boxplot_5p(%s), .(variable)]', varname)))
     
     A = with(d_avg, max(ymax, na.rm = TRUE) - min(ymin, na.rm = TRUE))
     A.adj <- A*0.04
