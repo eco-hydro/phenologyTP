@@ -34,8 +34,29 @@ if (!file.exists(file_plsr)) {
     load(file_plsr)    
 }
 
+##
+{ 
+    # check Contrasting influence of Tmin and Tmin
+    map(lst_plsr, function(x){
+        d <- x$SOS$std.coefs %>% data.table()
+        r <- d[, .(sign(Tmin), sign(Tmax))] %>% {table(.)/ngrid} %>% as.numeric()
+        c(same = sum(r[c(1, 4)]), "diff"=sum(r[2:3]))
+    }) %>% do.call(rbind, .)
+    
+    # contribute
+    map(lst_plsr, function(x){
+        d <- x$SOS$attribute_change %>% data.table()
+        r <- d[, -1] %>% as.matrix() %>% abs() %>% {./rowSums2(.)} %>% as.data.table()
+        {r[, Tmin+Tmax]*100} %>% label_sd()
+        # r <- d[, .(sign(Tmin), sign(Tmax))] %>% {table(.)/ngrid} %>% as.numeric()
+        # c(same = sum(r[c(1, 4)]), "diff"=sum(r[2:3]))
+    }) %>% do.call(rbind, .)
+}
 
-{
+
+## Fig_34: RMSE of PLSR in the spatial -----------------------------------------
+Fig_34 = TRUE
+if (Fig_34) {
     ## 1.1 OVERALL RMSE
     d <- map(lst_plsr, function(l){
         map(l, ~data.table(row = 1:ngrid, .x$Q2)) %>% melt_list("type")
@@ -75,26 +96,89 @@ if (!file.exists(file_plsr)) {
     write_fig(p, "Figure7_RMSE_spatial.pdf", 10, 5)
 }
 
-## FIGURE 3 and 4
-Fig_34 = TRUE
-if (Fig_34) {
+## FIGURE 5 and 6
+Fig_56 = TRUE
+if (Fig_56) {
     temp <- foreach(lst = lst_plsr, varname = names(lst_plsr), i = icount()) %do% {
         nyear <- ifelse(i == 1, 34 , 14)
         vjust <- ifelse(i == 1, 2.5, 4)
         hjust <- ifelse(i == 1, 2, 1.7)
         
         foreach(obj = lst, type = names(lst)) %do% {
-            
             outfile <- sprintf("Figure4_PLSR_%s_%s.pdf", varname, type)
             g1 <- pls_show(obj, nyear, hjust, vjust); write_fig(g1, outfile, 12, 7)
         }
+        # only statistic the result of SOS model
     }
+    
+    d <- foreach(l = lst_plsr, i = icount()) %do% {
+        nyear <- ifelse(i == 1, 34 , 14)
+        as.data.table(l$SOS$attribute_change) * nyear
+    } %>% melt_list("type")
+    
+    d[, map(.SD, sd), .(type),.SDcols = colnames(d)[-7]]
+    d[, map(.SD, mean), .(type),.SDcols = colnames(d)[-7]]
+    
+    browser()
 }
 
 # lst_plsr$GIMMS$SOS$VIP
 
-## SOS VIP and MC
-{
+## Figure7: SOS relative contribution ------------------------------------------
+Figure7 = TRUE
+if (Figure7) {
+    devtools::load_all()
+    
+    d <- map(lst_plsr, function(l){
+        mat <- l$SOS$attribute_change[, -1] # rm EOS
+        d_perc <- abs(mat) %>% {./rowSums2(., na.rm = TRUE)*100} %>% data.table()
+        d_perc$SOS
+    }) %>% as.data.frame()
+    d <- cbind(d, 100-d)[, c(1, 3, 2, 4)]
+    gridclip2_10@data <- data.frame(d)
+    
+    names <- c(expression(bold("(a) RC of SOS " * "(GIMMS"[3*g]*")")),
+               expression(bold("(b) RC of mete " * "(GIMMS"[3*g]*")")),
+               expression(bold("(c) RC of SOS (MCD12Q2)")),
+               expression(bold("(d) RC of mete (MCD12Q2)")))
+    
+    pars = list(title = list(x=76, y=39, cex=1.5), 
+                hist = list(origin.x=77, origin.y=28, A=15, by = 0.6))
+    p <- spplot_grid(gridclip2_10, 
+                     brks = c(0, 5, 10, 20, 50, 80, 90, 95, 98, Inf), 
+                     colors = colors$Blues[1:9],#%>% rev(), 
+                     panel.title = names,
+                     toFactor = T, 
+                     pars = pars, ylab.offset = 2.5, 
+                     stat = list(show = TRUE, name="RC", unit="%", loc = c(83, 26.5)),
+                     lgd.title = "RMSE")
+    write_fig(p, "Figure7_relative_contribution.pdf", 11, 5.5)
+}
+
+## Figure_S3 Annual variation of simulated EOS ---------------------------------
+# 可能还需要置信区间
+Figure_S1 = TRUE
+if (Figure_S1) {
+    lst <- lst_plsr$GIMMS
+    Cairo::CairoPDF("Figure5_SOS and non-SOS model.pdf", 7, 3)
+    par(mar = c(3, 3, 1, 1), mgp = c(1.8, 0.6, 0))
+    
+    lwd <- 1.5
+    Year <- 1982:2015
+    df_EOS_10deg %>% as.matrix() %>% colMeans2(na.rm = T) %>% 
+        plot(Year, ., col = "black", type = "b", pch = 21, bg = "grey80", lwd = lwd, 
+             ylab = "EOS (day of year)", font.lab = 2, cex.axis = 1, cex.lab=1); grid()
+    lst$SOS$ypred %>% colMeans2(na.rm = T) %>% lines(Year, ., col = "blue", lwd = lwd); grid()
+    lst$`Non-SOS`$ypred %>% colMeans2(na.rm = T) %>% lines(Year, ., col = "red", lwd = lwd); grid()
+    legend("topleft", c("Observation", "SOS model", "Non-SOS model"), lty = 1, 
+           col = c("black", "blue", "red"), pch = c(1, NA, NA))
+    dev.off()
+}
+# https://www.maketecheasier.com/sync-onedrive-linux/
+
+## Figure_S3: SOS VIP and MC ---------------------------------------------------
+Figure_S3 = FALSE
+if (Figure_S3) {
     devtools::load_all()
     d <- map(lst_plsr, function(l){
         VIP <- l$SOS$VIP %>% .[, ncol(.)] # rm EOS
@@ -118,52 +202,3 @@ if (Fig_34) {
                      lgd.title = "RMSE")
     write_fig(p, "Figure8_VIP_MC_sign.pdf", 11.2, 3)
 }
-
-
-## SOS relative contribution
-{
-    devtools::load_all()
-    
-    d <- map(lst_plsr, function(l){
-        mat <- l$SOS$attribute_change[, -1] # rm EOS
-        d_perc <- abs(mat) %>% {./rowSums2(., na.rm = TRUE)*100} %>% data.table()
-        d_perc$SOS
-    }) %>% as.data.frame()
-    
-    gridclip2_10@data <- d
-    
-    names <- c(expression(bold("(a) GIMMS"[3*g])),
-               expression(bold("(d) MCD12Q2")))
-    
-    pars = list(title = list(x=77, y=39, cex=1.5), 
-                hist = list(origin.x=77, origin.y=28, A=15, by = 0.6))
-    p <- spplot_grid(gridclip2_10, 
-                     brks = c(0, 2, 5, 10, 20, 30, Inf), 
-                     colors = colors$Blues,#%>% rev(), 
-                     panel.title = names,
-                     toFactor = T, 
-                     pars = pars, ylab.offset = 2.5,
-                     lgd.title = "RMSE")
-    write_fig(p, "Figure7_relative_contribution.pdf", 11.2, 3)
-}
-
-# 可能还需要置信区间
-Fig_s1 = TRUE
-if (Fig_s1) {
-    lst <- lst_plsr$GIMMS
-    Cairo::CairoPDF("Figure5_SOS and non-SOS model.pdf", 7, 3)
-    par(mar = c(3, 3, 1, 1), mgp = c(1.8, 0.6, 0))
-    
-    lwd <- 1.5
-    Year <- 1982:2015
-    df_EOS_10deg %>% as.matrix() %>% colMeans2(na.rm = T) %>% 
-        plot(Year, ., col = "black", type = "b", pch = 21, bg = "grey80", lwd = lwd, 
-             ylab = "EOS (day of year)", font.lab = 2, cex.axis = 1, cex.lab=1); grid()
-    lst$SOS$ypred %>% colMeans2(na.rm = T) %>% lines(Year, ., col = "blue", lwd = lwd); grid()
-    lst$`Non-SOS`$ypred %>% colMeans2(na.rm = T) %>% lines(Year, ., col = "red", lwd = lwd); grid()
-    legend("topleft", c("Observation", "SOS model", "Non-SOS model"), lty = 1, 
-           col = c("black", "blue", "red"), pch = c(1, NA, NA))
-    dev.off()
-}
-
-# https://www.maketecheasier.com/sync-onedrive-linux/

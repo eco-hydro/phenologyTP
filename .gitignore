@@ -2,7 +2,7 @@
 .RData
 .Rhistory
 *.log
-# log.txt
+log.txt
 
 # TIMESAT
 TSF/
@@ -14,3 +14,10 @@ TSF/
 # Figures
 *.pdf
 *.tif
+*.svg
+*.png
+*.html
+
+# TEMP
+test/temp/
+doc/
