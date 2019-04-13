@@ -36,7 +36,7 @@ if (Figure1) {
 }
 
 ## 2. inter-annual variation ---------------------------------------------------
-Figure2 = FALSE # TURE
+Figure2 = TRUE # TURE
 if (Figure2) {
 
     d <- foreach(l = lst_pheno) %do% {
@@ -55,7 +55,7 @@ if (Figure2) {
     d_lab <- data.frame(type=types_new[1:2])
     d$type %<>% factor(levels = types, types_new)
     
-    t_sos <- dlply(d, .(type), function(d) piecewise(d$SOS, d$year[1])) # %>% purrr::transpose() %>% map(~melt_list(., "type"))
+    t_sos <- dlply(d, .(type), function(d) piecewise(d$SOS, d$year[1], brk = 17)) # %>% purrr::transpose() %>% map(~melt_list(., "type"))
     t_eos <- dlply(d, .(type), function(d) piecewise(d$EOS, d$year[1])) # %>% purrr::transpose() %>% map(~melt_list(., "type"))
     
     trend <- t_sos$GIMMS

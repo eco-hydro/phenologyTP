@@ -19,7 +19,7 @@ piecewise <- function(y, year.origin = 1, predict = FALSE, brk = NULL){
     middle <- floor(n/2)
     pvalue <- NA
     
-    if (!is.null(brk)) {
+    if (is.null(brk)) {
         if (length(unique(y)) > 3){#如果全部为0,则把该点数据剔除
             x <- seq_along(y)
             lm_fit <- lm(y ~x)
@@ -44,7 +44,7 @@ piecewise <- function(y, year.origin = 1, predict = FALSE, brk = NULL){
     }    
     
     y_a  <- y[1:brk]
-    y_b  <- y[(brk+1):length(x)]
+    y_b  <- y[(brk+1):length(y)]
 
     trend_a   <- mkTrend(y_a)
     trend_b   <- mkTrend(y_b)
