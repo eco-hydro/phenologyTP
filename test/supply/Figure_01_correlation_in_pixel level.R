@@ -1,44 +1,9 @@
 source("test/main_pkgs.R")
 load(file_pheno_010_3s)
 
-## 1. correlation 
-Figure1 = FALSE # TURE
-if (Figure1) {
-    l_corr <- foreach(l = lst_pheno, i = icount()) %do% {
-        X <- l$SOS %>% t()
-        Y <- l$EOS %>% t()
-        corr_matrix(X, Y)
-    } %>% set_names(names(lst_pheno))
-
-    d_corr <- melt_list(l_corr, "type")
-    d_corr[, level := cut(pvalue, c(-Inf, 0.05, 0.1, 0.2, 1),
-                          labels=c("P ≤ 0.05", "0.05 < P ≤ 0.1", "0.1 < P ≤ 0.2", "0.2 < P"))]
-    # rm VIP_pheno
-    d_corr <- d_corr[type != "VIP_pheno", ]
-    d_corr_avg <- d_corr[, .(R = mean(R, na.rm = T)), .(type)][, label := sprintf("'(%s) %s'", letters[1:2], type)]
-    d_corr_avg$label[1] <- "'(a) GIMMS'[3*g]"
-    p <- ggplot(d_corr[!is.na(R)], aes(R, fill = level)) + 
-        geom_histogram(aes(y = ..count../sum(..count..) * 100)) + 
-        geom_vline(data = d_corr_avg, aes(xintercept = R), color = "red", linetype = 2) + 
-        geom_vline(xintercept = 0, color = "grey30", linetype = 1) + 
-        geom_text(data = d_corr_avg, aes(x = -Inf, y = Inf, label = label, fill = NULL), 
-                  hjust = -0.1, vjust = 2, size = 5, parse = T) + 
-        facet_wrap(~type, nrow = 1) + 
-        labs(x = "Correlation (r)", y = "Percentage of pixels (%)", fill = "p-value") + 
-        theme(panel.grid = element_blank(), 
-              strip.text = element_blank(), 
-              legend.position = c(1.01, 1.02), 
-              legend.justification = c(1, 1),
-              legend.background = element_blank()
-              )
-    write_fig(p, "Figure2_corr_v2.pdf", 8, 3.5)
-    d_corr[pvalue < 0.1, .N/ngrid*100, .(sign(R), type)]
-}
-
 ## 2. inter-annual variation ---------------------------------------------------
-Figure2 = TRUE # TURE
+Figure1 = TRUE # TURE
 if (Figure2) {
-
     d <- foreach(l = lst_pheno) %do% {
         sos = l$SOS %>% colMeans2(na.rm = T)
         eos = l$EOS %>% colMeans2(na.rm = T)
@@ -87,6 +52,41 @@ if (Figure2) {
 # d <- d[type == "GIMMS"]
 # ggplot(d, aes(year, SOS)) + geom_line() + 
 #     geom_abline(data = t_sos$trend[type == "GIMMS"], slope = slp, intercept = intercept)
+
+## 2. correlation 
+Figure2 = FALSE # TURE
+if (Figure2) {
+    l_corr <- foreach(l = lst_pheno, i = icount()) %do% {
+        X <- l$SOS %>% t()
+        Y <- l$EOS %>% t()
+        corr_matrix(X, Y)
+    } %>% set_names(names(lst_pheno))
+
+    d_corr <- melt_list(l_corr, "type")
+    d_corr[, level := cut(pvalue, c(-Inf, 0.05, 0.1, 0.2, 1),
+                          labels=c("P ≤ 0.05", "0.05 < P ≤ 0.1", "0.1 < P ≤ 0.2", "0.2 < P"))]
+    # rm VIP_pheno
+    d_corr <- d_corr[type != "VIP_pheno", ]
+    d_corr_avg <- d_corr[, .(R = mean(R, na.rm = T)), .(type)][, label := sprintf("'(%s) %s'", letters[1:2], type)]
+    d_corr_avg$label[1] <- "'(a) GIMMS'[3*g]"
+    p <- ggplot(d_corr[!is.na(R)], aes(R, fill = level)) + 
+        geom_histogram(aes(y = ..count../sum(..count..) * 100)) + 
+        geom_vline(data = d_corr_avg, aes(xintercept = R), color = "red", linetype = 2) + 
+        geom_vline(xintercept = 0, color = "grey30", linetype = 1) + 
+        geom_text(data = d_corr_avg, aes(x = -Inf, y = Inf, label = label, fill = NULL), 
+                  hjust = -0.1, vjust = 2, size = 5, parse = T) + 
+        facet_wrap(~type, nrow = 1) + 
+        labs(x = "Correlation (r)", y = "Percentage of pixels (%)", fill = "p-value") + 
+        theme(panel.grid = element_blank(), 
+              strip.text = element_blank(), 
+              legend.position = c(1.01, 1.02), 
+              legend.justification = c(1, 1),
+              legend.background = element_blank()
+              )
+    write_fig(p, "Figure2_corr_v2.pdf", 8, 3.5)
+    d_corr[pvalue < 0.1, .N/ngrid*100, .(sign(R), type)]
+}
+
 
 ## 3. PLSR result
 Figure3 = TRUE
