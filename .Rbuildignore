@@ -5,3 +5,7 @@
 ^TSF$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^appveyor\.yml$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

@@ -6,6 +6,7 @@ boxplot_sd <- function(x){
     list(y = y, ymin = y-sd, ymax = y+sd, sd = sd)
 }
 
+#' @export
 boxplot_5p <- function(x) {
     tryCatch({
         boxplot.stats(x)$stats    
