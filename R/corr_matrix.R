@@ -2,8 +2,8 @@
 #' 
 #' Correlation of each pixel.
 #' 
-#' @param X [time, grid], the dimension of X and Y should be same.
-#' @param Y [time, grid]
+#' @param X `[time, grid]`, the dimension of X and Y should be same.
+#' @param Y `[time, grid]`
 #' 
 #' @import foreach iterators
 #' @importFrom data.table data.table

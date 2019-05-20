@@ -1,7 +1,7 @@
 #' panel.annotation
 #' 
 #' @param grob grid object
-#' @param bbox [xmin, xmax, ymin, ymax]
+#' @param bbox `[xmin, xmax, ymin, ymax]`
 #' @param ... ignored
 #' 
 #' @importFrom grid grid.draw pushViewport grid.grabExpr

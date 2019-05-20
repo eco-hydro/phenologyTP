@@ -110,7 +110,7 @@ spplot_grid <- function(
             mu <- median(x, na.rm = TRUE) %>% round(1)
             sd <- sd(x, na.rm = TRUE) %>% round(1)
             unit  <- sprintf("(%s)", stat$unit)
-            label <- eval(substitute(expression(bolditalic(bar(name)) == mu * unit), 
+            label <- eval(substitute(expression(bolditalic(tilde(name)) == mu * unit), 
                 c(list(mu=mu, sd=sd), stat)))
             label
         })

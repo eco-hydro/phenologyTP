@@ -15,7 +15,7 @@ list are phenology metrics (This time was 17 matrix, TRS2, TRS5, TR6, DES, GU, Z
 global params:
 pheno_obs.SOS, pheno_obs.EOS}
 
-\item{pheno_sat}{A matrix, dims = [year, methods], same as pheno_sat.grow,}
+\item{pheno_sat}{A matrix, dims = \link{year, methods}, same as pheno_sat.grow,}
 
 \item{pheno_obs}{A dataframe,  at least have year and DOY column}
 }

@@ -11,32 +11,32 @@ panel.barchart2(z, subscripts, origin.x = 76, origin.y = 26.5,
   ylab.offset = 2, text.cex = 1, ...)
 }
 \arguments{
-\item{{[type]}}{perc      [description]}
+\item{{[type]}}{perc      \link{description}}
 
-\item{{Number}}{origin.x  [description]}
+\item{{Number}}{origin.x  \link{description}}
 
-\item{{Number}}{origin.y  [description]}
+\item{{Number}}{origin.y  \link{description}}
 
-\item{{Number}}{tck       [description]}
+\item{{Number}}{tck       \link{description}}
 
-\item{{Number}}{dx        [description]}
+\item{{Number}}{dx        \link{description}}
 
-\item{{Number}}{A         [description]}
+\item{{Number}}{A         \link{description}}
 
-\item{{Number}}{by        [description]}
+\item{{Number}}{by        \link{description}}
 
 \item{{[type]}}{col       Colors}
 
-\item{{[type]}}{box.width [description]}
+\item{{[type]}}{box.width \link{description}}
 
-\item{{Number}}{ntick     [description]}
+\item{{Number}}{ntick     \link{description}}
 
-\item{{Number}}{text.cex  [description]}
+\item{{Number}}{text.cex  \link{description}}
 
-\item{{...[type]}}{[description]}
+\item{{...[type]}}{\link{description}}
 }
 \value{
-{[type]}              [description]
+{\link{type}}              \link{description}
 }
 \description{
 new panel function for lattice, plot barchart in the bottomleft corner of subplot

@@ -7,7 +7,7 @@
 plsr_attributable(d, include.fitted = TRUE)
 }
 \arguments{
-\item{d}{Pre-season data.frame returned by \code{\link{get_preseason}}.}
+\item{d}{Pre-season data.frame returned by \code{\link[=get_preseason]{get_preseason()}}.}
 }
 \description{
 This function only suits for EOS model, Tmin, Tmax, Prec, Srad and SOS as INPUT

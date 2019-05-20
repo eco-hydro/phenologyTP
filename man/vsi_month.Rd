@@ -7,7 +7,7 @@
 vsi_month(full, t1 = FALSE)
 }
 \arguments{
-\item{full}{monthly data.frame ([NDVI, t1, Prec, Srad, Tmin, Tavg, Tmax]) input data}
+\item{full}{monthly data.frame \code{[NDVI, t1, Prec, Srad, Tmin, Tavg, Tmax]} input data}
 }
 \description{
 vsi_month

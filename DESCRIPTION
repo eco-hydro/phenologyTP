@@ -20,6 +20,8 @@ Imports:
     magrittr, plyr, reshape2, zoo, 
     grDevices, utils, stats,
     matrixStats, 
+    pls, 
+    RColorBrewer, iterators, lattice, numDeriv, pls, raster, segmented, sp,
     ppcor,
     foreach
 Suggests: knitr,
@@ -29,3 +31,4 @@ URL: https://github.com/kongdd/phenofit
 BugReports: https://github.com/kongdd/phenofit/issues
 LinkingTo: 
     Rcpp
+Roxygen: list(markdown = TRUE)

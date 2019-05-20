@@ -1,0 +1,27 @@
+---
+title: "Autumn Phenology in Tibetan Plateau"
+author: "Dongdong Kong"
+date: "2019/5/19"
+output: 
+    bookdown::word_document2: 
+      highlight: haddock
+      reference_docx: F:/rmarkdown_template.docx
+      fig_caption: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Figure Captions
+
+* Figs 4 and 7: `source('test/step3_PLSR.R')`
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE, fig.cap = "An amazing plot2"}
+plot(pressure)
+```

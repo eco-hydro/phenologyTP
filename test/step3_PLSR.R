@@ -93,7 +93,7 @@ if (Fig_34) {
                      toFactor = T, 
                      pars = pars, ylab.offset = 2.5,
                      lgd.title = "RMSE")
-    write_fig(p, "Figure7_RMSE_spatial.pdf", 10, 5)
+    write_fig(p, "Figure4_RMSE_spatial.pdf", 10, 5)
 }
 
 ## FIGURE 5 and 6
@@ -137,10 +137,10 @@ if (Figure7) {
     d <- cbind(d, 100-d)[, c(1, 3, 2, 4)]
     gridclip2_10@data <- data.frame(d)
     
-    names <- c(expression(bold("(a) RC of SOS " * "(GIMMS"[3*g]*")")),
-               expression(bold("(b) RC of mete " * "(GIMMS"[3*g]*")")),
-               expression(bold("(c) RC of SOS (MCD12Q2)")),
-               expression(bold("(d) RC of mete (MCD12Q2)")))
+    names <- c(expression(bold("(a) RC" [SOS]  * " (GIMMS" [3*g]*")")),
+               expression(bold("(b) RC" [mete] * " (GIMMS" [3*g]*")")),
+               expression(bold("(c) RC" [SOS]  * " (MCD12Q2)")),
+               expression(bold("(d) RC" [mete] * " (MCD12Q2)")))
     
     pars = list(title = list(x=76, y=39, cex=1.5), 
                 hist = list(origin.x=77, origin.y=28, A=15, by = 0.6))
@@ -153,6 +153,7 @@ if (Figure7) {
                      stat = list(show = TRUE, name="RC", unit="%", loc = c(83, 26.5)),
                      lgd.title = "RMSE")
     write_fig(p, "Figure7_relative_contribution.pdf", 11, 5.5)
+    write_fig(p, "Figure7_relative_contribution.tif", 11, 5.5)
 }
 
 ## Figure_S3 Annual variation of simulated EOS ---------------------------------

@@ -1,6 +1,6 @@
 #' This function only suits for EOS model, Tmin, Tmax, Prec, Srad and SOS as INPUT
 #' 
-#' @param d Pre-season data.frame returned by \code{\link{get_preseason}}.
+#' @param d Pre-season data.frame returned by [get_preseason()].
 #' 
 #' @export
 plsr_attributable <- function(d, include.fitted = TRUE) {

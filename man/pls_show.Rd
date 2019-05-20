@@ -8,5 +8,5 @@ pls_show(pls_obj, nyear = 34, hjust = 2, vjust = 2.5,
   base_size = 14)
 }
 \description{
-pls_show
+VIP, MC, attributable change, relative contribution
 }

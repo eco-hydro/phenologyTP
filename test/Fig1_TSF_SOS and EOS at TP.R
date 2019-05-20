@@ -4,7 +4,7 @@
 
 ## MAIN SCIPTS -----------------------------------------------------------------
 
-load_data = nrun == 0#FALSE
+load_data = nrun = 0#FALSE
 if (load_data) {
     source("test/00_shp_basement_TP.R")
     
@@ -28,7 +28,7 @@ if (load_data) {
 
 # parameters of figure 
 {
-    source("test/TSF_main.R")
+    source("test/main_TSF.R")
     source("R/panel.barchart.sp.R")
     
     sp_layout <- list("sp.polygons", p_TP, first = FALSE)

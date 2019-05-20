@@ -82,7 +82,7 @@ vsi_year <- function(x, t1 = FALSE) plyr::llply(x, vsi_month, t1)
 
 
 #' vsi_month
-#' @param full monthly data.frame ([NDVI, t1, Prec, Srad, Tmin, Tavg, Tmax]) input data
+#' @param full monthly data.frame `[NDVI, t1, Prec, Srad, Tmin, Tavg, Tmax]` input data
 vsi_month <- function(full, t1 = FALSE){
   ## detrend function
   # det.func<-function(x) {

@@ -1,40 +1,42 @@
 # source("test/main_pkgs.R")
-library(lubridate)
-library(data.table)
-# library(grid)
+suppressMessages({
+    library(lubridate)
+    library(data.table)
+    # library(grid)
 
-library(lattice)
-library(latticeExtra)
-library(Cairo)
-library(scales)
+    library(lattice)
+    library(latticeExtra)
+    library(Cairo)
+    library(scales)
 
-library(plyr)
-library(tidyverse)
-library(magrittr)
+    library(plyr)
+    library(tidyverse)
+    library(magrittr)
 
-# library(parallel)
-library(foreach)
-library(iterators)
+    # library(parallel)
+    library(foreach)
+    library(iterators)
 
-library(maptools)
-library(sf)
-library(segmented)
-library(pls)
-library(ropls)
-library(RColorBrewer)
+    library(maptools)
+    library(sf)
+    library(segmented)
+    library(pls)
+    library(ropls)
+    library(RColorBrewer)
 
-# library(plsdepot)#already rewrite its PLSREG1 function
-library(matrixStats)
-library(ppcor)
+    # library(plsdepot)#already rewrite its PLSREG1 function
+    library(matrixStats)
+    library(ppcor)
 
-library(data.table)
-library(matrixStats)
+    library(data.table)
+    library(matrixStats)
 
-# Myself packages 
-library(Ipaper)
-library(phenology)
-library(phenofit)
-library(Rcmip5)
+    # Myself packages 
+    library(Ipaper)
+    library(phenology)
+    library(phenofit)
+    library(Rcmip5)
+})
 
 file_pheno_012    <- "OUTPUT/phenology_TP_AVHRR_phenofit.rda"
 file_pheno_010    <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
@@ -47,8 +49,12 @@ file_plsr      <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS.rda"
 
 ## 
 theme_set( theme_bw(base_size = 14) + 
+    theme(
+        # legend.position = "none", 
+        # panel.grid = element_blank(), 
+        panel.grid.minor = element_blank()
+        ))
     # theme(panel.grid.minor = element_blank()) 
-    theme(legend.position = "none", panel.grid = element_blank()))
 
 
 titles_a <- c(expression(bold("(a) "*GIMMS[3*g]*" SOS")), 

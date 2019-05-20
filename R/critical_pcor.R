@@ -5,11 +5,11 @@
 #' @param gn the number of given variables
 #' 
 #' @references
-#' [1] Chen Yanguang (2012), Geographical Data analysis with MATLAB. \cr
-#' [2] Kim, S. (2015) ppcor: An R Package for a Fast Calculation to Semi-partial 
+#' 1. Chen Yanguang (2012), Geographical Data analysis with MATLAB. \cr
+#' 2. Kim, S. (2015) ppcor: An R Package for a Fast Calculation to Semi-partial 
 #' Correlation Coefficients. Communications for Statistical Applications and Methods, 
 #' 22(6), 665-674. \cr
-#' [3] pcor p.value calculation in ppcor. \cr
+#' 3. pcor p.value calculation in ppcor. \cr
 #' 
 #' @examples
 #' critical_pcor(34, 2)

@@ -26,9 +26,11 @@ critical_pcor(34, 2)
 critical_pcor2(34, 2)
 }
 \references{
-[1] Chen Yanguang (2012), Geographical Data analysis with MATLAB. \cr
-[2] Kim, S. (2015) ppcor: An R Package for a Fast Calculation to Semi-partial 
-Correlation Coefficients. Communications for Statistical Applications and Methods, 
+\enumerate{
+\item Chen Yanguang (2012), Geographical Data analysis with MATLAB. \cr
+\item Kim, S. (2015) ppcor: An R Package for a Fast Calculation to Semi-partial
+Correlation Coefficients. Communications for Statistical Applications and Methods,
 22(6), 665-674. \cr
-[3] pcor p.value calculation in ppcor. \cr
+\item pcor p.value calculation in ppcor. \cr
+}
 }
