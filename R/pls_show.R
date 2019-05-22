@@ -9,7 +9,8 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = 2.5, base_size = 14
     library(gridExtra)
     library(data.table)
     theme_set( theme_bw(base_size = base_size) + 
-        theme(axis.text = element_text(size = base_size)))
+        theme(axis.text = element_text(size = base_size), 
+            axis.title = element_text(size = base_size + 1, face = "bold")))
 
     fontface = "bold"
     fontsize_statistic = 5

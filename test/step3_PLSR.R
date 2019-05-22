@@ -35,7 +35,8 @@ if (!file.exists(file_plsr)) {
 }
 
 ##
-{ 
+s1_statistic = FALSE
+if (s1_statistic) { 
     # check Contrasting influence of Tmin and Tmin
     map(lst_plsr, function(x){
         d <- x$SOS$std.coefs %>% data.table()
@@ -106,7 +107,11 @@ if (Fig_56) {
         
         foreach(obj = lst, type = names(lst)) %do% {
             outfile <- sprintf("Figure4_PLSR_%s_%s.pdf", varname, type)
-            g1 <- pls_show(obj, nyear, hjust, vjust); write_fig(g1, outfile, 12, 7)
+            outfile.tif <- sprintf("Figure4_PLSR_%s_%s.tif", varname, type)
+            
+            g1 <- pls_show(obj, nyear, hjust, vjust); 
+            # write_fig(g1, outfile, 12, 7.5)
+            write_fig(g1, gsub(".pdf$", ".png", outfile), 12, 7.5)
         }
         # only statistic the result of SOS model
     }

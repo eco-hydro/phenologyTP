@@ -15,7 +15,7 @@ if (Figure1) {
         list(
             SOS = data.table(year, doy = sos, sd = sd_sos), 
             EOS = data.table(year, doy = eos, sd = sd_eos)) %>% melt_list("phrase")
-    } %>% set_names(names(lst_pheno)) %>% melt_list("type")
+    } %>% melt_list("type")
     
     types <- c("GIMMS", "MCD12Q2", "VIP_pheno")
     types_new <- c("'(a) GIMMS'[3*g]", "'(b) MCD12Q2'", "'(c) VIP_pheno'")
@@ -53,23 +53,23 @@ if (Figure1) {
               legend.justification = c(0, 1))
         # scale_color_discrete(name = "Y series", labels = c("Y2", "Y1"))
     
-    p <- ggplot(d[type != "'(c) VIP_pheno'"], aes(year, SOS, color = type)) + 
-        geom_line(size = lwd) + 
-        geom_line(aes(y = EOS - offset), color = "red", size =lwd) + 
-        # geom_ribbon(aes(ymin = ymin, ymax = ymax), alpha = 0.5, fill = "grey60") + 
-        # facet_wrap(~phase, scales = "free_y", ncol = 1) + 
-        scale_y_continuous("SOS  (day of year)", sec.axis = sec_axis(~.+offset, name = "EOS (day of year)")) + 
-        theme(axis.text.y.right = element_text(color = "red"), 
-              axis.ticks.y.right = element_line(color = "red"), 
-              axis.title.y.right = element_text(color = "red"), 
-              # strip.text = element_text(size = 14),
-              strip.text = element_blank(),
-              axis.text = element_text(size = 14), 
-              axis.title = element_text(size = 16)) + 
-        geom_text(data = d_lab, aes(x = 1985, y = Inf, label = type), 
-                  vjust = 1.5, hjust = 0, size = 5, parse = TRUE) +
-        facet_wrap(~type, ncol = 1, labeller = "label_parsed", scale = "free_y") + 
-        labs(x = "Year")
+    # p <- ggplot(d[type != "'(c) VIP_pheno'"], aes(year, SOS, color = type)) + 
+    #     geom_line(size = lwd) + 
+    #     geom_line(aes(y = EOS - offset), color = "red", size =lwd) + 
+    #     # geom_ribbon(aes(ymin = ymin, ymax = ymax), alpha = 0.5, fill = "grey60") + 
+    #     # facet_wrap(~phase, scales = "free_y", ncol = 1) + 
+    #     scale_y_continuous("SOS  (day of year)", sec.axis = sec_axis(~.+offset, name = "EOS (day of year)")) + 
+    #     theme(axis.text.y.right = element_text(color = "red"), 
+    #           axis.ticks.y.right = element_line(color = "red"), 
+    #           axis.title.y.right = element_text(color = "red"), 
+    #           # strip.text = element_text(size = 14),
+    #           strip.text = element_blank(),
+    #           axis.text = element_text(size = 14), 
+    #           axis.title = element_text(size = 16)) + 
+    #     geom_text(data = d_lab, aes(x = 1985, y = Inf, label = type), 
+    #               vjust = 1.5, hjust = 0, size = 5, parse = TRUE) +
+    #     facet_wrap(~type, ncol = 1, labeller = "label_parsed", scale = "free_y") + 
+    #     labs(x = "Year")
     # p + geom_line(data = trend$pred, aes(x, y))
     
     write_fig(p, "Figure1_annual_variation.pdf", 9, 6)
