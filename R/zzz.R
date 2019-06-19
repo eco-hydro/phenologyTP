@@ -4,7 +4,7 @@
 #' @docType package
 #' @keywords Vegetation phenology package
 #' @description Vegetation phenology package
-#' @import magrittr numDeriv plyr pls
+#' @import magrittr numDeriv plyr pls Ipaper
 #' @import tibble ggplot2 
 #' @importFrom gridExtra arrangeGrob
 #' @importFrom data.table data.table as.data.table := is.data.table fwrite fread

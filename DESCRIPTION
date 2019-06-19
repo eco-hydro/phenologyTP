@@ -17,16 +17,22 @@ Imports:
     tibble, dplyr, purrr, stringr, tidyr, ggplot2, lubridate, 
     data.table, 
     grid, gridExtra, 
-    magrittr, plyr, reshape2, zoo, 
+    magrittr, reshape2, zoo, 
     grDevices, utils, stats,
-    matrixStats, 
-    pls, 
+    matrixStats,
+    pls,
     RColorBrewer, iterators, lattice, numDeriv, pls, raster, segmented, sp,
     ppcor,
-    foreach
+    plyr, 
+    foreach, 
+    Ipaper
 Suggests: knitr,
     rmarkdown,
     testthat
+Remotes:
+    kongdd/plyr, 
+    kongdd/foreach,
+    kongdd/Ipaper
 URL: https://github.com/kongdd/phenofit
 BugReports: https://github.com/kongdd/phenofit/issues
 LinkingTo: 
