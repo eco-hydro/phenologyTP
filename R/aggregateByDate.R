@@ -13,3 +13,14 @@ aggregateByDate <- function(mat, dates, format){
     }) %>% do.call(cbind, .)    
     res
 }
+
+
+#' @importFrom matrixStats rowMeans2
+#' @export
+multiYear_mean <- function(mat, nptperyear = 24){
+    dims  <- dim(mat)
+    ndim  <- length(dims)
+    ntime <- dims[ndim] # time in last column
+    
+    array(mat, c(dims[-ndim], nptperyear, ntime/nptperyear)) %>% array_mean(ndim + 1)
+}

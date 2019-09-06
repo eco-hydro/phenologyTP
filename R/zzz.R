@@ -17,10 +17,10 @@
 #' @importFrom utils object.size
 #' @importFrom grDevices dev.off cairo_pdf
 #' @import graphics
-#' @useDynLib phenology, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 NULL
 # stats
+# ' @useDynLib phenology, .registration = TRUE
 
 .onLoad <- function (libname, pkgname){
     if(getRversion() >= "2.15.1") {

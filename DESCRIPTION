@@ -13,7 +13,6 @@ RoxygenNote: 6.1.1
 Depends:
     R (>= 3.1)
 Imports: 
-    Rcpp, 
     tibble, dplyr, purrr, stringr, tidyr, ggplot2, lubridate, 
     data.table, 
     grid, gridExtra, 
