@@ -1,12 +1,6 @@
 
 ## ------------------------ GLOBAL VARIABLES -------------------------------
-Cairo_Pdf <- function(p, file, width = 6, height = 6, times = 1){
-    CairoPDF(file, width = width*times, height = height*times)
-    print(p)
-    dev.off()
-}
   
-
 ################################################################################
 Id_del <- c(16035, 18443, 20925, 21407, 21618, 21732, 21827)
 
@@ -69,4 +63,3 @@ changeLevels <- function(x, at){
     result[, i] <- cut(x[, i], breaks = at, include.lowest = T)
   result#quickly return
 }
-

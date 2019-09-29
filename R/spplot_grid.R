@@ -66,7 +66,7 @@ panel_hist <- function(x, y, z, subscripts, ...,
     if (!is.null(data.stat)) {
         loc   <- data.stat$loc # 81.5, 26.5
         label <- data.stat$label[[i]]
-        panel.text(loc[[1]], loc[[2]], label, fontfamily = "Times", cex = 1.2, adj = c(0,0))    
+        panel.text(loc[[1]], loc[[2]], label, fontfamily = "Times", cex = 1.2, adj = c(0.5,0))    
     }
 
     if (sub.hist) {
@@ -76,9 +76,6 @@ panel_hist <- function(x, y, z, subscripts, ...,
         do.call(panel.barchart2, params)
     }
 }
-
-xlim <- c(73.5049, 104.9725)
-ylim <- c(25.99376, 40.12632)
 
 #' spplot_grid
 #' 
