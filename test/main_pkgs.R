@@ -30,19 +30,24 @@ suppressMessages({
 
     library(data.table)
     library(matrixStats)
-
+    library(glue)
+    
     # Myself packages 
     library(Ipaper)
     library(phenology)
     library(phenofit)
     library(Rcmip5)
+
+    library(sp)
+    library(oce)
 })
 
 file_pheno_012    <- "OUTPUT/phenology_TP_AVHRR_phenofit.rda"
 file_pheno_010    <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
 
-file_pheno_010    <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
-file_pheno_010_3s <- "OUTPUT/phenology_TP_phenology_010deg_3s.rda"
+file_pheno_010       <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
+file_pheno_010_3s    <- "OUTPUT/phenology_TP_phenology_010deg_3s.rda"
+file_pheno_010_3s_V2 <- "OUTPUT/phenology_TP_phenology_010deg_3s_V2.rda"
 
 file_preseason <- "OUTPUT/TP_010deg_preseason2.rda"
 file_plsr      <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS.rda"

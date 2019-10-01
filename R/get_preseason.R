@@ -34,9 +34,7 @@ get_preseason <- function(Tmin, Tmax, Prec, Srad, SOS, EOS, dates_mete, DateRang
     d_pheno  <- data.table(SOS, EOS) # column vector,  = d_sos[, 1]
     I_nozero <- !(SOS == 0 & EOS == 0) # ZERO means NA: for VIP_pheno
 
-    mat_pcor <- foreach(j = 1:maxI,
-                        .combine = "rbind"
-                        ) %do% {
+    mat_pcor <- foreach(j = 1:maxI, .combine = "rbind" ) %do% {
         I_start <- EOS_avg - 15*j + 1
         if (I_start <= 0) { return(NULL)}
         

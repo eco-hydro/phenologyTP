@@ -22,3 +22,6 @@ TSF/
 test/temp/
 doc/
 parallel.R
+
+notebook
+*.ipynb

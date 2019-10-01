@@ -1,10 +1,30 @@
 source("test/main_pkgs.R")
 
+root <- "D:/Documents/OneDrive - mail2.sysu.edu.cn/SciData/TP_phenology_010deg"
+load("data/00basement_TP.rda")
+load(file_pheno_010)
+
+## GLOBAL FUNCTIONS ------------------------------------------------------------
 # Get spatial mean of 3 dataset.
+read_MCD12Q2_V6 <- function(file){
+    I_V6    <- c(1, 2, 7, 8, 9, 10, 13, 14)+1
+    I_bands <- I_V6[seq(1, 8, 2)]
+    x = rgdal::readGDAL(file, silent = TRUE)[I_bands]
+    
+    year <- str_extract(basename(file), "\\d{4}") %>% as.numeric()
+    
+    
+    doy_first <- { make_date(year, 1, 1) - 1 } %>% as.numeric()
+    x@data[x@data == 0] = NA
+    x@data %<>% subtract(doy_first)
+    
+    x@data
+}
 
 read_MCD12Q2 <- function(file){
-    rgdal::readGDAL(file, silent = TRUE)[seq(1, 8, 2)]@data 
+    rgdal::readGDAL(file, silent = TRUE)[seq(1, 8, 2)]@data + 1
 }
+
 read_VIPpheno <- function(file){
     rgdal::readGDAL(file, silent = TRUE)@data
 }
@@ -13,38 +33,49 @@ pheno_MOD      <- c("Greenup", "Maturity", "Senescence", "Dormancy")
 pheno_VIP      <- c("VIPpheno_SOS", "VIPpheno_EOS")
 pheno_GIMMS    <- c("GIMMS_SOS", "GIMMS_EOS")
 
-load("data/00basement_TP.rda")
-load(file_pheno_010)
+types = c("MCD12Q2_V5", "MCD12Q2_V6", "VIPpheno_NDVI") %>% 
+    set_names(., .)
+
+lst_pheno <- foreach(type = types, i = icount()) %do% {
+    runningId(i)
+    FUN = switch(type, 
+        MCD12Q2_V5 = read_MCD12Q2, 
+        MCD12Q2_V6 = read_MCD12Q2_V6, 
+        VIPpheno_NDVI = read_VIPpheno)
+    indir <- file.path(root, type)
+    files <- dir(indir, "*.tif", full.names = TRUE)
+    
+    l <- llply(files, FUN) %>% purrr::transpose() %>% 
+        map(~do.call(cbind, .))
+    if (length(l) == 4) {
+        l <- l[c(1, 4)] # Greenup, Dormancy
+        # names = pheno_MOD
+    } #else 
+    names = c("SOS", "EOS")
+    set_names(l, names) %>% map(~.[I_grid2_10, ])
+}
+
+lst_pheno$GIMMS = list(SOS = df_SOS_10deg, EOS = df_EOS_10deg) %>% map(as.matrix)
+save(lst_pheno, gridclip2_10, I_grid2_10, file = file_pheno_010_3s_V2)
+
+df <- map_depth(lst_pheno, 2, ~rowMeans2(., na.rm = TRUE)) %>% 
+    map(~as.data.table(.) %>% cbind(I_grid = I_grid2_10, .)) %>% melt_list("type_source")
+# dcast(df, I_grid~type_source, value.var = "EOS")
+
+# write_fig(spplot(x5, as.table = TRUE), "v5.tif", 8, 10)
+# write_fig(spplot(x6[1:8], as.table = TRUE), "v6.tif", 8, 10)
 
 ## MAIN ------------------------------------------------------------------------
-root <- "D:/Documents/OneDrive - mail2.sysu.edu.cn/SciData/TP_phenology_010deg"
-dirs <- dir(root, full.names = TRUE) # mcd12q2 and VIPpheno_NDVI
-
-lst_MCD12Q2 <- dir(dirs[1], "*.tif", full.names = TRUE) %>% 
-    llply(read_MCD12Q2) %>% purrr::transpose() %>% 
-    map(~do.call(cbind, .)) %>% 
-    set_names(pheno_MOD)
-df_avg <- map(lst_MCD12Q2, ~rowMeans2(., na.rm = TRUE)) %>% as.data.frame()
-
-lst_VIPpheno <- dir(dirs[2], "*.tif", full.names = TRUE) %>% 
-    llply(read_VIPpheno) %>% purrr::transpose() %>% 
-    map(~do.call(cbind, .)) %>% 
-    set_names(pheno_VIP)
-df_avg_VIPpheno <- map(lst_VIPpheno, ~rowMeans2(., na.rm = TRUE)) %>% as.data.frame()
-df_avg %<>% cbind(df_avg_VIPpheno)
-df_avg <- cbind(df_avg[I_grid2_10, ], GIMMS_SOS = d_SOS_avg, GIMMS_EOS = d_EOS_avg)
-rm(df_avg_VIPpheno)
+# resampled to 0.1 deg first
+# df_avg <- map(lst_MCD12Q2, ~rowMeans2(., na.rm = TRUE)) %>% as.data.frame()
+# df_avg_VIPpheno <- map(lst_VIPpheno, ~rowMeans2(., na.rm = TRUE)) %>% as.data.frame()
+# df_avg %<>% cbind(df_avg_VIPpheno)
+# df_avg <- cbind(df_avg[I_grid2_10, ], GIMMS_SOS = d_SOS_avg, GIMMS_EOS = d_EOS_avg)
+# rm(df_avg_VIPpheno)
 # gridclip2_10@data <- df_avg#[I_grid2_10, ]
 # spplot(gridclip2_10)
 
 ## 2. prepare inter-annual phenology metrics Time-series
-lst_pheno <- list(
-    GIMMS = list(SOS = df_SOS_10deg, EOS = df_EOS_10deg) %>% map(as.matrix),
-    MCD12Q2 = lst_MCD12Q2[c(1, 4)] %>% map(~.[I_grid2_10, ] %>% set_colnames(2001:2014)),
-    VIP_pheno = map(lst_VIPpheno, ~.[I_grid2_10, -1] %>% set_colnames(1982:2014))
-) %>% map(~set_names(., c("SOS", "EOS")))
-
-save(lst_pheno, gridclip2_10, I_grid2_10, file = file_pheno_010_3s)
 
 ## Figure 1. simple correlation analysis
 # source('test/supply/Figure_s1_check spatial dist of GIMMS3g MCD12Q2 and VIPpheno_NDVI.R')    
@@ -89,4 +120,4 @@ if (Fig_s1){
 # "Onset_Greenness_Decrease1", 
 # "Onset_Greenness_Decrease2", 
 # "Onset_Greenness_Minimum1", 
-# "Onset_Greenness_Minimum2", 
+# "Onset_Greenness_Minimum2",

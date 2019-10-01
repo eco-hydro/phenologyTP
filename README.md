@@ -13,3 +13,11 @@ You can install the released version of phenology from GitHub with:
 ``` r
 devtools:install.packages("kongdd/phenology_TP")
 ```
+
+# This repository replies heavily on `Rcmip5` and `Ipaper` package. 
+
+## Updates
+
+1. MCD12Q2 modified to V6
+2. meteorological forcing update to 2018
+

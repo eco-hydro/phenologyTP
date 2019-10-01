@@ -34,8 +34,44 @@ if (!file.exists(file_plsr)) {
     load(file_plsr)    
 }
 
+# MODIS and AVHRR were resampled into 0.1 deg
+mat_obs <- df_EOS_10deg %>% as.matrix()
+mat_pred <- lst_plsr$GIMMS$SOS$ypred
+
+yobs  <- colMeans2(mat_obs, na.rm = TRUE)
+ypred <- colMeans2(mat_pred, na.rm = TRUE)
+
+d_obs  <- mat2df(mat_obs)
+d_pred <- mat2df(mat_pred)
+d <- list(OBS = d_obs, PRED = d_pred) %>% melt_list("type")
+
+
+lst_info <- foreach(i = 1:nrow(mat_obs)) %do% {
+    yobs <- mat_obs[i, ]
+    ypred <- mat_pred[i, ]
+    GOF(yobs, ypred, include.r = TRUE)
+}
+
+info <- do.call(rbind, lst_info) %>% data.table() %>% cbind(I = 1:nrow(.), .)
+
+years <- 1982:2015
+
+mat2df <- function(mat) {
+    d  <- mat %>% set_colnames(years) %>% cbind(I = 1:nrow(.), .) %>% data.table() %>% melt("I")
+    d$variable %<>% gsub("X", "", .) %>% as.numeric()
+    d
+}
+
+ggplot(d, aes(variable, value, color = type)) + 
+    # geom_smooth() + 
+    # stat_summary(fun.data = stat_quantile, size = 0.6, geom = "errorbar") + 
+    stat_summary(fun.data = stat_quantile, size = 1, geom = "line") + 
+    geom_smooth(data = d_pred, color = "red"
+#  %>% plot(type = "b")
+# colMeans2(mat_pred, na.rm = TRUE) %>% lines(type = "b", col = "red")
+
 ##
-s1_statistic = FALSE
+s1_statistic = TRUE
 if (s1_statistic) { 
     # check Contrasting influence of Tmin and Tmin
     map(lst_plsr, function(x){
@@ -48,12 +84,12 @@ if (s1_statistic) {
     map(lst_plsr, function(x){
         d <- x$SOS$attribute_change %>% data.table()
         r <- d[, -1] %>% as.matrix() %>% abs() %>% {./rowSums2(.)} %>% as.data.table()
+        # ldply(r*100, label_sd) # use percentile 更合适
         {r[, Tmin+Tmax]*100} %>% label_sd()
         # r <- d[, .(sign(Tmin), sign(Tmax))] %>% {table(.)/ngrid} %>% as.numeric()
         # c(same = sum(r[c(1, 4)]), "diff"=sum(r[2:3]))
     }) %>% do.call(rbind, .)
 }
-
 
 ## Fig_34: RMSE of PLSR in the spatial -----------------------------------------
 Fig_34 = TRUE
@@ -89,12 +125,12 @@ if (Fig_34) {
                 hist = list(origin.x=77, origin.y=28, A=15, by = 0.6))
     p <- spplot_grid(gridclip2_10, 
                      brks = c(0, 3, 4, 5, 7, 10, 15, Inf), 
-                     colors = colors$default %>% rev(), 
+                     colors = .colors$default %>% rev(), 
                      panel.title = names,
                      toFactor = T, 
                      pars = pars, ylab.offset = 2.5,
                      lgd.title = "RMSE")
-    write_fig(p, "Figure4_RMSE_spatial.pdf", 10, 5)
+    write_fig(p, "Figure4_RMSE_spatial.tif", 10, 5)
 }
 
 ## FIGURE 5 and 6
@@ -124,7 +160,7 @@ if (Fig_56) {
     d[, map(.SD, sd), .(type),.SDcols = colnames(d)[-7]]
     d[, map(.SD, mean), .(type),.SDcols = colnames(d)[-7]]
     
-    browser()
+    # browser()
 }
 
 # lst_plsr$GIMMS$SOS$VIP
@@ -151,7 +187,7 @@ if (Figure7) {
                 hist = list(origin.x=77, origin.y=28, A=15, by = 0.6))
     p <- spplot_grid(gridclip2_10, 
                      brks = c(0, 5, 10, 20, 50, 80, 90, 95, 98, Inf), 
-                     colors = colors$Blues[1:9],#%>% rev(), 
+                     colors = .colors$Blues[1:9],#%>% rev(), 
                      panel.title = names,
                      toFactor = T, 
                      pars = pars, ylab.offset = 2.5, 
@@ -201,7 +237,7 @@ if (Figure_S3) {
                 hist = list(origin.x=77, origin.y=28, A=6, by = 0.8, axis.x.text = FALSE))
     p <- spplot_grid(gridclip2_10, 
                      brks = c(0.8, Inf) %>% c(-rev(.), .), 
-                     colors = colors$default,#%>% rev(), 
+                     colors = .colors$default,#%>% rev(), 
                      panel.title = names,
                      toFactor = T, 
                      pars = pars, ylab.offset = 2.5,

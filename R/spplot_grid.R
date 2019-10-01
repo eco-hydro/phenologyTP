@@ -44,7 +44,7 @@ panel_hist <- function(x, y, z, subscripts, ...,
     if (!is.null(dot$contour) && dot$contour) {
         # dot$at <- c(5000)
         dot$region <- FALSE
-        params <- listk(x, y, z, subscripts, contour = TRUE, interpolate = TRUE, 
+        params <- listk(x, y, z, subscripts, contour = TRUE, interpolate = FALSE, 
                         lwd = 0.1, lty =2,
                         labels = FALSE, label.style = "flat") %>% c(dot)
         do.call(panel.contourplot, params)

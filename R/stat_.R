@@ -35,3 +35,16 @@ stat_5p <- function(x) {
         set_names(c("ymin", "lower", "middle", "upper", "ymax")) %>%
         as.list()
 }
+
+stat_errorbar2 <- function (mapping = NULL, data = NULL, geom = "errorbar", 
+    position = "identity", ..., fun.data = NULL, fun.y = NULL, 
+    fun.ymax = NULL, fun.ymin = NULL, fun.args = list(), na.rm = FALSE, 
+    show.legend = NA, inherit.aes = TRUE) 
+{
+    layer(data = data, mapping = mapping, stat = StatSummary, 
+        geom = geom, position = position, show.legend = show.legend, 
+        inherit.aes = inherit.aes, params = list(fun.data = stat_quantile, 
+            fun.y = fun.y, fun.ymax = fun.ymax, fun.ymin = fun.ymin, 
+            fun.args = fun.args, na.rm = na.rm, ...)) + 
+    stat_summary(fun.data = stat_quantile, geom = "point")
+}

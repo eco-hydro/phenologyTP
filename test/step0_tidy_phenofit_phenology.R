@@ -45,11 +45,11 @@ if (Fig1_data) {
     
     df_SOS_10deg %<>% .[I_rem, ] 
     df_EOS_10deg %<>% .[I_rem, ]
-    d_SOS_avg %<>% .[I_rem]
-    d_EOS_avg %<>% .[I_rem]
-    I_grid2_10 <- I_grid_10[I_rem]
+    d_SOS_avg    %<>% .[I_rem]
+    d_EOS_avg    %<>% .[I_rem]
+    I_grid2_10   <- I_grid_10[I_rem]
     
     save(df_SOS, df_EOS, df_SOS_10deg, df_EOS_10deg, d_EOS_avg, d_SOS_avg, 
         gridclip2_10, I_grid2_10, 
-        file = file_pheno_010)    
+        file = file_pheno_010)
 }
