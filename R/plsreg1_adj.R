@@ -11,7 +11,7 @@ plsreg1_adj <- function(X, Y, comps = 2,
 {
     varnames <- varnames0 <- colnames(X)
     # select_model
-    m_pls <- plsdepot::plsreg1(X[, varnames, drop = FALSE], Y, comps = comps, crosval = TRUE)
+    m_pls  <- plsdepot::plsreg1(X[, varnames, drop = FALSE], Y, comps = comps, crosval = TRUE)
     r_init <- PLS_performIndex(m_pls, varnames0, include.fitted, I_nona)
     
     if (autoVars) {

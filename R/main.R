@@ -39,6 +39,7 @@ filter_rational.dt <- function(x){
   })#quickly return, x_list.trim <-
   do.call(cbind, setNames(res, NULL))#return data.frame
 }
+
 filter_rational <- function(x){
   x[x <= 0 | x > 366] <- NA
   x_list <- lapply(method.group, function(i) x[, i])

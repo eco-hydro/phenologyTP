@@ -20,13 +20,16 @@ get_preseason <- function(Tmin, Tmax, Prec, Srad, SOS, EOS, dates_mete, DateRang
     maxI    <- floor(maxDays/15)
     EOS_avg <- floor(mean(EOS, na.rm = TRUE))
 
+    if (sum(!is.na(SOS)) <= 6 || sum(!is.na(EOS)) <= 6) return(NULL)
+    # if (is.na(EOS_avg)) return(NULL)
+
     varnames <- c("Tmin", "Tmax", "Prec", "Srad")
 
     # modified for MCD12Q2
     info_date <- data.table(date = dates_mete, year = year(dates_mete), yday = yday(dates_mete))
     df <- data.table(Tmin, Tmax, Prec, Srad) %>% set_names(varnames) %>% 
         cbind(info_date, .)
-
+    
     if (!is.null(DateRange_pheno)) {
         df  <- df[date >= DateRange_pheno[1] & date <= DateRange_pheno[2], ]
     }
@@ -48,7 +51,7 @@ get_preseason <- function(Tmin, Tmax, Prec, Srad, SOS, EOS, dates_mete, DateRang
     } %>% set_rownames(NULL)
     
     pcor_max <- mat_pcor %>% apply(2, which_max)
-        
+
     d <- foreach(var = varnames, pos = pcor_max[2, ], .combine = "cbind") %do% {
         # print(pos)
         I_start <- EOS_avg - 15*pos + 1

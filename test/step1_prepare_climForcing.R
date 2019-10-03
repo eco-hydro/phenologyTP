@@ -57,7 +57,7 @@ if (temp3h_ToDaily) {
     lst_temp$Tmax %<>% cbind(lst_temp_1981$Tmax, .)
     lst_temp$Tmin %<>% cbind(lst_temp_1981$Tmin, .)
     
-    save(lst_temp, dates, file = "INPUT/TP_010deg_temp3.rda")
+    save(lst_temp, dates, file = "INPUT/TP_010deg_temp2.rda")
     # fwrite(lst_temp$Tavg, "TP_010deg_Tavg.csv")
 }
 

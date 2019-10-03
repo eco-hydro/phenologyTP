@@ -34,7 +34,7 @@ suppressMessages({
     
     # Myself packages 
     library(Ipaper)
-    library(phenology)
+    # library(phenology)
     library(phenofit)
     library(Rcmip5)
 
@@ -50,7 +50,7 @@ file_pheno_010_3s    <- "OUTPUT/phenology_TP_phenology_010deg_3s.rda"
 file_pheno_010_3s_V2 <- "OUTPUT/phenology_TP_phenology_010deg_3s_V2.rda"
 
 file_preseason <- "OUTPUT/TP_010deg_preseason2.rda"
-file_plsr      <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS.rda"
+file_plsr      <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_V2.rda"
 
 ## 
 theme_set( theme_bw(base_size = 14) + 

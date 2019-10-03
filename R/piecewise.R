@@ -12,7 +12,7 @@ check_turnpoint <- function(x, nyear = 34, min = 5) {
 #' @param predict If true, returned predicted data of piecewise regression.
 #' @param brk If provide, changing point detected will not applied.
 #' 
-#' @import segmented
+#' @importFrom segmented davies.test segmented
 #' @export
 piecewise <- function(y, year.origin = 1, predict = FALSE, brk = NULL){
     n <- length(y)

@@ -11,6 +11,7 @@ This package is for my Ph.D. thesis, Phenology research in Tibet Plateau.
 You can install the released version of phenology from GitHub with:
 
 ``` r
+devtools:install.packages("kongdd/plsdepot")
 devtools:install.packages("kongdd/phenology_TP")
 ```
 
@@ -20,4 +21,8 @@ devtools:install.packages("kongdd/phenology_TP")
 
 1. MCD12Q2 modified to V6
 2. meteorological forcing update to 2018
+
+## Findings
+
+认为VIPpheno质量比较差，结果不可信。
 

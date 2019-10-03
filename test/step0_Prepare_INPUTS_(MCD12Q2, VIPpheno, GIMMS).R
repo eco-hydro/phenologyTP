@@ -22,7 +22,8 @@ read_MCD12Q2_V6 <- function(file){
 }
 
 read_MCD12Q2 <- function(file){
-    rgdal::readGDAL(file, silent = TRUE)[seq(1, 8, 2)]@data + 1
+    rgdal::readGDAL(file, silent = TRUE)[seq(1, 8, 2)]@data
+    # + 1
 }
 
 read_VIPpheno <- function(file){
