@@ -53,6 +53,23 @@ file_preseason <- "OUTPUT/TP_010deg_preseason2.rda"
 file_plsr      <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_V2.rda"
 
 ## 
+# source('test/main_vis.R')
+OS.type = .Platform$OS.type
+if (OS.type == 'windows') {
+    windowsFonts(
+        Times = windowsFont("Times New Roman"), 
+        Arial = windowsFont("Arial"), 
+        YH = windowsFont("Microsoft Yahei")
+    )
+} else if (OS.type == 'unix'){
+    Cairo::CairoFonts(
+        regular="Times New Roman:style=Regular",
+        bold="Times New Roman:style=Bold",
+        italic="Times New Roman:style=Oblique",
+        bolditalic="Times New Roman:style=BoldOblique"
+    )
+}
+
 theme_set( theme_bw(base_size = 14) + 
     theme(
         # legend.position = "none", 
@@ -63,9 +80,9 @@ theme_set( theme_bw(base_size = 14) +
 
 
 titles_a <- c(expression(bold("(a) "*GIMMS[3*g]*" SOS")), 
-                expression(bold("(b) "*GIMMS[3*g]*" EOS")))
-    titles_b <- c("MCD12Q2", "VIP_Pheno") %>% rep(each = 2) %>% paste(c("SOS", "EOS"), sep = " ") %>% 
-                    sprintf("(%s) %s", letters[3:6], .)
+    expression(bold("(b) "*GIMMS[3*g]*" EOS")))
+titles_b <- c("MCD12Q2", "VIP_Pheno") %>% rep(each = 2) %>% paste(c("SOS", "EOS"), sep = " ") %>% 
+    sprintf("(%s) %s", letters[3:6], .)
 
 A     = 20
 ntick = 2

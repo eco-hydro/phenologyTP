@@ -1,3 +1,111 @@
+init = 0
+if (init == 0) {
+    init = init + 1
+    source("test/main_pkgs.R")
+
+    load(file_plsr)    
+    load(file_preseason)
+    load("data/00basement_TP.rda")     
+}
+
+
+# GOF of PLSR SOS model
+df_pred <- foreach(l_preseason = lst_preseason, l_plsr = lst_plsr, i = icount()) %do% {
+    temp = foreach(d = l_preseason$data, ypred = t(l_plsr$SOS$ypred), j = icount()) %do% {
+        runningId(j, 1000)
+        GOF(d$EOS, ypred, include.r = TRUE)
+    } 
+    do.call(rbind, temp) %>% data.table()
+}
+
+info <- foreach(l_preseason = lst_preseason, l_plsr = lst_plsr, i = icount()) %do% {
+    temp = foreach(d = l_preseason$data, ypred = t(l_plsr$SOS$ypred), j = icount()) %do% {
+        runningId(j, 1000)
+        GOF(d$EOS, ypred, include.r = TRUE)
+    } 
+    do.call(rbind, temp) %>% data.table()
+}
+
+r <- info[1:2] %>% map(~.[, .(RMSE, NSE, MAE, R, R2)]) %>% purrr::transpose() %>% map(as.data.table)
+
+{
+    pars = list(title = list(x=76, y=39.5, cex=1.2), 
+        hist = list(origin.x=77, origin.y=28, A=10, by = 0.6))
+    par.settings2 = list(
+        layout.heights  = list(bottom.padding = 0, top.padding = 0.5),
+        layout.widths   = list(axis.left = 0, axis.right = 0, key.left = 0, key.right = 0.5, axis.key.padding = 1, right.padding = 4),
+        axis.components = list(left = list(pad1 = 0)),
+        axis.line = list(col = "white")
+    )
+    .brks = list(
+        RMSE = c(0, 3, 4, 5, 7, 10, 15, Inf),
+        MAE  = c(0, 3, 4, 5, 7, 10, 15, Inf), 
+        NSE  = c(-1, seq(0, 0.7, 0.1), 1), 
+        R2   = c(0, seq(0.1, 0.7, 0.1), 1))
+    
+    indexes = c("RMSE", "MAE", "R2") %>% set_names(., .)
+    ps = foreach(index = indexes, i = icount()) %do% {
+        unit = ifelse(i < 3, "days", "")
+         params <- list(
+            brks = .brks[[index]], 
+            colors = .colors$default %>% rev(), 
+            sp.layout = sp_layout,
+            panel.title = names,
+            unit = unit, 
+            unit.adj = 100, 
+            # layout = c(2, 4),
+            ylim = c(25.99376, 40.52632),
+            toFactor = T, 
+            pars = pars, ylab.offset = 2.5,
+            stat = stat, 
+            par.settings2 = par.settings2,
+            lgd.title = "RMSE"
+        )
+        
+        gridclip2_10@data <- r[[index]] %>% data.frame()
+        names <- c(expression(bold("(a) GIMMS"[3*g])),
+                   expression(bold("(b) MCD12Q2")))
+        
+        # document("E:/Research/cmip5/Ipaper")
+        if (index == "R2") index = quote(R^2)
+        stat = list(show = TRUE, name=index, loc = c(84, 26), digit = 1, include.sd = TRUE)
+        if (i >= 3) {
+            params$colors = RColorBrewer::brewer.pal(11, "RdYlGn")
+            stat$digit    = 2
+        }
+        
+        title1 = eval(substitute(
+            expression(bold("(" * num*") " * index * " of GIMMS"[3*g])), list(num = letters[i*2-1], index = index) ))
+        title2 = eval(substitute(
+            expression(bold("("* num*") " * index * " of MCD12Q2")), list(num = letters[i*2], index = index) ))
+        
+        
+        # if (i == 3) params$brks = get_R2_brks(34)
+        params$stat        = stat
+        params$panel.title = title1
+        p1 <- do.call(spplot_grid, c(gridclip2_10[, 1], params))
+
+        # if (i == 3) params$brks = get_R2_brks(14)
+        params$panel.title = title2
+        p2 <- do.call(spplot_grid, c(gridclip2_10[, 2], params))
+
+        p <- arrangeGrob(p1, p2, nrow = 1)
+        # write_fig(p, glue("Figures/Figure4_{index}_spatial2.tif"), 13.2, 3.2)
+        p
+    }
+
+    p2 <- do.call(arrangeGrob, list(grobs = ps, ncol = 1))
+    write_fig(p2, "a.tif", 10, 7.5)
+}
+
+# 导出到 检查一下特殊点的情况
+
+
+
+
+
+
+
 
 # MODIS and AVHRR were resampled into 0.1 deg
 mat_obs <- df_EOS_10deg %>% as.matrix()
@@ -9,7 +117,6 @@ ypred <- colMeans2(mat_pred, na.rm = TRUE)
 d_obs  <- mat2df(mat_obs)
 d_pred <- mat2df(mat_pred)
 d <- list(OBS = d_obs, PRED = d_pred) %>% melt_list("type")
-
 
 lst_info <- foreach(i = 1:nrow(mat_obs)) %do% {
     yobs <- mat_obs[i, ]

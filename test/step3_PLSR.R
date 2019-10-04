@@ -15,7 +15,7 @@ par.settings2 = list(
 
 # 2.4 The difference of considering SOS or not
 if (!file.exists(file_plsr)) {
-    InitCluster(6)
+    InitCluster(12)
     
     load("data/00basement_TP.rda") 
     load(file_pheno_010)
@@ -23,11 +23,11 @@ if (!file.exists(file_plsr)) {
     ngrid <- lst_preseason$GIMMS$pcor.max %>% nrow
     
     lst_plsr <- foreach(mat_preseason = lst_preseason, var = names(lst_preseason)) %do% {
-        res <- foreach(d = mat_preseason$data, i = icount(),
-           .combine = ,
-           .packages = c("magrittr")) %do% {
+        res <- foreach(d = mat_preseason$data, 
+                       i = icount(),
+           .packages = c("magrittr")) %dopar% {
             Ipaper::runningId(i, 100, ngrid)
-               tryCatch(plsr_attributable(d), 
+               tryCatch(phenology::plsr_attributable(d, slope = Ipaper::slope_mk), 
                         error = function(e){
                             message(sprintf("[%-12s: %d] %s", var, i, e$message))
                         })
@@ -41,14 +41,16 @@ if (!file.exists(file_plsr)) {
         res2
     }
     lst_plsr$GIMMS$`Non-SOS`$Q2
+    
+    file_plsr = "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_(slope_mk).rda"
     save(lst_plsr, file = file_plsr)
 } else {
     load(file_plsr)    
 }
 
-## Fig_34: RMSE of PLSR in the spatial -----------------------------------------
-Fig_34 = TRUE
-if (Fig_34) {
+## Figure2: RMSE of PLSR in the spatial -----------------------------------------
+Figure2 = TRUE
+if (Figure2) {
     ## 1.1 OVERALL RMSE
     d <- map(lst_plsr, function(l){
         I <- l$I
@@ -56,18 +58,18 @@ if (Fig_34) {
     }) %>% melt_list("sate")
     
     # d$sate %<>%  factor(levels = c("GIMMS", "MCD12Q2"), c('"(a) GIMMS"[3*g]', '"(b) MCD12Q2"'))
-    g <- ggplot(d, aes(type, RMSE, fill = type)) + 
-        stat_boxplot(geom ='errorbar', width = 0.5) +
-        geom_boxplot2(outlier.size = -1) + 
-        stat_summary(fun.data = label_sd, colour = "black", size = 5, geom = "text", vjust = -0.5) + 
-        facet_wrap(~sate, labeller = label_parsed, nrow = 1) + 
-        labs(x = NULL) + 
-        theme(legend.position = "none", 
-              axis.text = element_text(color = "black", size = 12), 
-              strip.text = element_text(size = 14, 
-                                        margin = margin(1,0,1,0)*3, lineheight = 0) 
-        )
-    write_fig(g, "Figures/Figure6_RMSE_overall.pdf", 10, 4)
+    # g <- ggplot(d, aes(type, RMSE, fill = type)) + 
+    #     stat_boxplot(geom ='errorbar', width = 0.5) +
+    #     geom_boxplot2(outlier.size = -1) + 
+    #     stat_summary(fun.data = label_sd, colour = "black", size = 5, geom = "text", vjust = -0.5) + 
+    #     facet_wrap(~sate, labeller = label_parsed, nrow = 1) + 
+    #     labs(x = NULL) + 
+    #     theme(legend.position = "none", 
+    #           axis.text = element_text(color = "black", size = 12), 
+    #           strip.text = element_text(size = 14, 
+    #                                     margin = margin(1,0,1,0)*3, lineheight = 0) 
+    #     )
+    # write_fig(g, "Figures/Figure6_RMSE_overall.pdf", 10, 4)
 
     ## 1.2 RMSE IN SPATIAL
     names <- c(expression(bold("(a) GIMMS"[3*g]*" Non-SOS")),
@@ -78,37 +80,46 @@ if (Fig_34) {
     gridclip2_10@data <- d_rmse[, -1] %>% data.frame()
     
     pars = list(title = list(x=77, y=39, cex=1.5), 
-                hist = list(origin.x=77, origin.y=28, A=15, by = 0.6))
+                hist = list(origin.x=77, origin.y=27, A=15, by = 0.6))
+    stat = list(show = TRUE, name="RMSE", loc = c(84, 26), include.sd = TRUE)
     {
+        names <- c(expression(bold("(a) GIMMS"[3*g])),
+                   expression(bold("(d) MCD12Q2")))
         # document("E:/Research/cmip5/Ipaper")
-        p <- spplot_grid(gridclip2_10, 
+        p <- spplot_grid(gridclip2_10[c(2, 4)], 
                          brks = c(0, 3, 4, 5, 7, 10, 15, Inf), 
                          colors = .colors$default %>% rev(), 
                          sp.layout = sp_layout,
-                         # panel.title = names,
-                         layout = c(2, 4),
+                         panel.title = names,
+                         unit = "days", 
+                         unit.adj = 1.5, 
+                         # layout = c(2, 4),
                          toFactor = T, 
                          pars = pars, ylab.offset = 2.5,
+                         stat = stat, 
                          par.settings2 = par.settings2,
                          lgd.title = "RMSE")
-        write_fig(p, "Figures/Figure4_RMSE_spatial.tif", 10, 10)
+        write_fig(p, "Figures/Figure4_RMSE_spatial.tif", 12, 3.2)
     }
+    # 添加NSE and R2
 }
 
-nyears = c(34, 14, 17, 33)
-## FIGURE 5 and 6
-Fig_56 = TRUE
-if (Fig_56) {
-    temp <- foreach(lst = lst_plsr, varname = names(lst_plsr), i = icount()) %do% {
+
+## FIGURE 3: Relative Contributions
+Figure3 = TRUE
+if (Figure3) {
+    nyears = c(34, 14, 17, 33)
+    
+    temp <- foreach(lst = lst_plsr, varname = names(lst_plsr), i = icount(2)) %do% {
         nyear = nyears[i]
         vjust <- ifelse(i == 1, 2.5, 4)
         hjust <- ifelse(i == 1, 2, 1.7)
         
-        foreach(obj = lst[1:2], type = names(lst)) %do% {
+        foreach(obj = lst[1], type = names(lst)) %do% {
             outfile <- glue("Figures/Figure4_PLSR_{varname}_{type}.pdf")
             # outfile.tif <- sprintf("Figure4_PLSR_%s_%s.tif", varname, type)
             
-            g1 <- pls_show(obj, nyear, hjust, vjust); 
+            g1 <- pls_show(obj, nyear, hjust, vjust)
             # write_fig(g1, outfile, 12, 7.5)
             write_fig(g1, gsub(".pdf$", ".png", outfile), 12, 7.5)
         }

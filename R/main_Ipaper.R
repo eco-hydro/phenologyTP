@@ -28,3 +28,10 @@ mask_outlier <- function(x) {
     x
 }
 
+path_mnt2win <- function(path) {
+    path <- normalizePath(path)
+    if (substr(path, 1, 5) == "/mnt/") {
+        path = substr(path, 6, nchar(path)) %>% str_replace("/", ":/")    
+    }
+    path
+}

@@ -1,8 +1,14 @@
 #' @name critical
-#' @title critical
+#' @title Critical value of Partial Correlation
+#' 
+#' @description
+#' - `critical_autor`: critical value of autocorrelation
+#' - `critical_pcor` : critical value of partial correlation
 #' 
 #' @param n the number of samples
-#' @param gn the number of given variables
+#' @param gn the number of given variables. When `gn = 0`, the returned values are
+#' critical values of pearson correlation.
+#' @param alpha numeric vector, significant level
 #' 
 #' @references
 #' 1. Chen Yanguang (2012), Geographical Data analysis with MATLAB. \cr
@@ -18,7 +24,7 @@ NULL
 
 #' @rdname critical
 #' @export
-critical_pcor <- function(n, gn, alpha = c(0.1, 0.05, 0.01)){
+critical_pcor <- function(n, gn = 0, alpha = c(0.1, 0.05, 0.01)){
     freedom <- n - 2 - gn # the number of given variables is 3
     Rc_cor <- sqrt(qf(1 - alpha, 1, freedom)/(qf(1 - alpha, 1, freedom) + freedom))
     Rc_cor
@@ -37,7 +43,6 @@ critical_pcor2 <- function(n, gn, alpha = c(0.1, 0.05, 0.01)){
     return(Rc)
 }
 
-# autocorrelation critical values
 #' @rdname critical
 #' @export
 critical_autor <- function(n, alpha = c(0.1, 0.05, 0.01)) {
@@ -48,4 +53,13 @@ critical_autor <- function(n, alpha = c(0.1, 0.05, 0.01)) {
 brks_pcor <- function(n = 34){
     brks <- critical_pcor(n, 3) %>% c(1) %>% c(-rev(.), 0, .) %>% round(3)
     brks
+}
+
+
+#' @export
+get_R2_brks <- function(n = 34) {
+    critical_pcor(n, 0) %>% c(., 1) %>% 
+        c(-1, 0, .) %>% 
+        round(3)
+        # c(-rev(.), 0, .) %>% 
 }

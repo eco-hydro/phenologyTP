@@ -10,12 +10,12 @@ This package is for my Ph.D. thesis, Phenology research in Tibet Plateau.
 
 You can install the released version of phenology from GitHub with:
 
-``` r
+``` R
 devtools:install.packages("kongdd/plsdepot")
 devtools:install.packages("kongdd/phenology_TP")
 ```
 
-# This repository replies heavily on `Rcmip5` and `Ipaper` package. 
+**This repository replies heavily on `Rcmip5` and `Ipaper` package.**
 
 ## Updates
 

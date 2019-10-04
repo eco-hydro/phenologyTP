@@ -5,9 +5,9 @@
 \alias{critical_pcor}
 \alias{critical_pcor2}
 \alias{critical_autor}
-\title{critical}
+\title{Critical value of Partial Correlation}
 \usage{
-critical_pcor(n, gn, alpha = c(0.1, 0.05, 0.01))
+critical_pcor(n, gn = 0, alpha = c(0.1, 0.05, 0.01))
 
 critical_pcor2(n, gn, alpha = c(0.1, 0.05, 0.01))
 
@@ -16,10 +16,16 @@ critical_autor(n, alpha = c(0.1, 0.05, 0.01))
 \arguments{
 \item{n}{the number of samples}
 
-\item{gn}{the number of given variables}
+\item{gn}{the number of given variables. When \code{gn = 0}, the returned values are
+critical values of pearson correlation.}
+
+\item{alpha}{numeric vector, significant level}
 }
 \description{
-critical
+\itemize{
+\item \code{critical_autor}: critical value of autocorrelation
+\item \code{critical_pcor} : critical value of partial correlation
+}
 }
 \examples{
 critical_pcor(34, 2)

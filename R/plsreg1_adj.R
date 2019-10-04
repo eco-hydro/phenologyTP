@@ -1,5 +1,7 @@
 #' plsreg1_adj
 #' 
+#' @param ... other params will be ignored
+#' 
 #' @examples
 #' \dontrun{
 #' plsreg1_adj(X, Y, comps = 2, autoVars = TRUE, nminVar = 2, minVIP = 0.8)
@@ -7,12 +9,14 @@
 #' @export
 plsreg1_adj <- function(X, Y, comps = 2, 
     autoVars = TRUE, nminVar = 2, minVIP = 0.8, 
-    include.fitted = FALSE, ...)
+    include.fitted = FALSE, 
+    slope = slope, 
+    ...)
 {
     varnames <- varnames0 <- colnames(X)
     # select_model
     m_pls  <- plsdepot::plsreg1(X[, varnames, drop = FALSE], Y, comps = comps, crosval = TRUE)
-    r_init <- PLS_performIndex(m_pls, varnames0, include.fitted, I_nona)
+    r_init <- PLS_performIndex(m_pls, varnames0, include.fitted, slope = slope)
     
     if (autoVars) {
         repeat({
@@ -28,7 +32,7 @@ plsreg1_adj <- function(X, Y, comps = 2,
             }
         })
         # only init and the last kept
-        r_last <- PLS_performIndex(m_pls, varnames0, include.fitted, I_nona)
+        r_last <- PLS_performIndex(m_pls, varnames0, include.fitted, slope = slope) # I_nona
         r <- list(init = r_init, last = r_last) # r is improved        
         purrr::transpose(r) %>% map(~do.call(rbind, .) %>% 
             data.frame() %>% set_rownames(NULL) %>% 
@@ -47,7 +51,7 @@ fill_missingVar <- function(x, varnames0){
 }
 
 #' @export
-PLS_performIndex <- function(obj, varnames0, include.fitted = FALSE, ...){
+PLS_performIndex <- function(obj, varnames0, include.fitted = FALSE, slope = slope, ...){
     Xx <- obj$INPUT$Xx
     Yy <- obj$INPUT$Yy
     mu.x <- attributes(Xx)$"scaled:center" #%>% as.matrix(ncol = 1)
@@ -65,10 +69,12 @@ PLS_performIndex <- function(obj, varnames0, include.fitted = FALSE, ...){
 
     # slope need * nyear = delta  (linear regression used here)
     # Note that: Xx and Yy has been scaled.
+    slope2 <- function(x) slope(x)[1]
+    # fatel error
     attribute_change <- c(
-        slope(Yy)*sd.y, # EOS 
-        fill_missingVar(slope(Xx)*sd.x*reg.coefs, varnames0)) 
-
+        slope2(Yy)*sd.y, # EOS 
+        fill_missingVar(apply(Xx, 2, slope2)*sd.x*reg.coefs, varnames0)) 
+    
     ans <- list(
         reg.coefs = reg.coefs,
         std.coefs = std.coefs,
@@ -81,14 +87,4 @@ PLS_performIndex <- function(obj, varnames0, include.fitted = FALSE, ...){
     }
     ans[1:3] %<>% map(fill_missingVar, varnames0)
     ans
-}
-
-#' @export
-plsr_fix_ypred <- function(obj, I, I_nona){
-    ypred <- obj$ypred
-    ans <- I*NA_real_
-    ans[I_nona] <- ypred
-    
-    obj$ypred <- ans
-    obj
 }

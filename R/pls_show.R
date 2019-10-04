@@ -53,7 +53,11 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = 2.5, base_size = 14
     # geom_hline(yintercept = 1, color = "red", linetype = 2)
     
     # 3. delta change
-    d <- pls_obj$attribute_change %>% cbind(row = 1:ngrid, .) %>% data.table() %>% melt("row") 
+    d <- pls_obj$attribute_change %>% {
+        colnames(.)[1] <- "EOS"
+        cbind(row = 1:ngrid, .) %>% data.table() %>% melt("row") 
+    }
+
     # add attributable change
     # d[is.na(value), value:= 0]
     d[variable != "EOS", perc := abs(value)/sum(abs(value), na.rm = TRUE)*100, .(row)] # not y    
