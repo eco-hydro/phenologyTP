@@ -36,19 +36,27 @@ if (s3_preseason) {
 
     dates_mete <- seq(ymd('19810101'), ymd('20171231'), by = "day") 
     lst_dates <- list(
-        GIMMS = c(ymd('19820101'), ymd('20151231')), 
         MCD12Q2_V5 = c(ymd('20010101'), ymd('20141231')), 
         MCD12Q2_V6 = c(ymd('20010101'), ymd('20171231')), 
-        VIPpheno = c(ymd('19820101'), ymd('20141231')))
+        VIPpheno_NDVI = c(ymd('19820101'), ymd('20141231')), 
+        GIMMS = c(ymd('19820101'), ymd('20151231')), 
+        SPOT  = c(ymd('19980101'), ymd('20121231')))
     
     load(file_pheno_010_3s_V2)
     # fix VIPpheno (0 = NA) and remove 1981
-    lst_pheno$VIPpheno_NDVI %<>% map(function(x){ x[x == 0] <- NA; x[, -1] })
+    lst_pheno$VIPpheno_NDVI %<>% map(function(x){ x[x == 0] <- NA; x[, -1] }) 
+    
+    ## add SPOT
+    l_SPOT <- read_rds(check_file(file_SPOT_010))
+    l <- l_SPOT %>% purrr::transpose() %>% map(~do.call(cbind, .))
+    lst_pheno$SPOT = l
 }
 
+
 ## 1. Prepare Pre-season data --------------------------------------------------
-InitCluster(7)
-l_preseason <- foreach(l_pheno = lst_pheno[c(4, 1, 2, 3)], DateRange = lst_dates, j = icount()) %do% {
+InitCluster(12)
+grps = c(4, 1, 5)
+l_preseason <- foreach(l_pheno = lst_pheno[grps], DateRange = lst_dates[grps], j = icount()) %do% {
     # if (j == 1) { DateRange = NULL }
     # if (j < 4) return(NULL)
     r <- foreach(
@@ -74,6 +82,7 @@ save(lst_preseason, file = file_preseason)
     
 ## 2. Autumn phenology model -----------------------------------------------
 {
+    ## 2.1 pcor_max in preseason (of one time-step)
     document("E:/Research/cmip5/Ipaper")
     load("data/00basement_TP.rda")
     gridclip2_10@data <- data.frame(id = I_grid2_10)
@@ -83,7 +92,7 @@ save(lst_preseason, file = file_preseason)
     # load(file_pheno_010_3s)
 
     mat_preseason <- lst_preseason$MCD12Q2_V5
-    # 2.1 preseason max_pcor
+    
     temp <- foreach(mat_preseason = lst_preseason, var = names(lst_preseason), i = icount()) %do% {
         n = mat_preseason$data[[1]] %>% nrow()
         brks <- brks_pcor(n)

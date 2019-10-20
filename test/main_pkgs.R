@@ -51,6 +51,9 @@ file_pheno_010_3s_V2 <- "OUTPUT/phenology_TP_phenology_010deg_3s_V2.rda"
 
 file_preseason <- "OUTPUT/TP_010deg_preseason2.rda"
 file_plsr      <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_V2.rda"
+file_plsr_mk   <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_(slope_mk).rda"
+
+file_SPOT_010 <- "E:/SciData/pheno_SPOT_TP (1998-2013)/phenofit_SPOT_TP_010deg.RDS"
 
 ## 
 # source('test/main_vis.R')
@@ -59,7 +62,8 @@ if (OS.type == 'windows') {
     windowsFonts(
         Times = windowsFont("Times New Roman"), 
         Arial = windowsFont("Arial"), 
-        YH = windowsFont("Microsoft Yahei")
+        YH = windowsFont("Microsoft Yahei"), 
+        whit = windowsFont("Whitney-Book")
     )
 } else if (OS.type == 'unix'){
     Cairo::CairoFonts(

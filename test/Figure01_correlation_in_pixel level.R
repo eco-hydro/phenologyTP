@@ -71,9 +71,9 @@ if (Figure1) {
     #     facet_wrap(~type, ncol = 1, labeller = "label_parsed", scale = "free_y") + 
     #     labs(x = "Year")
     # p + geom_line(data = trend$pred, aes(x, y))
-    
     write_fig(p, "Figure1_annual_variation.pdf", 9, 6)
 }
+
 # d <- d[type == "GIMMS"]
 # ggplot(d, aes(year, SOS)) + geom_line() + 
 #     geom_abline(data = t_sos$trend[type == "GIMMS"], slope = slp, intercept = intercept)

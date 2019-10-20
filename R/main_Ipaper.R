@@ -35,3 +35,23 @@ path_mnt2win <- function(path) {
     }
     path
 }
+
+#' If windows style, then convert to WSL style
+#' 
+#' @export
+check_file <- function(path){
+    if (.Platform$OS.type == "unix") {
+        pos <- str_locate(path, ":")[1, 1]
+        if (!is.na(pos)) {
+            pan  <- substr(path, 1, 1)
+            path <- paste0("/mnt/", tolower(pan), substr(path, 3, nchar(path)) )
+        }
+    }
+    path
+}
+
+# load draw.colorkey
+suppressWarnings({
+    environment(draw.colorkey) <- environment(lattice::xyplot)
+    assignInNamespace("draw.colorkey", draw.colorkey, ns="lattice")  
+})

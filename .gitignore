@@ -25,3 +25,4 @@ parallel.R
 
 notebook
 *.ipynb
+inst/extdata/userguide
