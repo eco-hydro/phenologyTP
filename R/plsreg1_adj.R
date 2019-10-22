@@ -75,16 +75,37 @@ PLS_performIndex <- function(obj, varnames0, include.fitted = FALSE, slope = slo
         slope2(Yy)*sd.y, # EOS 
         fill_missingVar(apply(Xx, 2, slope2)*sd.x*reg.coefs, varnames0)) 
     
+    scale = list(x.mu = mu.x, x.sd = sd.x, y.mu = mu.y, y.sd = sd.y)
     ans <- list(
         reg.coefs = reg.coefs,
         std.coefs = std.coefs,
         VIP = last_row(obj$VIP), 
         attribute_change = attribute_change, 
-        Q2  = last_row(obj$Q2))
+        Q2  = last_row(obj$Q2), 
+        scale = scale)
 
     if (include.fitted) {
         ans$ypred <- ypred
     }
     ans[1:3] %<>% map(fill_missingVar, varnames0)
     ans
+}
+
+#' attribute_change
+#' 
+#' @param plsr plsr object
+#' @param l_trend list(trend, pvalue), trend is a data.frame
+#' 
+#' @export
+attribute_change <- function(plsr, l_trend, nyear = 1) {
+    I_y = 6
+    slope_Xx  <- l_trend$trend[-I_y]
+    slope_Yy  <- l_trend$trend[I_y]
+    
+    # x.sd      <- plsr$scale$x.sd
+    # y.sd      <- plsr$scale$y.sd
+    reg.coefs <- plsr$reg.coefs
+
+    # cbind(slope_Yy * y.sd, slope_Xx * x.sd * reg.coefs) * nyear
+    cbind(slope_Yy, slope_Xx * reg.coefs) * nyear
 }

@@ -3,6 +3,7 @@
 export(PLS_performIndex)
 export(PhenoThermal)
 export(aggregateByDate)
+export(attribute_change)
 export(boxplot2)
 export(brks_pcor)
 export(check_file)

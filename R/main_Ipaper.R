@@ -55,3 +55,26 @@ suppressWarnings({
     environment(draw.colorkey) <- environment(lattice::xyplot)
     assignInNamespace("draw.colorkey", draw.colorkey, ns="lattice")  
 })
+
+
+slope_p <- function (y, x) {
+    if (!is.matrix(y)) 
+        y <- as.matrix(y)
+    n <- nrow(y)
+    if (missing(x)) 
+        x <- as.matrix(1:n)
+    I_bad <- which(!is.finite(y))
+    if (length(I_bad) > 0) {
+        y <- y[-I_bad, ]
+        x <- x[-I_bad, ]
+    }
+    l <- lm(y ~ x)
+    info <- summary(l)
+    info$coefficients[2, c(1, 4)] %>% set_names(c("slope", "pvalue"))
+}
+
+fill_df_null <- function(df, I){
+    df_new <- matrix(NA, nrow = max(I), ncol(df)) %>% set_colnames(colnames(df)) %>% as.data.frame()
+    df_new[I, ] <- df
+    data.table(df_new)
+}

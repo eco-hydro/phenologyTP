@@ -12,7 +12,6 @@ par.settings2 = list(
     axis.line = list(col = "white")
 )
 
-
 # 2.4 The difference of considering SOS or not
 if (!file.exists(file_plsr)) {
     InitCluster(12)
@@ -25,19 +24,20 @@ if (!file.exists(file_plsr)) {
     lst_plsr <- foreach(mat_preseason = lst_preseason, var = names(lst_preseason), grp = icount(3)) %do% {
         # if (grp != 3) return()
         res <- foreach(d = mat_preseason$data, 
-                       i = icount(),
-           .packages = c("magrittr")) %dopar% {
+                       i = icount()) %dopar% {
             Ipaper::runningId(i, 100, ngrid)
-               tryCatch(phenology::plsr_attributable(d, slope = Ipaper::slope), 
-                        error = function(e){
-                            message(sprintf("[%-12s: %d] %s", var, i, e$message))
-                        })
-           }
+            tryCatch(phenology::plsr_attributable(d, slope = Ipaper::slope), 
+                    error = function(e){
+                        message(sprintf("[%-12s: %d] %s", var, i, e$message))
+                    })
+       }
         # fix I_rem for SPOT, 20191019
         I_rem <- mat_preseason$I[map_lgl(res, ~!is.null(.x)) %>% which()]
         res2 <- rm_empty(res) %>% purrr::transpose() %>% map(function(l){
-                ans <- transpose(l) 
-                ans %>% map(~do.call(rbind, .))
+                l2 <- transpose(l) 
+                ans = l2[-6] %>% map(~do.call(rbind, .)) 
+                ans$scale = l2[[6]] %>% transpose() %>% map(~do.call(rbind, .))
+                ans
             })
         res2$I <- I_rem
         res2
