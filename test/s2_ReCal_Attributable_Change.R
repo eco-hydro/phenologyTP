@@ -41,39 +41,6 @@ df[value < -1, value := -1]
 sources = df$source %>% unique() # %>% .[c(1, 3, 2, 4, 5)]
 df$source %<>% factor(sources)
 {
-    opt_trellis_strip <- list(
-        layout.heights = list(
-            top.padding       = 0,
-            main.key.padding  = 0,
-            key.axis.padding  = 0,
-            axis.xlab.padding = 0,
-            axis.top = 1.2, 
-            xlab.key.padding  = 0,
-            key.sub.padding   = 0,
-            bottom.padding    = 0, 
-            strip = 2
-        ), 
-        layout.widths = list(
-            left.padding      = 0.5, # left
-            right.padding     = 1, # right
-            key.ylab.padding  = 0, # axis.y padding
-            key.left          = 1.4, 
-            key.right         = 1.8, 
-            ylab.axis.padding = 0, # same as above
-            axis.key.padding  = 0, # legend left padding
-            axis.left = 1, 
-            axis.right = 1
-        ), 
-        # axis.line = list(col = "white"),
-        axis.components = list(
-            left = list(pad1 = 0), 
-            right = list(pad1 = 0), 
-            top = list(pad1 = 0.5), 
-            bottom = list(pad1 = 0.5) 
-        ), 
-        par.strip.text = list(cex = 2)
-    )
-    
     varnames <- unique(df$variable)
     lattice.options("panel.levelplot" = "panel.levelplot.raster")
     # dplot$source %<>% as.factor()
@@ -122,5 +89,5 @@ df$source %<>% factor(sources)
     }
     margin = 0.18
     p_final <- arrangeGrob(grobs = ps, ncol = 1, heights = c(11.2 + margin, 10, 10, 10, 10, 10 + margin))
-    write_fig(p_final, "a.tif", 10, 8.6)
+    write_fig(p_final, "FigureS2_attributable_changes_all_factors.tif", 10, 8.6)
 }

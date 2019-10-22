@@ -42,9 +42,8 @@ suppressMessages({
     library(oce)
 })
 
-file_pheno_012    <- "OUTPUT/phenology_TP_AVHRR_phenofit.rda"
-file_pheno_010    <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
-
+file_pheno_012       <- "OUTPUT/phenology_TP_AVHRR_phenofit.rda"
+# file_pheno_010       <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
 file_pheno_010       <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
 file_pheno_010_3s    <- "OUTPUT/phenology_TP_phenology_010deg_3s.rda"
 file_pheno_010_3s_V2 <- "OUTPUT/phenology_TP_phenology_010deg_3s_V2.rda"
@@ -54,7 +53,8 @@ file_plsr      <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_V2.rda"
 file_plsr_mk   <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_(slope_mk).rda"
 
 file_trend    <- "INPUT/preseason_trend.rda"
-file_SPOT_010 <- "E:/SciData/pheno_SPOT_TP (1998-2013)/phenofit_SPOT_TP_010deg.RDS"
+file_SPOT_010    <- "E:/SciData/pheno_TP (SPOT&MODIS)/phenofit_SPOT_TP_010deg.RDS"
+file_MOD13C1_010 <- "E:/SciData/pheno_TP (SPOT&MODIS)/phenofit_MOD13C1_TP_010deg.RDS"
 
 ## 
 # source('test/main_vis.R')
@@ -92,3 +92,8 @@ titles_b <- c("MCD12Q2", "VIP_Pheno") %>% rep(each = 2) %>% paste(c("SOS", "EOS"
 A     = 20
 ntick = 2
 by    = 0.6
+
+
+select_metric <- function(mat){
+    mat[, c("TRS2.sos", "TRS6.eos")] %>% set_names(c("SOS", "EOS")) %>% as.data.table()
+}
