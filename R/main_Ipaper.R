@@ -73,8 +73,15 @@ slope_p <- function (y, x) {
     info$coefficients[2, c(1, 4)] %>% set_names(c("slope", "pvalue"))
 }
 
-fill_df_null <- function(df, I){
-    df_new <- matrix(NA, nrow = max(I), ncol(df)) %>% set_colnames(colnames(df)) %>% as.data.frame()
+#' @export
+fill_df_null <- function(df, I, convert2.data.table = FALSE){
+    df_new <- matrix(NA, nrow = max(I), ncol(df)) %>% set_colnames(colnames(df))
+    if (is.data.frame(df)) {
+        df_new %<>% as.data.frame()
+    }
     df_new[I, ] <- df
-    data.table(df_new)
+    if (convert2.data.table) {
+        df_new %<>% as.data.table()
+    }
+    df_new
 }

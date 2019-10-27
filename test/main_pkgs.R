@@ -75,14 +75,13 @@ if (OS.type == 'windows') {
     )
 }
 
+# legend.position = "none", 
+# panel.grid = element_blank(), 
 theme_set( theme_bw(base_size = 14) + 
     theme(
-        # legend.position = "none", 
-        # panel.grid = element_blank(), 
         panel.grid.minor = element_blank()
         ))
     # theme(panel.grid.minor = element_blank()) 
-
 
 titles_a <- c(expression(bold("(a) "*GIMMS[3*g]*" SOS")), 
     expression(bold("(b) "*GIMMS[3*g]*" EOS")))
@@ -95,5 +94,10 @@ by    = 0.6
 
 
 select_metric <- function(mat){
-    mat[, c("TRS2.sos", "TRS6.eos")] %>% set_names(c("SOS", "EOS")) %>% as.data.table()
+    mat[, c("TRS2.sos", "TRS6.eos")] %>% set_colnames(c("SOS", "EOS")) %>% as.data.table()
 }
+
+namesSatellites = c(
+    expression(bold("(a) GIMMS"[3*g])), 
+    expression(bold("(b) MODIS")), 
+    expression(bold("(c) SPOT")))

@@ -17,7 +17,7 @@ colnames(df_pheno_avg)[1] <- "row"
     A     = 20
     ntick = 2
     by    = 0.6
-        
+
     # ps <- foreach(d_avg = lst_avg, meth = names(lst_avg)) %do% {
         # gridclip <- fill_grid(gridclip, d_avg)
         gridclip <- fill_grid(gridclip, df_pheno_avg)

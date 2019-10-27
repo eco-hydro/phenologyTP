@@ -84,6 +84,7 @@ l_preseason <- foreach(l_pheno = lst_pheno[grps], DateRange = lst_dates[grps], j
         }
 }
 
+lst_preseason$MOD13C1 <- lst_preseason2$MOD13C1
 lst_preseason2 <- map(l_preseason, tidy_preseason)
 save(lst_preseason, file = file_preseason)
     
@@ -97,8 +98,6 @@ save(lst_preseason, file = file_preseason)
     
     ngrid <- lst_preseason$GIMMS$pcor.max %>% nrow
     # load(file_pheno_010_3s)
-
-    mat_preseason <- lst_preseason$MCD12Q2_V5
     
     temp <- foreach(mat_preseason = lst_preseason, var = names(lst_preseason), i = icount()) %do% {
         n = mat_preseason$data[[1]] %>% nrow()

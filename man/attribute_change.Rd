@@ -4,12 +4,15 @@
 \alias{attribute_change}
 \title{attribute_change}
 \usage{
-attribute_change(plsr, l_trend, nyear = 1)
+attribute_change(obj, l_trend, nyear = 1, model = "SOS")
 }
 \arguments{
-\item{plsr}{plsr object}
+\item{obj}{plsr object, list(\code{SOS}, \code{NonSOS}, I_grid)}
 
 \item{l_trend}{list(trend, pvalue), trend is a data.frame}
+}
+\value{
+data.table
 }
 \description{
 attribute_change

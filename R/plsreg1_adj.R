@@ -93,19 +93,26 @@ PLS_performIndex <- function(obj, varnames0, include.fitted = FALSE, slope = slo
 
 #' attribute_change
 #' 
-#' @param plsr plsr object
+#' @param obj plsr object, list(`SOS`, `NonSOS`, I_grid)
 #' @param l_trend list(trend, pvalue), trend is a data.frame
 #' 
+#' @return data.table 
+#' 
 #' @export
-attribute_change <- function(plsr, l_trend, nyear = 1) {
-    I_y = 6
-    slope_Xx  <- l_trend$trend[-I_y]
-    slope_Yy  <- l_trend$trend[I_y]
-    
+attribute_change <- function(obj, l_trend, nyear = 1, model = "SOS") {
+    plsr   = obj[[model]]
+    I_grid = obj$I
+    # if (is.null(I_grid)) I_grid <- 1:nrow(slope_Xx)
+
+    I_y = 6 # EOS
+    slope_Xx  <- l_trend$trend[, -6]
+    slope_Yy  <- l_trend$trend[, 6]    
     # x.sd      <- plsr$scale$x.sd
     # y.sd      <- plsr$scale$y.sd
-    reg.coefs <- plsr$reg.coefs
-
+    
+    reg.coefs <- plsr$reg.coefs %>% fill_df_null(I_grid) # fill missing grid
     # cbind(slope_Yy * y.sd, slope_Xx * x.sd * reg.coefs) * nyear
-    cbind(slope_Yy, slope_Xx * reg.coefs) * nyear
+    ans <- cbind(slope_Yy, slope_Xx * reg.coefs) * nyear # last return
+    d   <- cbind(I = 1:nrow(ans), ans) %>% data.table()
+    d
 }

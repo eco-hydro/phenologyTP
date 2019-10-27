@@ -7,25 +7,25 @@ load("data/00basement_TP.rda")
 load(file_pheno_010)
 load(file_preseason)
 
-# l_trend <- l_lm
-sources <- c("GIMMS", "GIMMS before 2000", "GIMMS after 2001", "MCD12Q2", "SPOT")
+## 2. --------------------------------------------------------------------------
+Figure1.2 = FALSE
+if (Figure1.2){
+  sources <- c("GIMMS", "GIMMS before 2000", "GIMMS after 2001", "MCD12Q2", "SPOT")
+  lst_trend <- list(MK = l_mk, LM = l_lm)
 
-lst_trend <- list(MK = l_mk, LM = l_lm)
+  # update attributable change
+  res <- foreach(l_trend = lst_trend) %do% {
+      foreach(obj = lst_plsr[c(1, 1, 1, 2, 3)], trend = l_trend) %do% {
+          ans = attribute_change(obj, trend)
+      } %>% set_names(sources)
+  }
 
-# update attributable change
-res <- foreach(l_trend = lst_trend) %do% {
-    foreach(l = lst_plsr[c(1, 1, 1, 2, 3)], trend = l_trend) %do% {
-        plsr <- l$SOS
-        ans = attribute_change(plsr, trend)
-        d = cbind(I = 1:nrow(ans), ans) %>% data.table() #%>% melt("I") 
-    } %>% set_names(sources)
+  df <- melt_tree(res, c("type_trend", "type_source")) %>% melt(c("type_trend", "type_source", "I"))
+  # ggplot(df, aes(variable, value)) + geom_boxplot2() + 
+  #     facet_grid(source~type_trend)  
 }
 
-df <- melt_tree(res, c("type_trend", "source")) %>% melt(c("type_trend", "source", "I"))
-# ggplot(df, aes(variable, value)) + geom_boxplot2() + 
-#     facet_grid(source~type_trend)
-
-# 补充一个trends of all factors即可
+## 2. Visualization ============================================================
 coord <- coordinates(gridclip2_10) %>% set_colnames(c("lon", "lat"))
 df %<>% cbind(coord)
 
@@ -40,6 +40,9 @@ df[value < -1, value := -1]
 ## Check about meteorological factors' trend
 sources = df$source %>% unique() # %>% .[c(1, 3, 2, 4, 5)]
 df$source %<>% factor(sources)
+
+test1 = FALSE
+if (test1 = TRUE)
 {
     varnames <- unique(df$variable)
     lattice.options("panel.levelplot" = "panel.levelplot.raster")

@@ -26,7 +26,11 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
 
     ngrid <- nrow(pls_obj$VIP)
     # 1. VIP value
-    d <- pls_obj$VIP %>% cbind(row = 1:ngrid, .) %>% data.table() %>% melt("row") 
+    melt_index <- function(mat) {
+        cbind(row = 1:nrow(mat), mat) %>% data.table() %>% melt("row") 
+    }
+    
+    d <- pls_obj$VIP %>% melt_index()
     
     d_rem <- d[!is.na(value), .N, .(variable)]
     d_rem[, label := sprintf("%s \n(%.1f%%)", variable, N/ngrid*100)]
@@ -46,7 +50,7 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
 
     color_zero = "black"
     # 2. std coef
-    d <- pls_obj$std.coefs %>% cbind(row = 1:ngrid, .) %>% data.table() %>% melt("row") 
+    d <- pls_obj$std.coefs %>% melt_index()
     p_coef <- ggplot(d, aes(variable, value, fill = variable)) + 
         # stat_boxplot(geom ='errorbar', width = 0.5) +
         # geom_boxplot2() + 
@@ -60,15 +64,13 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
     # 3. delta change
     # browser()
     tidy_cont <- function(mat, is.fix = TRUE){
-        # if fix
+        mat %<>% as.matrix()
         mat[, -1] %<>% {. /rowSums2(.) * mat[, 1]}
         colnames(mat)[1] <- "EOS"
         cbind(row = 1:ngrid, mat) %>% data.table() %>% melt("row") 
     }
 
     d <- pls_obj$attribute_change %>% tidy_cont(TRUE)
-
-    # fix attributable change by multiply a factor
 
     # add attributable change
     # d[is.na(value), value:= 0]
@@ -106,12 +108,13 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
     #         geom = "text", vjust = -0.5) +
     #     labs(y = "Relative contribution 2 (%)", x = NULL)
     #     # scale_fill_manual(values = colors)
+# browser()
 
     p_delta %<>% add_fig_No("(c)")
     p_attribute %<>% add_fig_No("(d)")
     # p_attribute2 %<>% add_fig_No("(e)")
     # , p_attribute2
-    g <- gridExtra::arrangeGrob(p_VIP, p_coef, p_delta, p_attribute, nrow = 2)
+    g <- gridExtra::arrangeGrob(p_VIP, p_coef, p_delta, p_attribute, ncol = 2)
     g
 }
 

@@ -21,7 +21,9 @@ if (!file.exists(file_plsr)) {
     load(file_preseason)
     ngrid <- lst_preseason$GIMMS$pcor.max %>% nrow
     
-    lst_plsr <- foreach(mat_preseason = lst_preseason, var = names(lst_preseason), grp = icount(3)) %do% {
+    grps = c(4)
+    lst  = lst_preseason[grps]
+    lst_plsr2 <- foreach(mat_preseason = lst, var = names(lst), grp = grps, icount()) %do% {
         # if (grp != 3) return()
         res <- foreach(d = mat_preseason$data, 
                        i = icount()) %dopar% {
@@ -64,16 +66,15 @@ if (init == 0) {
 # Figure2 = TRUE
 # /test/s3_1. Check-PLSR-performance.R
 
-
 ## FIGURE 3: Relative Contributions
 Figure3 = TRUE
 if (Figure3) {
-    nyears = c(34, 14, 16) # 17, 33
-    temp <- foreach(lst = lst_plsr, varname = names(lst_plsr), i = icount(3)) %do% {
+    nyears = c(34, 14, 16, 19) # 17, 33
+    temp <- foreach(lst = lst_plsr, varname = names(lst_plsr), i = icount()) %do% {
         nyear = nyears[i]
         # vjust <- ifelse(i == 1, 2.5, 4)
-        hjust <- switch(i, 2, 2, 3)
-        vjust = switch(i, 1.5, 1.5, 2.5)
+        hjust <- switch(i, 2, 2, 3, 3)
+        vjust = switch(i, 1.5, 1.5, 2.5, 2.5)
         
         foreach(obj = lst[1], type = names(lst)) %do% {
             outfile <- glue("Figures/Figure4_PLSR_{varname}_{type}.pdf")
@@ -111,11 +112,12 @@ if (Figure4) {
     }) %>% as.data.frame()
     names2 <- paste0(rep(c("SOS", "mete"), each = ncol(d)), "-", colnames(d))
     d <- cbind(d, 100-d) %>% set_names(names2)#[, c(1, 3, 2, 4)]
-    gridclip2_10@data <- data.frame(d)
+    gridclip2_10@data <- data.frame(d)[, c(1, 4, 3, 5, 8, 7)]
     
     names <- c(expression(bold("(a) RC" [SOS]  * " (GIMMS" [3*g]*")")),
                expression(bold("(b) RC" [SOS]  * " (MCD12Q2)")),
                expression(bold("(c) RC" [SOS]  * " (SPOT)")),
+               # expression(bold("(c) RC" [SOS]  * " (SPOT)")),
                expression(bold("(d) RC" [mete] * " (GIMMS" [3*g]*")")),
                expression(bold("(e) RC" [mete] * " (MCD12Q2)")),
                expression(bold("(f) RC" [mete] * " (SPOT)")) 
@@ -168,10 +170,11 @@ if (FigureS2) {
         ans[I, ] <- d*nyear
         ans
     }
-
-    df_perc <- purrr::transpose(lst_perc) %>% map(as.data.frame) %>% 
+    
+    grps = c(1, 4, 3)
+    df_perc <- purrr::transpose(lst_perc[grps]) %>% map(as.data.frame) %>% 
         do.call(cbind, .)
-    df_change <- purrr::transpose(lst_change) %>% map(as.data.frame) %>% 
+    df_change <- purrr::transpose(lst_change[grps]) %>% map(as.data.frame) %>% 
         do.call(cbind, .)
     
     # names2 <- paste0(rep(c("SOS", "mete"), each = ncol(d)), "-", colnames(d))
