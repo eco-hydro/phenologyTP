@@ -2,8 +2,8 @@
 #' 
 #' Get preseason of autumn phenology (EOS).
 #' 
-#' @param Tmin, Tmax Prec, Srad: daily time-series
-#' @param SOS, EOS: yearly phenological metrics
+#' @param Tmin,Tmax,Prec,Srad daily time-series
+#' @param SOS,EOS yearly phenological metrics
 #' @param dates_mete dates of mete
 #' @param DateRange_pheno range of phenology data
 #' @param maxDays max length of preseason。

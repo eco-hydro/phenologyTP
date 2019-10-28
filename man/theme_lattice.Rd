@@ -5,10 +5,16 @@
 \title{theme_lattice}
 \usage{
 theme_lattice(plot.margin, key.margin, axis.margin, axis.components.inner,
-  axis.components.outer, par.settings, ...)
+  axis.components.outer, ..., layout.widths, layout.heights, par.settings)
 }
 \arguments{
-\item{plot.margin, key.margin, axis.margin, axis.components.inner, axis.components.outer}{margin object in the order to \code{"top", "right", "bottom", "left"}.}
+\item{plot.margin}{plot padding in layout.heights and layoutheights}
+
+\item{key.margin}{legend margin}
+
+\item{axis.margin}{axis margin}
+
+\item{axis.components.inner, axis.components.outer}{margin object in the order to \code{"top", "right", "bottom", "left"}.}
 }
 \description{
 theme_lattice

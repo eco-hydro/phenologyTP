@@ -16,6 +16,8 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
     fontface = "bold"
     fontsize_statistic = 5
     FUN_lab = label_median
+    
+    ngrid <- nrow(pls_obj$VIP)
 
     add_fig_No <- function(g, label = "(a)"){
         g + geom_text(data = data.table(x = Inf, y = Inf, label = label), 
@@ -24,8 +26,14 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
             theme(legend.position = "none", panel.grid = element_blank()) 
     }
 
-    ngrid <- nrow(pls_obj$VIP)
-    # 1. VIP value
+    add_boxplot <- function(p){
+        # stat_boxplot(geom ='errorbar', width = 0.5) +
+        # geom_boxplot2(width = 0.75) +
+        p + stat_summary(fun.data = box_qtl, geom = "errorbar", width = 0.6) +
+            geom_boxplot2(outlier.size = -1, coef = 0)
+            # stat_summary(fun.y = mean, geom = "point")
+    }
+    
     melt_index <- function(mat) {
         cbind(row = 1:nrow(mat), mat) %>% data.table() %>% melt("row") 
     }
@@ -36,11 +44,7 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
     d_rem[, label := sprintf("%s \n(%.1f%%)", variable, N/ngrid*100)]
     
     # d[is.na(value), value:=0]
-    p_VIP <- ggplot(d, aes(variable, value, fill = variable)) + 
-        # stat_boxplot(geom ='errorbar', width = 0.5) +
-        # geom_boxplot2(width = 0.75) +
-        stat_summary(fun.data = box_qtl, geom = "errorbar", width = 0.6) +
-        geom_boxplot2(outlier.size = -1, coef = 0) + 
+    p_VIP <- {ggplot(d, aes(variable, value, fill = variable)) %>% add_boxplot()} + 
         geom_hline(yintercept = 1, color = "red", linetype = 1) + 
         geom_hline(yintercept = 0.8, color = "red", linetype = 2) + 
         # scale_x_discrete(breaks = d_rem$variable, labels = d_rem$label) +
@@ -51,50 +55,40 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
     color_zero = "black"
     # 2. std coef
     d <- pls_obj$std.coefs %>% melt_index()
-    p_coef <- ggplot(d, aes(variable, value, fill = variable)) + 
-        # stat_boxplot(geom ='errorbar', width = 0.5) +
-        # geom_boxplot2() + 
-        stat_summary(fun.data = box_qtl, geom = "errorbar", width = 0.6) +
-        geom_boxplot2(outlier.size = -1, coef = 0) + 
+    p_coef <- {ggplot(d, aes(variable, value, fill = variable)) %>% add_boxplot()} + 
         labs(y = "Standardized coefficients", x = NULL) + 
         geom_hline(yintercept = 0, color = color_zero, linetype = 2)
     p_coef %<>% add_fig_No("(b)")
     # geom_hline(yintercept = 1, color = "red", linetype = 2)
     
     # 3. delta change
-    # browser()
     tidy_cont <- function(mat, is.fix = TRUE){
         mat %<>% as.matrix()
         mat[, -1] %<>% {. /rowSums2(.) * mat[, 1]}
         colnames(mat)[1] <- "EOS"
-        cbind(row = 1:ngrid, mat) %>% data.table() %>% melt("row") 
+        mat[abs(mat) >= 50] = NA_real_
+
+        cbind(row = 1:nrow(mat), mat) %>% data.table() %>% melt("row") 
     }
 
+    # 3. add attributable change
     d <- pls_obj$attribute_change %>% tidy_cont(TRUE)
-
-    # add attributable change
-    # d[is.na(value), value:= 0]
     d[variable != "EOS", perc := abs(value)/sum(abs(value), na.rm = TRUE)*100, .(row)] # not y    
-    colors <- hue_pal()(5) %>% c("grey", .)
+    # d[is.na(value), value:= 0]
+    # browser()
 
-    p_delta <- ggplot(d, aes(variable, value*nyear, fill = variable)) + 
-        # stat_boxplot(geom ='errorbar', width = 0.5) +
-        # geom_boxplot2(outlier.size = -1) + 
-        stat_summary(fun.data = box_qtl, geom = "errorbar", width = 0.6) +
-        geom_boxplot2(outlier.size = -1, coef = 0) + 
+    colors <- hue_pal()(5) %>% c("grey", .)
+    p_delta <- {ggplot(d, aes(variable, value*nyear, fill = variable)) %>% add_boxplot()} + 
         # stat_summary(fun.data = FUN_lab, colour = "black", size = fontsize_statistic, geom = "text", vjust = -0.5) + 
         labs(y = "Attributable changes (days)", x = NULL) + 
         scale_fill_manual(values = colors) + 
         geom_hline(yintercept = 0, color = color_zero, linetype = 2)
-
-    # browser()
-    p_attribute <- ggplot(d[variable != "EOS"], aes(variable, perc, fill = variable)) + 
-        # stat_boxplot(geom ='errorbar', width = 0.5) +
-        # geom_boxplot2(outlier.size = -1) + 
-        stat_summary(fun.data = box_qtl, geom = "errorbar", width = 0.6) +
-        geom_boxplot2(outlier.size = -1, coef = 0) + 
+    obs.mean <- d[variable == "EOS", .(value = mean(value, na.rm = TRUE)), .(variable)]
+    p_delta <- p_delta + geom_point(data = obs.mean, aes(variable, value), size = 2, show.legend = FALSE)
+    
+    p_attribute <- {ggplot(d[variable != "EOS"], aes(variable, perc, fill = variable)) %>% add_boxplot()} + 
         stat_summary(fun.data = FUN_lab, colour = "black", size = fontsize_statistic, geom = "text", vjust = -0.5) +
-        labs(y = "Relative contribution (%)", x = NULL)
+        labs(y = "Relative contributions (%)", x = NULL)
         # scale_fill_manual(values = colors)
     
     # 考虑正负的贡献率

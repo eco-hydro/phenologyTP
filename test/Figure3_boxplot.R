@@ -46,10 +46,9 @@ melt_list2 <- function(res){
 }
 
 
-## FIGURE 3: Relative Contributions
+## FIGURE 3: boxplot
 Figure3 = TRUE
 if (Figure3) {
-
     ## 2000-2015
     names_sate = c("GIMMS", "MOD13C1", "SPOT")
     years = c(16, 16, 14)

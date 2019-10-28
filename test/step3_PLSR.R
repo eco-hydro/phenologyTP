@@ -66,35 +66,12 @@ if (init == 0) {
 # Figure2 = TRUE
 # /test/s3_1. Check-PLSR-performance.R
 
-## FIGURE 3: Relative Contributions
-Figure3 = TRUE
-if (Figure3) {
-    nyears = c(34, 14, 16, 19) # 17, 33
-    temp <- foreach(lst = lst_plsr, varname = names(lst_plsr), i = icount()) %do% {
-        nyear = nyears[i]
-        # vjust <- ifelse(i == 1, 2.5, 4)
-        hjust <- switch(i, 2, 2, 3, 3)
-        vjust = switch(i, 1.5, 1.5, 2.5, 2.5)
-        
-        foreach(obj = lst[1], type = names(lst)) %do% {
-            outfile <- glue("Figures/Figure4_PLSR_{varname}_{type}.pdf")
-            # outfile.tif <- sprintf("Figure4_PLSR_%s_%s.tif", varname, type)
-            
-            g1 <- pls_show(obj, nyear, hjust, vjust)
-            # write_fig(g1, outfile, 12, 7.5)
-            write_fig(g1, gsub(".pdf$", ".tif", outfile), 11, 6.6) # 12, 7.5
-        }
-        # only statistic the result of SOS model
-    }
-    
-    # d <- foreach(l = lst_plsr, i = icount()) %do% {
-    #     nyear <- ifelse(i == 1, 34 , 14)
-    #     as.data.table(l$SOS$attribute_change) * nyear
-    # } %>% melt_list("type")
-    # 
-    # d[, map(.SD, sd), .(type),.SDcols = colnames(d)[-7]]
-    # d[, map(.SD, mean), .(type),.SDcols = colnames(d)[-7]]
-}
+# d <- foreach(l = lst_plsr, i = icount()) %do% {
+#     nyear <- ifelse(i == 1, 34 , 14)
+#     as.data.table(l$SOS$attribute_change) * nyear
+# } %>% melt_list("type")
+# d[, map(.SD, sd), .(type),.SDcols = colnames(d)[-7]]
+# d[, map(.SD, mean), .(type),.SDcols = colnames(d)[-7]]
 
 # lst_plsr$GIMMS$SOS$VIP
 ngrid <- lst_plsr$GIMMS$SOS$ypred %>% nrow()
@@ -199,59 +176,6 @@ if (FigureS2) {
                                    list(no = letters[no], varname = varname, sate = sate)))
         }
     } %>% do.call(c, .)
-    # par(cex.main = 2)
-    # temp <- foreach(d = lst_df, type_source = names(lst_df), i = icount(1)) %do% {
-    
-    {
-        pars = list(title = list(x=76, y=39.5, cex=1.5), 
-                    hist = list(origin.x=77, origin.y=28, A=12, by = 0.6, tick = c(0, 0.1, 0.2, 0.3)))
-        stat = list(show = TRUE, name="RC", loc = c(84, 25.8), include.sd = TRUE)
-        
-        gridclip2_10@data <- df_perc
-        p <- spplot_grid(gridclip2_10, 
-                         brks = c(-0.01, 5, 10, 20, 30, 40, 50, Inf), 
-                         colors = .colors$Blues[1:9],#%>% rev(), 
-                         panel.title = names,
-                         ylim = c(25.9, 41),
-                         # layout = c(3, 1),
-                         # xlab.top = list("GIMMS",cex = 1.5, fontfamily = "Times", fontface = "bold"), 
-                         # ylab = list("Tmax",cex = 1.5, fontfamily = "Times", fontface = "bold"),
-                         # scales=list(x=list(cex=2)), 
-                         cex.main = 10, 
-                         sp.layout = list(list(sp_layout), list(gridclip2_10[1], col = "grey60", first = TRUE)), 
-                         toFactor = T, 
-                         pars = pars, ylab.offset = 2.5, 
-                         par.settings2 = par.settings2,
-                         # colorkey = FALSE,
-                         stat = stat,
-                         unit = "(%)", 
-                         unit.adj = 1.5,
-                         lgd.title = "RMSE")
-        write_fig(p, glue("Figures/FigureS2_All_factor_relative_contribution.tif"), 12, 11)
-        
-        stat = list(show = TRUE, name="Days", loc = c(84, 25.8), include.sd = TRUE)
-        gridclip2_10@data <- df_change
-        p <- spplot_grid(gridclip2_10, 
-                         brks = c(1, 2, 5, 10, Inf) %>% c(-rev(.), 0, .), 
-                         colors = RColorBrewer::brewer.pal(11, "RdYlBu"),#%>% rev(), 
-                         panel.title = names_change,
-                         ylim = c(25.4, 41),
-                         # layout = c(3, 1),
-                         # xlab.top = list("GIMMS",cex = 1.5, fontfamily = "Times", fontface = "bold"), 
-                         # ylab = list("Tmax",cex = 1.5, fontfamily = "Times", fontface = "bold"),
-                         # scales=list(x=list(cex=2)), 
-                         cex.main = 10, 
-                         sp.layout = list(list(sp_layout), list(gridclip2_10[1], col = "grey60", first = TRUE)), 
-                         toFactor = T, 
-                         pars = pars, ylab.offset = 2.5, 
-                         par.settings2 = par.settings2,
-                         # colorkey = FALSE,
-                         stat = stat,
-                         unit = "", 
-                         unit.adj = 1.5,
-                         lgd.title = "RMSE")
-        write_fig(p, glue("Figures/FigureS2_All_factor_contribution.tif"), 12, 13)
-    }
 }
 
 ## Figure_S3 Annual variation of simulated EOS ---------------------------------

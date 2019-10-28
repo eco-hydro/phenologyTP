@@ -8,9 +8,9 @@ get_preseason(Tmin, Tmax, Prec, Srad, SOS, EOS, dates_mete,
   DateRange_pheno = NULL, maxDays = 150)
 }
 \arguments{
-\item{Tmin, }{Tmax Prec, Srad: daily time-series}
+\item{Tmin, Tmax, Prec, Srad}{daily time-series}
 
-\item{SOS, }{EOS: yearly phenological metrics}
+\item{SOS, EOS}{yearly phenological metrics}
 
 \item{dates_mete}{dates of mete}
 

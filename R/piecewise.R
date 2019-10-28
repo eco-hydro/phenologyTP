@@ -39,9 +39,8 @@ piecewise <- function(y, year.origin = 1, predict = FALSE, brk = NULL){
                 brk <- tryCatch(floor(dtest$statistic[[1]]), error = function(e) NA)
             }
         }
-
         brk %<>% check_turnpoint(n, min = 5)
-    }    
+    }
     
     y_a  <- y[1:brk]
     y_b  <- y[(brk+1):length(y)]
