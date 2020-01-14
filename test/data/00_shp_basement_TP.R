@@ -58,6 +58,13 @@ baesdata <- function(outfile = 'data/00basement_TP.rda'){
 
 res <- baesdata()
 
+
+## 统计alpine steppe的比例
+library(raster)
+library(sp)
+r = over( gridclip_10, poly_veg[, 2])
+
+
 # label_style <- 
 #     labelOptions(
 #         noHide = T, textOnly = TRUE,

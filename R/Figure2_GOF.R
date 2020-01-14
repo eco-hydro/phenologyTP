@@ -37,6 +37,7 @@ func_Figure2 <- function(df, outfile = "Figure2_PLSR_model_performance.png", FUN
         unit  = ifelse(i == 3, "", "days")
         padding = ifelse(i == 1, 0.2, 0) # legend top padding
         
+        # browser()
         p <- levelplot2(
             value ~ s1+s2| variable + index, d, SpatialPixel, 
             stat = stat, 
@@ -57,13 +58,14 @@ func_Figure2 <- function(df, outfile = "Figure2_PLSR_model_performance.png", FUN
             aspect = .6
         ) 
         
+        # browser()
         if (i == 1) strip = strip.custom(factor.levels = labels)
         p2 = useOuterStrips(p, strip = strip, 
                             strip.left = strip.custom(factor.levels = indexes_eq[i])) + 
             theme_lattice(
-                plot.margin = plot.margin, 
-                key.margin  = c(0, 1.5, 0, 0), 
-                axis.line   = list(col = "black"), 
+                plot.margin = plot.margin,
+                key.margin  = c(0, 1.5, 0, 0),
+                axis.line   = list(col = "black"),
                 layout.heights = list(
                     key.top = 0,
                     xlab.key.padding  = 0,

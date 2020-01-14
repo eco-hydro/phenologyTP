@@ -64,9 +64,9 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
     # 3. delta change
     tidy_cont <- function(mat, is.fix = TRUE){
         mat %<>% as.matrix()
-        mat[, -1] %<>% {. /rowSums2(.) * mat[, 1]}
+        # mat[, -1] %<>% {. /rowSums2(.) * mat[, 1]}
         colnames(mat)[1] <- "EOS"
-        mat[abs(mat) >= 50] = NA_real_
+        mat[abs(mat) >= 50] = 50 #NA_real_
 
         cbind(row = 1:nrow(mat), mat) %>% data.table() %>% melt("row") 
     }
@@ -76,7 +76,10 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
     d[variable != "EOS", perc := abs(value)/sum(abs(value), na.rm = TRUE)*100, .(row)] # not y    
     # d[is.na(value), value:= 0]
     # browser()
-
+    d[!is.na(value), .(mean = mean(value), median = median(value), sd = sd(value)), .(variable)] %>% 
+        print()
+    
+    
     colors <- hue_pal()(5) %>% c("grey", .)
     p_delta <- {ggplot(d, aes(variable, value*nyear, fill = variable)) %>% add_boxplot()} + 
         # stat_summary(fun.data = FUN_lab, colour = "black", size = fontsize_statistic, geom = "text", vjust = -0.5) + 

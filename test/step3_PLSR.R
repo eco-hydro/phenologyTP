@@ -12,6 +12,10 @@ par.settings2 = list(
     axis.line = list(col = "white")
 )
 
+
+info <- over(gridclip2_10, poly_veg[, 2])[[1]]
+d = rowMeans(df_EOS_10deg - df_SOS_10deg)
+
 # 2.4 The difference of considering SOS or not
 if (!file.exists(file_plsr)) {
     InitCluster(12)

@@ -47,7 +47,7 @@ info2 <- foreach(l_preseason = lst_preseason[grps], l_plsr = lst_plsr[grps], i =
 tidy_info <- function(info) {
     r <- info %>% map(~.[, .(I, RMSE, NSE, MAE, R, R2)]) %>% 
         purrr::transpose() %>% map(as.data.table)
-    lst <- r[c("RMSE", "MAE", "R2")] %>% map(~cbind(I = 1:ngrid, .) %>% melt("I"))
+    lst <- r[c("RMSE", "MAE", "R2")] %>% map(~cbind(I = 1:nrow(.), .) %>% melt("I"))
     df <- melt_list(lst, "index")
     df
 }
@@ -61,8 +61,11 @@ ngrid <- length(gridclip2_10)
 SpatialPixel = gridclip2_10[, 1]
 
 
+library(lattice)
+library(latticeExtra)
 ## 1. 
-func_Figure2(df.SOS   , outfile = "Figure2_PLSR_model_performance_SOS.png")
+# load_all("E:/Research/cmip5/Ipaper")
+func_Figure2(df.SOS   , outfile = "Figure2_PLSR_model_performance_SOS.pdf")
 func_Figure2(df.NONSOS, outfile = "Figure2_PLSR_model_performance_NonSOS.png")
 
 ## 2. diff
@@ -70,5 +73,6 @@ func_Figure2(df.NONSOS, outfile = "Figure2_PLSR_model_performance_NonSOS.png")
     brks0 = c(0.2, 0.5, 1) %>% c(-rev(.), 0, .)
     brks2 = c(0.05, 0.1, 0.2) %>% c(-rev(.), 0, .)
     lst_brks = list(brks0, brks0, brks2) %>% map(~c(-Inf, ., Inf))
-    func_Figure2.diff(df.diff, lst_brks, outfile = "Figure2_PLSR_model_performance_diff.png")
+    # df.diff$value %<>% multiply_by(-1)
+    func_Figure2.diff(df.diff, lst_brks, outfile = "Figure7_PLSR_model_performance_diff2.pdf")
 }
