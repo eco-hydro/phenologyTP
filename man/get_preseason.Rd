@@ -4,8 +4,17 @@
 \alias{get_preseason}
 \title{get_preseason}
 \usage{
-get_preseason(Tmin, Tmax, Prec, Srad, SOS, EOS, dates_mete,
-  DateRange_pheno = NULL, maxDays = 150)
+get_preseason(
+  Tmin,
+  Tmax,
+  Prec,
+  Srad,
+  SOS,
+  EOS,
+  dates_mete,
+  DateRange_pheno = NULL,
+  maxDays = 150
+)
 }
 \arguments{
 \item{Tmin, Tmax, Prec, Srad}{daily time-series}

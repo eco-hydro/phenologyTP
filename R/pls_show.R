@@ -15,7 +15,16 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
 
     fontface = "bold"
     fontsize_statistic = 5
-    FUN_lab = label_median
+    
+    label_fun <- function(x, include.sd=FALSE){
+        md <- median(x, na.rm = T)
+        sd <- sd(x, na.rm = T)
+        
+        r <- data.frame(y = md, sd = sd)
+        r$label <- ifelse(include.sd, sprintf("%.1f±%.1f", md, sd), sprintf("%.1f", md)) 
+        r
+    }
+    FUN_lab = label_fun
     
     ngrid <- nrow(pls_obj$VIP)
 

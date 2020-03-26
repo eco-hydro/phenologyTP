@@ -4,8 +4,7 @@
 \alias{phenofit_input.avhrr}
 \title{phenofit_input.avhrr}
 \usage{
-phenofit_input.avhrr(mat_y, mat_qc, d_date, wmax = 0.8, I_st, st,
-  outfile)
+phenofit_input.avhrr(mat_y, mat_qc, d_date, wmax = 0.8, I_st, st, outfile)
 }
 \description{
 prepare input for phenofit obj

@@ -70,13 +70,13 @@ if (Figure3) {
     }
     
     type = "SOS"
-    gs = foreach(obj = lst, varname = names(lst), i = icount(3)) %do% {
+    gs = foreach(obj = lst, varname = names(lst), i = icount()) %do% {
       hjust <- switch(i, 2, 2, 3, 3)
       vjust = switch(i, 1.5, 1.5, 2.5, 2.5)
       
       outfile <- glue("Figures/Figure4_PLSR_{varname}_{type}.pdf")
       p <- pls_show(obj, nyear = 1, hjust, vjust)
-      write_fig(p, gsub(".pdf$", ".tif", outfile), 11, 6.6)
+      write_fig(p, gsub(".pdf$", ".pdf", outfile), 11, 6.6)
     }
     # g = arrangeGrob(grobs = gs, nrow = 1)
     # write_fig(g, "a.pdf", 10, 7)

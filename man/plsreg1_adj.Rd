@@ -4,8 +4,17 @@
 \alias{plsreg1_adj}
 \title{plsreg1_adj}
 \usage{
-plsreg1_adj(X, Y, comps = 2, autoVars = TRUE, nminVar = 2,
-  minVIP = 0.8, include.fitted = FALSE, slope = slope, ...)
+plsreg1_adj(
+  X,
+  Y,
+  comps = 2,
+  autoVars = TRUE,
+  nminVar = 2,
+  minVIP = 0.8,
+  include.fitted = FALSE,
+  slope = slope,
+  ...
+)
 }
 \arguments{
 \item{...}{other params will be ignored}

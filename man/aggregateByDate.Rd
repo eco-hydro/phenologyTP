@@ -7,7 +7,7 @@
 aggregateByDate(mat, dates, format)
 }
 \arguments{
-\item{format}{'\%Y-\%m-\%d': year, month, day}
+\item{format}{'\\%Y-\\%m-\\%d': year, month, day}
 }
 \description{
 aggregateByDate

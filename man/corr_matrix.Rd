@@ -7,9 +7,9 @@
 corr_matrix(X, Y)
 }
 \arguments{
-\item{X}{\code{[time, grid]}, the dimension of X and Y should be same.}
+\item{X}{\verb{[time, grid]}, the dimension of X and Y should be same.}
 
-\item{Y}{\code{[time, grid]}}
+\item{Y}{\verb{[time, grid]}}
 }
 \description{
 Correlation of each pixel.

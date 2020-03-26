@@ -4,8 +4,7 @@
 \alias{pls_show}
 \title{pls_show}
 \usage{
-pls_show(pls_obj, nyear = 34, hjust = 2, vjust = -2,
-  base_size = 16)
+pls_show(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
 }
 \description{
 VIP, MC, attributable change, relative contribution
