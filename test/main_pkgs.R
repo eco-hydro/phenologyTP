@@ -42,38 +42,22 @@ suppressMessages({
     library(oce)
 })
 
-file_pheno_012       <- "OUTPUT/phenology_TP_AVHRR_phenofit.rda"
-# file_pheno_010       <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
-file_pheno_010       <- "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
-file_pheno_010_3s    <- "OUTPUT/phenology_TP_phenology_010deg_3s.rda"
-file_pheno_010_3s_V2 <- "OUTPUT/phenology_TP_phenology_010deg_3s_V2.rda"
+prj_TP               <- path.mnt("n:/Research/phenology/phenology_TP/")
+file_pheno_012       <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit.rda")
+# file_pheno_010     <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
+file_pheno_010       <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda")
+file_pheno_010_3s    <- paste0(prj_TP, "OUTPUT/phenology_TP_phenology_010deg_3s.rda")
+file_pheno_010_3s_V2 <- paste0(prj_TP, "OUTPUT/phenology_TP_phenology_010deg_3s_V2.rda")
 
-file_preseason <- "OUTPUT/TP_010deg_preseason2.rda"
-file_plsr      <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_V2.rda"
-file_plsr_mk   <- "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_(slope_mk).rda"
+file_preseason       <- paste0(prj_TP, "OUTPUT/TP_010deg_preseason2.rda")
+file_plsr            <- paste0(prj_TP, "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_V2.rda")
+file_plsr_mk         <- paste0(prj_TP, "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_(slope_mk).rda")
 
-file_trend    <- "INPUT/preseason_trend.rda"
-file_SPOT_010    <- "E:/SciData/pheno_TP (SPOT&MODIS)/phenofit_SPOT_TP_010deg.RDS"
-file_MOD13C1_010 <- "E:/SciData/pheno_TP (SPOT&MODIS)/phenofit_MOD13C1_TP_010deg.RDS"
+file_trend           <- paste0(prj_TP, "INPUT/preseason_trend.rda")
+file_SPOT_010        <- path.mnt("E:/SciData/pheno_TP (SPOT&MODIS)/phenofit_SPOT_TP_010deg.RDS")
+file_MOD13C1_010     <- path.mnt("E:/SciData/pheno_TP (SPOT&MODIS)/phenofit_MOD13C1_TP_010deg.RDS")
 
-## 
 # source('test/main_vis.R')
-OS.type = .Platform$OS.type
-if (OS.type == 'windows') {
-    windowsFonts(
-        Times = windowsFont("Times New Roman"), 
-        Arial = windowsFont("Arial"), 
-        YH = windowsFont("Microsoft Yahei"), 
-        whit = windowsFont("Whitney-Book")
-    )
-} else if (OS.type == 'unix'){
-    Cairo::CairoFonts(
-        regular="Times New Roman:style=Regular",
-        bold="Times New Roman:style=Bold",
-        italic="Times New Roman:style=Oblique",
-        bolditalic="Times New Roman:style=BoldOblique"
-    )
-}
 
 # legend.position = "none", 
 # panel.grid = element_blank(), 

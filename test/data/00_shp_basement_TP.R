@@ -46,24 +46,24 @@ baesdata <- function(outfile = 'data/00basement_TP.rda'){
     proj4string(poly_veg) <- proj4string(grid)
     I_grid_10 <- over(grid_10, poly_veg[, 1])[[1]] %>% which.notna()
     gridclip_10 <- grid_10[I_grid_10, ]
-
+    
+    poly <- readOGR("E:/Research/phenology/DATA/shp/TP/TP_poly.shp")
     save(gridclip, I_grid, 
          gridclip_10, I_grid_10, 
          range,
-         poly_veg, sp_layout, st, sp, I_st, xlim, ylim, 
+         poly, poly_veg, sp_layout, st, sp, I_st, xlim, ylim, 
          file = outfile)
+    
     res <- listk(gridclip, poly_veg, I_grid, I_st, st, sp, xlim, ylim)
     res
 }
 
 res <- baesdata()
 
-
 ## 统计alpine steppe的比例
 library(raster)
 library(sp)
 r = over( gridclip_10, poly_veg[, 2])
-
 
 # label_style <- 
 #     labelOptions(

@@ -17,6 +17,7 @@ TSF/
 *.svg
 *.png
 *.html
+*.jpg
 
 # TEMP
 test/temp/
@@ -26,3 +27,7 @@ parallel.R
 notebook
 *.ipynb
 inst/extdata/userguide
+*.json
+*.geojson
+data-raw/ArcGIS
+data-raw/shp
