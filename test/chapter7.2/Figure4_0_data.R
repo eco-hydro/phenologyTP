@@ -42,6 +42,7 @@ files_static  <- dir(indir, "PML2_yearly_static", full.names = TRUE) %>%
     set_year_names()
 files_lai <- dir(indir, "LAI", full.names = TRUE) %>%
     set_year_names()
+
 files_lc <- dir("INPUT/tif/", "MCD12Q1_land_perc_010", full.names = TRUE) %>%
     set_year_names()
 
@@ -50,7 +51,7 @@ files_lc <- dir("INPUT/tif/", "MCD12Q1_land_perc_010", full.names = TRUE) %>%
 
 lst_dynamic <- llply(files_dynamic, readGDAL, band = 1:4)
 lst_static  <- llply(files_static , readGDAL, band = 1:4)
-lst_lai     <- llply(files_lai    , readGDAL)
+lst_lai <- llply(files_lai, readGDAL)
 
 df_lai      <- get_anorm(lst_lai)
 df_dynamic  <- get_anorm(lst_dynamic)

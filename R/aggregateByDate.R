@@ -25,11 +25,15 @@ multiYear_mean <- function(mat, nptperyear = 24){
     array(mat, c(dims[-ndim], nptperyear, ntime/nptperyear)) %>% array_mean(ndim + 1)
 }
 
+#' fill_grid
+#' 
+#' `row` should be in the first column
+#' 
 #' @export
 fill_grid <- function(grid, d){
     ngrid <- nrow(grid)
     I <- match(seq_len(ngrid), d$row)
-    
+
     grid@data <- d[I, -1] %>% data.frame()
     grid
 }

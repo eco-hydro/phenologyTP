@@ -9,4 +9,3 @@ lst_pheno <- list(
     VIP_pheno = map(lst_VIPpheno, ~.[I_grid2_10, -1] %>% set_colnames(1982:2014))
 ) %>% map(~set_names(., c("SOS", "EOS")))
 ```
-

@@ -56,6 +56,7 @@ if (s3_preseason) {
     l <- read_rds(check_file(file_MOD13C1_010)) %>% map(select_metric) %>% 
         purrr::transpose() %>% map(~do.call(cbind, .))
     lst_pheno$MOD13C1 = l
+    save(lst_pheno, file = "data-raw/pheno_TP_010deg (1982-2015).rda")
 }
 
 

@@ -1,35 +1,10 @@
 source("test/main_pkgs.R")
 
-root <- "D:/Documents/OneDrive - mail2.sysu.edu.cn/SciData/TP_phenology_010deg"
+root <- path.mnt("D:/Documents/OneDrive - mail2.sysu.edu.cn/SciData/TP_phenology_010deg")
 load("data/00basement_TP.rda")
 load(file_pheno_010)
 
 ## GLOBAL FUNCTIONS ------------------------------------------------------------
-# Get spatial mean of 3 dataset.
-read_MCD12Q2_V6 <- function(file){
-    I_V6    <- c(1, 2, 7, 8, 9, 10, 13, 14)+1
-    I_bands <- I_V6[seq(1, 8, 2)]
-    x = rgdal::readGDAL(file, silent = TRUE)[I_bands]
-    
-    year <- str_extract(basename(file), "\\d{4}") %>% as.numeric()
-    
-    
-    doy_first <- { make_date(year, 1, 1) - 1 } %>% as.numeric()
-    x@data[x@data == 0] = NA
-    x@data %<>% subtract(doy_first)
-    
-    x@data
-}
-
-read_MCD12Q2 <- function(file){
-    rgdal::readGDAL(file, silent = TRUE)[seq(1, 8, 2)]@data
-    # + 1
-}
-
-read_VIPpheno <- function(file){
-    rgdal::readGDAL(file, silent = TRUE)@data
-}
-
 pheno_MOD      <- c("Greenup", "Maturity", "Senescence", "Dormancy")
 pheno_VIP      <- c("VIPpheno_SOS", "VIPpheno_EOS")
 pheno_GIMMS    <- c("GIMMS_SOS", "GIMMS_EOS")
@@ -51,7 +26,7 @@ lst_pheno <- foreach(type = types, i = icount()) %do% {
     if (length(l) == 4) {
         l <- l[c(1, 4)] # Greenup, Dormancy
         # names = pheno_MOD
-    } #else 
+    } # else 
     names = c("SOS", "EOS")
     set_names(l, names) %>% map(~.[I_grid2_10, ])
 }
@@ -80,7 +55,6 @@ df <- map_depth(lst_pheno, 2, ~rowMeans2(., na.rm = TRUE)) %>%
 
 ## Figure 1. simple correlation analysis
 # source('test/supply/Figure_s1_check spatial dist of GIMMS3g MCD12Q2 and VIPpheno_NDVI.R')    
-
 
 ## 1. spatial dist ------------------------------------------------------------------
 Fig_s1 = FALSE

@@ -1,7 +1,11 @@
 melt_lc <- function(d) {
-    add_column_id(d) %>%
+    ans <- add_column_id(d) %>%
         melt("I", variable.name = "LC") %>%
         data.table()
+    ans$LC %<>% factor(LCs_types)
+    # note NA values at here 
+    ans[value == 0, value := NA_real_]
+    ans
 }
 
 aggregate_lc <- function(df_diff) {

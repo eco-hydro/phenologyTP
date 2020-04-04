@@ -2,8 +2,8 @@
 suppressMessages({
     library(lubridate)
     library(data.table)
-    # library(grid)
-
+    
+    library(grid)
     library(lattice)
     library(latticeExtra)
     library(Cairo)
@@ -21,7 +21,7 @@ suppressMessages({
     library(sf)
     library(segmented)
     library(pls)
-    library(ropls)
+    # library(ropls)
     library(RColorBrewer)
 
     # library(plsdepot)#already rewrite its PLSREG1 function
@@ -30,6 +30,7 @@ suppressMessages({
 
     library(data.table)
     library(matrixStats)
+    library(abind)
     library(glue)
     
     # Myself packages 
@@ -39,13 +40,21 @@ suppressMessages({
     library(CMIP5tools)
 
     library(sp)
-    library(oce)
+    # library(oce)
+    library(sp2)
+    library(raster)
+    library(rgdal)
 })
+
+file_PML <- "data-raw/PMLV2_TP_010deg.rda"
+
+range_global <- c(-180, 180, -60, 90)
+grid_global  <- get_grid(range_global, cellsize = 0.1, type = "vec")
 
 prj_TP               <- path.mnt("n:/Research/phenology/phenology_TP/")
 file_pheno_012       <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit.rda")
-# file_pheno_010     <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda"
-file_pheno_010       <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda")
+
+# file_pheno_010      <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda")
 file_pheno_010_3s    <- paste0(prj_TP, "OUTPUT/phenology_TP_phenology_010deg_3s.rda")
 file_pheno_010_3s_V2 <- paste0(prj_TP, "OUTPUT/phenology_TP_phenology_010deg_3s_V2.rda")
 
@@ -54,12 +63,13 @@ file_plsr            <- paste0(prj_TP, "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_V2
 file_plsr_mk         <- paste0(prj_TP, "OUTPUT/TP_010deg_PLSR_SOS and Non-SOS_(slope_mk).rda")
 
 file_trend           <- paste0(prj_TP, "INPUT/preseason_trend.rda")
-file_SPOT_010        <- path.mnt("E:/SciData/pheno_TP (SPOT&MODIS)/phenofit_SPOT_TP_010deg.RDS")
-file_MOD13C1_010     <- path.mnt("E:/SciData/pheno_TP (SPOT&MODIS)/phenofit_MOD13C1_TP_010deg.RDS")
+
+file_SPOT_010        <- path.mnt("F:/SciData/pheno_TP (SPOT&MODIS)/phenofit_SPOT_TP_010deg_v2.RDS")
+file_MOD13C1_010     <- path.mnt("F:/SciData/pheno_TP (SPOT&MODIS)/phenofit_MOD13C1_TP_010deg.RDS")
+file_AVHRR_010       <- "data-raw/phenology_AVHRR_010deg_TP_cliped (1982-2015).rds"
+file_pheno_full      <- "data-raw/phenology_6types_010deg_TP_cliped (1982-2015).RDS"
 
 # source('test/main_vis.R')
-
-# legend.position = "none", 
 # panel.grid = element_blank(), 
 theme_set( theme_bw(base_size = 14) + 
     theme(
@@ -75,7 +85,6 @@ titles_b <- c("MCD12Q2", "VIP_Pheno") %>% rep(each = 2) %>% paste(c("SOS", "EOS"
 A     = 20
 ntick = 2
 by    = 0.6
-
 
 select_metric <- function(mat){
     mat[, c("TRS2.sos", "TRS6.eos")] %>% set_colnames(c("SOS", "EOS")) %>% as.data.table()

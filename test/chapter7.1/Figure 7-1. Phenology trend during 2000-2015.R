@@ -57,11 +57,15 @@ melt_list2 <- function(res){
 # pvalue mask
 df.mask <- map_depth(lst_trend, 2, ~cbind(I = 1:ngrid, .x$pvalue)) %>% 
   melt_list2() %>% 
-  .[, mask := value <= 0.05]
+  .[, mask := value <= 0.05] # This pvalue
 df      <- melt_list2(res)
 levels  <- c("SOS", "EOS", "Tmin", "Tmax", "Prec", "Srad")
 df$variable %<>% factor(levels)
-df$df.mask %<>% factor(levels)
+df.mask$variable %<>% factor(levels)
+
+# pheno_trend.2000_2015 <- df
+save(df, df.mask, file = "data-raw/pheno_trend.2000_2015.rda")
+# use_data(, overwrite = TRUE)
 
 Figure4 = TRUE
 if (Figure4) {
@@ -70,14 +74,18 @@ if (Figure4) {
   pars = list(title = list(x=77, y=39, cex=1.5), 
               hist = list(origin.x=77, origin.y=28, A=12, by = 0.5, box.width = 0.48, ylab.offset = 3, 
                           tick = seq(0, 0.3, 0.1)))
-  stat = list(show = TRUE, name="Days", loc = c(84.5, 25.7), digit = 1, include.sd = TRUE, FUN = weightedMean)
+  stat = list(show = TRUE, name="均值", loc = c(84.5, 25.7), digit = 1, include.sd = TRUE, FUN = weightedMean)
   SpatialPixel = gridclip2_10[, 1]
   labels = c(
-    expression(bold("GIMMS"[3*g] * " (2000-2015)")), 
-    expression(bold("MODIS (2000-2015)")), 
-    expression(bold("SPOT (2000-2013)")))
+    expression("GIMMS"[3*g] * " (2000-2015)"), 
+    "MODIS (2000-2015)", 
+    "SPOT (2000-2013)") %>% char2expr()
   # df$type_source %<>% factor(labels = labels)
   varnames = c("SOS", "EOS")#[2]
+  varnames_zh = c("生长季开始时间", "生长季结束时间") %>% char2expr()
+  x = expression("GIMMS"[3*g] * " (2000-2015)")
+  # plot(0, main = eval(substitute(expression(bold(x)), list(x = varnames_zh[1]))))
+
   p <- levelplot2(value ~ s1 + s2 | type_source + variable, 
                   df[type_trend == "MK" & variable %in% varnames], SpatialPixel, 
                   df.mask[type_trend == "MK" & variable %in% varnames],
@@ -88,6 +96,7 @@ if (Figure4) {
                   stat = stat, pars = pars,
                   brks = brks,
                   # strip = TRUE,
+                  panel.titles_full = label_tag(rep("", 6)), 
                   density = 0.5,
                   par.shade = list(lwd = 0.5), 
                   border = "white", border.lwd = 0.01,
@@ -98,9 +107,12 @@ if (Figure4) {
                   # par.settings = opt_trellis_strip,
                   interpolate = FALSE,
                   aspect = .6) 
-  p %<>% useOuterStrips(strip = strip.custom(factor.levels = labels), strip.lines = 1.1)
+  p %<>% useOuterStrips(strip = strip.custom(factor.levels = labels),
+                        strip.left = strip.custom(factor.levels = varnames_zh),
+                        strip.lines = 1.1)
   # write_fig(p, "Figure4_attributable_changes_all_factors.pdf", 10, 12.5)
-  write_fig(p, "Figure7-1 EOS and SOS changes.pdf", 10, 5, devices = c("jpg", "pdf")) # clear and small file size
+  scale = 1
+  write_fig(p, "Figure7-1 EOS and SOS changes.pdf", 10, 5, devices = c("jpg")) # clear and small file size
 }
 
 

@@ -15,10 +15,10 @@ baesdata <- function(outfile = 'data/00basement_TP.rda'){
 
     # GET TP boundary
     region <- "mongo" # "TP" # 
-    shpfile_tp <- "../data/shp/TP/TP_vegZoneSolve84.shp"
+    shpfile_tp <- "E:/Research/phenology/DATA/shp/TP/TP_vegZoneSolve84.shp"
     shpfile_mongo <- "../data/shp/mongo/veg_mongo84.shp"
 
-    poly_veg    <- rgdal::readOGR(shpfile_tp, verbose = FALSE)
+    poly_veg    <- rgdal::readOGR(shpfile_tp, verbose = FALSE, encoding = "UTF-8")
     sp_layout <- list("sp.polygons", poly_veg, first = FALSE)
     
     # p_mongo <- rgdal::readOGR(shpfile_mongo, verbose = FALSE)

@@ -13,6 +13,7 @@ which_max <- function(x) {
     c(value = x[I], pos = I)
 }
 
+
 #' @export
 yearlyDates <- function(year) {
     dates <- seq(ymd(year*1e4+0101), ymd(year*1e4+1231), "day")
@@ -84,4 +85,11 @@ fill_df_null <- function(df, I, convert2.data.table = FALSE){
         df_new %<>% as.data.table()
     }
     df_new
+}
+
+#' get_colors
+#' @examples
+#' cols <- get_colors(RColorBrewer::brewer.pal(11, "RdYlBu"), 10)
+get_colors <- function(colors, n) {
+    colorRampPalette(colors)(n)
 }

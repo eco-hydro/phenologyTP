@@ -1,21 +1,38 @@
 # load("INPUT/lc_trends.rda")
 # visualization
-# grid2 <- as(grid, "SpatialPixelsDataFrame")
 source("test/main_pkgs.R")
 
+# obj_global <- make_grid(range=c(-180, 180, -60, 90), cellsize=0.1)
+# shp <- TP_poly
+# grid <- obj_global$grid[obj$ids, ]
+# system.time(obj <- sp2:::clipbasins(shp, obj_global))
+# PML result in 0.1 deg
+# id_grid_010.TP_in_global <- raster::extract(raster(grid), grid_010.TP)
+use_data(id_grid_010.TP_in_global, overwrite = TRUE)
+
+# v2: cliped
+# grid <- grid_010.TP
+grid <- grid_010.TP_cliped
+id_grid_010.TP_in_global <- raster::extract(raster(grid_global), grid)
+
+# grid5 <- get_grid(range_global, cellsize = 0.5)
 d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
 # d_diff       <- fread("INPUT/lc_diff (2008-2018)-(2003-2007).csv")
 # d_diff       <- fread("INPUT/lc_diff (2018)-(2008-2017).csv")
-{
-    d_diff_major <- aggregate_lc(d_diff %>% as.matrix)[, ]
 
+## clip regional data
+{
+    d_diff_major <- aggregate_lc(d_diff[id_grid_010.TP_in_global, ] %>% as.matrix)[, ]
+    d_major <- melt_lc(d_diff_major)
+    
+    r <- grid_010.TP
+    # r@data <- d[, -1] 
     # df = resample_grid(grid, d_diff, fact = 5)@data %>% add_column_id() %>% melt('I', variable.name = "LC")
-    df_major = resample_grid(grid, d_diff_major, fact = 1)@data %>% data.table() %>% melt_lc()
-    df_major$LC %<>% factor(LCs_types)
-    df_major[value == 0, value := NA_real_]
+    # df_major = resample_grid(grid, d_diff_major, fact = 1)@data %>% data.table() %>% melt_lc()
 }
 
 {
+    sp_layout2 <- c(list(sp_layout), list(list("sp.polygons", TP_poly, fill = alpha("white", 0.5), first = TRUE)))
     max = 4
     # brks <-  c(-Inf, seq(-2, 2, 0.2), Inf) # perc
     # brks <-  c(-Inf, seq(-max, max, 0.4), Inf) # km^2, 3600 in total
@@ -38,12 +55,13 @@ d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
     # # par.settings = opt_trellis_strip,
     # interpolate = FALSE,
     # aspect = .6)
+    levels = c("森林", "灌木", "草地", "耕地", "城市", "水体")
     p <- levelplot2(value ~ s1+s2 | LC,
                     # df,
-                    df_major,
+                    d_major,
                     # df[!(LC %in% c("UNC", "water"))], # blank
                     # df[LC %in% IGBP006_names[1:4]],
-                    grid5,
+                    grid,
                     # df.mask = df[, .(LC, mask = pval <= 0.05)],
                     colors = cols, brks = brks,
                     strip = TRUE,
@@ -51,13 +69,14 @@ d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
                     pars = pars,
                     aspect = 0.5,
                     ylim = c(25, 40),
+                    strip.factors = levels, 
                     xlim = c(73, 105),
                     par.settings2 = list(strip.background = list(alpha = 0)),
                     par.strip.text = list(cex = 1.5, font = 2, fontfamily = "Times", lineheight = 2),
                     # unit = "km2", unit.adj = 0.5,
                     sub.hist = TRUE,
                     legend.num2factor = TRUE,
-                    sp.layout = sp_layout,
+                    sp.layout = sp_layout2,
                     interpolate = FALSE
                     # stat = NULL,
                     # xlim = xlim, ylim = ylim
@@ -67,7 +86,7 @@ d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
     # p %<>% useOuterStrips(
     #     # strip = strip.custom(factor.levels = labels),
     #                       strip.lines = 1.1)
-    write_fig(p, "Figure1_LC_changes_major_(2008-2017)-(2003-2007).pdf", 9, 7.2)
+    write_fig(p, "Figure1_LC_changes_major_(2008-2017)-(2003-2007)_cliped.jpg", 9, 7.2)
 }
 
 # d <- na.omit(df_major)

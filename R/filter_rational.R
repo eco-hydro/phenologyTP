@@ -55,12 +55,3 @@ filter_rational <- function(x){
   })#quickly return, x_list.trim <-
   do.call(cbind, setNames(res, NULL))#return data.frame
 }
-
-## ----------------------- PLOT FUNCTIONS --------------------------
-# change factor levels for plot
-changeLevels <- function(x, at){
-  result <- data.frame(x)
-  for (i in 1:ncol(x))
-    result[, i] <- cut(x[, i], breaks = at, include.lowest = T)
-  result#quickly return
-}
