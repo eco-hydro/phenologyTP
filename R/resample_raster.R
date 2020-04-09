@@ -51,3 +51,28 @@ resample_lst <- function(lst, grid, scale = 1) {
     }
     ans
 }
+
+
+#' fill_grid
+#'
+#' `row` should be in the first column
+#'
+#' @export
+fill_grid <- function(grid, d) {
+    ngrid <- nrow(grid)
+    I <- match(seq_len(ngrid), d$row)
+
+    grid@data <- d[I, -1] %>% data.frame()
+    grid
+}
+
+fill_grid2 <- function(ngrid, d) {
+    # ngrid <- nrow(grid)
+    ind <- seq_len(ngrid)
+    I <- match(seq_len(ngrid), d[[1]])
+    # browser()
+    ans <- d[I, ]
+    ans[[1]] <- ind
+    ans
+    # grid
+}

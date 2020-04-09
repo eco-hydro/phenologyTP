@@ -108,7 +108,7 @@ read_VIPpheno <- function(file) {
 # metric_autumn <- metrics_select[-(1:nmetrics)]
 
 # "DER.pop",
-metric_all = c("TRS2.sos", "TRS2.eos", "TRS5.sos", "TRS5.eos", "TRS6.sos", "TRS6.eos", "DER.sos", "DER.pop","DER.eos", "UD", "SD", "DD", "RD", "Greenup", "Maturity", "Senescence", "Dormancy")
+metrics_all = c("TRS2.sos", "TRS2.eos", "TRS5.sos", "TRS5.eos", "TRS6.sos", "TRS6.eos", "DER.sos", "DER.pop","DER.eos", "UD", "SD", "DD", "RD", "Greenup", "Maturity", "Senescence", "Dormancy")
 metrics_select = c("TRS2.sos", "TRS2.eos", "TRS5.sos", "TRS5.eos", "TRS6.sos", "TRS6.eos", "DER.sos", "DER.eos", "UD", "SD", "DD", "RD", "Greenup", "Maturity", "Senescence", "Dormancy")
 
 metric_spring <- c("TRS2.sos", "TRS5.sos", "TRS6.sos", "DER.sos", "UD", "SD", "Greenup", "Maturity")

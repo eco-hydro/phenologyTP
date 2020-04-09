@@ -37,9 +37,6 @@ tidy_PML <- function(lst, grid) {
         transpose() %>% map(~do.call(cbind, .))
 }
 
-
-
-
 yearly_date <- function(year, dn = 4) {
     doy <- seq(1, leap_year(year) + 365, dn)
     as.Date(sprintf("%d-%03d", year, doy), "%Y-%j")
@@ -55,3 +52,7 @@ seq_date_dn <- function(start, end, dn = 4) {
     ans %>% .[. >= start & . <= end]
 }
 
+set_dimnames <- function(x, names) {
+    dimnames(x) <- names
+    x
+}

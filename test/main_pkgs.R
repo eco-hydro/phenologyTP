@@ -35,6 +35,7 @@ suppressMessages({
     
     # Myself packages 
     library(Ipaper)
+    library(rcolors)
     # library(phenology)
     library(phenofit)
     library(CMIP5tools)
@@ -68,6 +69,7 @@ file_SPOT_010        <- path.mnt("F:/SciData/pheno_TP (SPOT&MODIS)/phenofit_SPOT
 file_MOD13C1_010     <- path.mnt("F:/SciData/pheno_TP (SPOT&MODIS)/phenofit_MOD13C1_TP_010deg.RDS")
 file_AVHRR_010       <- "data-raw/phenology_AVHRR_010deg_TP_cliped (1982-2015).rds"
 file_pheno_full      <- "data-raw/phenology_6types_010deg_TP_cliped (1982-2015).RDS"
+file_pheno           <- "data-raw/phenology_6types_010deg_TP_cliped 2metrics (1982-2015).RDS"
 
 # source('test/main_vis.R')
 # panel.grid = element_blank(), 

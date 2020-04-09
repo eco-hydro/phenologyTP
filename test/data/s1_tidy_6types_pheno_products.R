@@ -47,3 +47,36 @@ lst_pheno$GIMMS3g <- readRDS(file_AVHRR_010)
 
 saveRDS(lst_pheno, file_pheno_full)
 # lst_pheno <- readRDS(file_pheno_full)
+
+## 2. select phenological metrics -------------------------------------------------
+sources <- c("MCD12Q2_V5", "MCD12Q2_V6", "VIPpheno_EVI2", "VIPpheno_NDVI", "MOD13C1", "SPOT", "GIMMS3g")
+lst_time <- list(
+    2001:2014,
+    2001:2017, 
+    1981:2014, 
+    1981:2014,
+    2000:2018,
+    1998:2013, 
+    1982:2015
+) %>% set_names(sources)
+
+# select metrics first
+# metrics = c("Greenup" , "DER.pop", "TRS6.eos") # Dormancy
+l_pheno <- foreach(l = lst_pheno, years = lst_time, i = icount()) %do% {
+    if (i %in% c(1, 2)) {
+        names = c("Greenup", "Peak", "Dormancy")
+        i_metric <- match(names, names(l))
+        ans <- l[i_metric] %>% set_names(c("SOS", "POP", "EOS"))
+    } else if (i >= 3 && i <= 4) {
+        ans <- l
+    } else {
+        i_metric <- match(c("TRS2.sos", "DER.pop", "TRS6.eos"), metrics_all)
+        ans <- map(l, ~ as.data.table(.[, i_metric])) %>%
+            purrr::transpose() %>%
+            map(~ do.call(cbind, .) %>% set_dirnames(NULL)) %>% 
+            set_names(c("SOS", "POP", "EOS"))
+    } 
+    ans$year <- years
+    ans
+} 
+saveRDS(l_pheno, file_pheno)
