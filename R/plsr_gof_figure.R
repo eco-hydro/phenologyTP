@@ -1,4 +1,4 @@
-func_Figure2 <- function(df, outfile = "Figure2_PLSR_model_performance.png", FUN = weightedMean){
+plsr_gof_figure <- function(df, outfile = "Figure2_PLSR_model_performance.png", FUN = weightedMean){
     labels = c(
         expression(bold("GIMMS"[3*g])), 
         expression(bold("MODIS")), 

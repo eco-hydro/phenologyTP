@@ -39,7 +39,7 @@ ngrid <- length(gridclip2_10)
 lst <- r[indexes] %>% map(~cbind(I = 1:ngrid, .) %>% melt("I"))
 SpatialPixel = gridclip2_10[, 1]
 
-func_Figure2 <- function(){}
+plsr_gof_figure <- function(){}
 {
     pars = list(title = list(x=76, y=39.8, cex=1.2), 
                 hist = list(origin.x=77, origin.y=28, A=10, by = 0.6))

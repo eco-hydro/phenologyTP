@@ -65,8 +65,8 @@ library(lattice)
 library(latticeExtra)
 ## 1. 
 # load_all("E:/Research/cmip5/Ipaper")
-func_Figure2(df.SOS   , outfile = "Figure2_PLSR_model_performance_SOS.pdf")
-func_Figure2(df.NONSOS, outfile = "Figure2_PLSR_model_performance_NonSOS.png")
+plsr_gof_figure(df.SOS   , outfile = "Figure2_PLSR_model_performance_SOS.pdf")
+plsr_gof_figure(df.NONSOS, outfile = "Figure2_PLSR_model_performance_NonSOS.png")
 
 ## 2. diff
 {
@@ -74,5 +74,5 @@ func_Figure2(df.NONSOS, outfile = "Figure2_PLSR_model_performance_NonSOS.png")
     brks2 = c(0.05, 0.1, 0.2) %>% c(-rev(.), 0, .)
     lst_brks = list(brks0, brks0, brks2) %>% map(~c(-Inf, ., Inf))
     # df.diff$value %<>% multiply_by(-1)
-    func_Figure2.diff(df.diff, lst_brks, outfile = "Figure7_PLSR_model_performance_diff2.pdf")
+    plsr_gof_figure.diff(df.diff, lst_brks, outfile = "Figure7_PLSR_model_performance_diff2.pdf")
 }

@@ -9,10 +9,10 @@
 #' @importFrom gridExtra arrangeGrob
 #' @importFrom data.table data.table as.data.table := is.data.table fwrite fread
 #' @importFrom zoo na.approx index zoo
-#' @importFrom dplyr bind_cols bind_rows group_by first last nth
+#' @importFrom dplyr bind_cols bind_rows group_by
 #' @importFrom purrr map map_df map_dbl is_empty
 #' @importFrom tidyr gather spread
-#' @importFrom lubridate ymd yday year month day dyears is.Date
+#' @importFrom lubridate ymd dyears is.Date
 #' @importFrom stringr str_extract
 #' @importFrom utils object.size
 #' @importFrom grDevices dev.off cairo_pdf

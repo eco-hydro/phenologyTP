@@ -1,5 +1,5 @@
 source("test/main_pkgs.R")
-
+library(ggpmisc)
 load(file_PML)
 load("data-raw/pheno_trend.2000_2015.rda")
 ## 1. 准备一个0.1deg的高程文件
@@ -44,7 +44,7 @@ df <- foreach(l = lst_pheno[5:7], i = icount()) %do% {
 df$source %<>% factor(sources[5:7], sources_labels[5:7])
 df$metric %<>% factor(c("SOS", "EOS", "LOS"), c("SOS", "EOS", "LOS") %>% label_tag(tag = FALSE))
 {
-    theme_set( theme_bw(base_size = 14, base_family = "rTimes") + 
+    theme_set( theme_bw(base_size = 16, base_family = "TimesSimSun") + 
                    theme(
                        panel.grid.minor = element_blank(),
                        panel.grid.major = element_blank(), 
@@ -63,7 +63,7 @@ df$metric %<>% factor(c("SOS", "EOS", "LOS"), c("SOS", "EOS", "LOS") %>% label_t
                                                     stat(x_p.value)))) + 
         stat_fit_glance(method = "lm",
                         # label.y = "bottom",
-                        label.y = 0.12,
+                        label.y = 0.15,
                         geom = "label_npc", label.size = NA,
                         method.args = list(formula = y ~ x),
                         mapping = aes(label = sprintf('italic(p)~"="~%.3f', stat(p.value))), parse = TRUE) + 
@@ -76,12 +76,13 @@ df$metric %<>% factor(c("SOS", "EOS", "LOS"), c("SOS", "EOS", "LOS") %>% label_t
              x = "植被物候变化 (天)", y = "蒸发变化 (mm/a)") + 
         facet_grid(metric~source, scales = "free", labeller = label_parsed) + 
         theme(strip.text = element_text(family = "Times"))
-    write_fig(tag_facet(p, size = 5, vjust = 2), "Figure7-8 ET ~ phenology metrics.jpg", 12, 8)
+    write_fig(tag_facet(p, size = 5, vjust = 2), "Figure7-8 ET ~ phenology metrics.jpg", 10, 6.5)
 }
 
 ## GPP -------------------------------------------------------------------------
 {
-    p <- ggplot(df[variable == "GPP"], aes(x, y)) + geom_point(aes(shape = region, color = region, size = size)) +
+    p <- ggplot(df[variable == "GPP"], aes(x, y)) + 
+        geom_point(aes(shape = region, color = region, size = size)) +
         geom_smooth(method = "lm") +
         # stat_cor(aes(label = paste(..adj.rr.label.., ..adj.rr.label..))) +
         # stat_regline_equation(label.y.npc = 0.9) +
@@ -99,7 +100,7 @@ df$metric %<>% factor(c("SOS", "EOS", "LOS"), c("SOS", "EOS", "LOS") %>% label_t
         stat_fit_glance(
             method = "lm",
             # label.y = "bottom",
-            label.y = 0.12,
+            label.y = 0.15,
             geom = "label_npc", label.size = NA,
             method.args = list(formula = y ~ x),
             mapping = aes(label = sprintf('italic(p)~"="~%.3f', stat(p.value))), parse = TRUE
@@ -115,7 +116,7 @@ df$metric %<>% factor(c("SOS", "EOS", "LOS"), c("SOS", "EOS", "LOS") %>% label_t
         ) +
         facet_grid(metric ~ source, scales = "free", labeller = label_parsed) +
         theme(strip.text = element_text(family = "Times"))
-    write_fig(tag_facet(p, size = 5, vjust = 2), "Figure7-7 GPP ~ phenology metrics.jpg", 12, 8)
+    write_fig(tag_facet(p, size = 5, vjust = 2), "Figure7-7 GPP ~ phenology metrics.jpg", 10, 6.5)
 }
 
 # ggplot(df, aes(x= new_price, y= carat, color = cut)) +
