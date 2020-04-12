@@ -80,6 +80,14 @@ df_mean <- df_dynamic %>% map(rowMeans2) %>% as.data.table() %>%
     names %<>% char2expr()
 }
 
+
+id_veg_010deg <- overlap_id(grid_010.TP, poly_veg)
+
+res <- foreach(ind = id_veg_010deg) %do% {
+    df_mean[I %in% ind, .(value = mean(value, na.rm = TRUE)), .(band)]
+}
+d <- res %>% melt_list("veg_type") %>% dcast(veg_type~band)
+
 ## Figure 7-3 spatial distribution of simulations ------------------------------
 {
     ps = foreach(bandName = bandNames, i = icount()) %do% {
@@ -130,6 +138,7 @@ df_mean <- df_dynamic %>% map(rowMeans2) %>% as.data.table() %>%
             theme_lattice(key.margin = c(0, 1, 0, 0),
                           plot.margin = c(0.5, 0.5, -1.5, -1.5))
     }
+    # "no applicable method for 'as.layer' applied to an object of class "list""
     # tbl2 <- do.call(rbind, ps) %>% data.table() %>% cbind(band = bandNames[1:4], .)
     # write_list2xlsx(list(tbl2 = tbl2), "dat2_LUCC_induced x changes.xlsx")
     g = arrangeGrob(grobs = ps, nrow = 3)

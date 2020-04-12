@@ -1,6 +1,2 @@
-
-grid_010.TP_cliped@data <- data.table(id = 1:nrow(grid_010.TP_cliped))
-d <- poly_veg@data
-r <- raster::extract(raster(grid_010.TP_cliped), poly_veg) %>% set_names(d$Name)
-id_veg_010deg <- r %>% map(rm_empty)
+id_veg_010deg <- overlap_id(grid_010.TP_cliped, poly_veg)
 use_data(id_veg_010deg, overwrite = TRUE)

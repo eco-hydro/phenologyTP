@@ -31,3 +31,4 @@ inst/extdata/userguide
 *.geojson
 data-raw/ArcGIS
 data-raw/shp
+*.xlsx

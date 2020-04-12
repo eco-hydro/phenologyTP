@@ -8,6 +8,7 @@ suppressMessages({
     library(latticeExtra)
     library(Cairo)
     library(scales)
+    library(ggpmisc)
 
     library(plyr)
     library(tidyverse)

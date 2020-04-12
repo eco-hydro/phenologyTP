@@ -1,5 +1,5 @@
 source("test/main_pkgs.R")
-library(ggpmisc)
+
 load(file_PML)
 load("data-raw/pheno_trend.2000_2015.rda")
 ## 1. 准备一个0.1deg的高程文件
@@ -21,6 +21,8 @@ grid_010.TP@data <- data.frame(id = 1:length(grid_010.TP))
 inds <- raster::extract(raster(grid_010.TP), grid_010.TP_cliped)
 areas <- values(raster::area(raster(grid_010.TP_cliped)))[grid_010.TP_cliped$id]
 
+id_veg_010deg <- overlap_id(grid_010.TP_cliped, TP_poly_veg)
+
 df <- foreach(l = lst_pheno[5:7], i = icount()) %do% {
     info <- match2(l$year, years_gpp)
     l_pheno <- map(l[c(1,3)] %>% rm_empty, ~.[, info$I_x])
@@ -41,6 +43,7 @@ df <- foreach(l = lst_pheno[5:7], i = icount()) %do% {
     dplot
 } %>% melt_list("source")
 
+df = df[region != "热带雨林", ]
 df$source %<>% factor(sources[5:7], sources_labels[5:7])
 df$metric %<>% factor(c("SOS", "EOS", "LOS"), c("SOS", "EOS", "LOS") %>% label_tag(tag = FALSE))
 {
@@ -58,7 +61,7 @@ df$metric %<>% factor(c("SOS", "EOS", "LOS"), c("SOS", "EOS", "LOS") %>% label_t
                       label.x = "left", label.y = 0.02,
                       geom = "label_npc", label.size = NA,
                       method.args = list(formula = y ~ x), parse = TRUE, 
-                      mapping = aes(label = sprintf('Slope~"="~%.2f ~ mm ~ a^-1 ~ d^-1',
+                      mapping = aes(label = sprintf('Slope~"="~%.2f', #  ~ mm ~ a^-1 ~ d^-1
                                                     stat(x_estimate),
                                                     stat(x_p.value)))) + 
         stat_fit_glance(method = "lm",
