@@ -46,6 +46,7 @@ suppressMessages({
     library(sp2)
     library(raster)
     library(rgdal)
+    library(plsdepot)
 })
 
 file_PML <- "data-raw/PMLV2_TP_010deg.rda"

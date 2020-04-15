@@ -36,7 +36,7 @@ df <- foreach(l = lst_pheno[5:7], i = icount()) %do% {
     ET  <- abind(l_PML[-1], along = 3) %>% apply_3d(FUN = rowSums2)
     
     dplot <- foreach(X = listk(SOS, EOS, LOS)) %do% {
-        foreach(Y = listk(GPP, ET)) %do% {
+        foreach(Y = listk(GPP, ET, Ec = l_PML$Ec, Es = l_PML$Es)) %do% {
             get_regional_mean(X, Y, areas)
         }
     } %>% melt_tree(c("metric", "variable"))
@@ -45,84 +45,29 @@ df <- foreach(l = lst_pheno[5:7], i = icount()) %do% {
 
 df = df[region != "热带雨林", ]
 df$source %<>% factor(sources[5:7], sources_labels[5:7])
-df$metric %<>% factor(c("SOS", "EOS", "LOS"), c("SOS", "EOS", "LOS") %>% label_tag(tag = FALSE))
+df$metric %<>% factor(c("SOS", "EOS", "LOS"), c("生长季开始时间", "生长季结束时间", "生长季长度") %>% label_tag(tag = FALSE))
+df[, x2 := mark_outlier(x), .(source, metric, variable)]
+df[, y2 := mark_outlier(y), .(source, metric, variable)]
+
 {
-    theme_set( theme_bw(base_size = 16, base_family = "TimesSimSun") + 
-                   theme(
-                       panel.grid.minor = element_blank(),
-                       panel.grid.major = element_blank(), 
-                       panel.border = element_rect(size = 0.5)
-                   ))
-    p <- ggplot(df[variable == "ET"], aes(x, y)) + geom_point(aes(shape = region, color = region, size = size)) + 
-        geom_smooth(method = "lm") + 
-        # stat_cor(aes(label = paste(..adj.rr.label.., ..adj.rr.label..))) +
-        # stat_regline_equation(label.y.npc = 0.9) +
-        stat_fit_tidy(method = "lm",
-                      label.x = "left", label.y = 0.02,
-                      geom = "label_npc", label.size = NA,
-                      method.args = list(formula = y ~ x), parse = TRUE, 
-                      mapping = aes(label = sprintf('Slope~"="~%.2f', #  ~ mm ~ a^-1 ~ d^-1
-                                                    stat(x_estimate),
-                                                    stat(x_p.value)))) + 
-        stat_fit_glance(method = "lm",
-                        # label.y = "bottom",
-                        label.y = 0.15,
-                        geom = "label_npc", label.size = NA,
-                        method.args = list(formula = y ~ x),
-                        mapping = aes(label = sprintf('italic(p)~"="~%.3f', stat(p.value))), parse = TRUE) + 
-                        # mapping = aes(label = sprintf('italic(R^2)~"="~%.3f*","~italic(p)~"="~%.3f', 
-                        #                               stat(r.squared), stat(p.value))), parse = TRUE) +
-        scale_shape_manual(values = 0:18) + 
-        scale_size_manual(values = seq(1, 10, 0.7)) + 
-        labs(size = expression("面积 ("*10^3~km*")"), 
-             shape = "植被分区", color = "植被分区", fill  = "植被分区",
-             x = "植被物候变化 (天)", y = "蒸发变化 (mm/a)") + 
-        facet_grid(metric~source, scales = "free", labeller = label_parsed) + 
-        theme(strip.text = element_text(family = "Times"))
-    write_fig(tag_facet(p, size = 5, vjust = 2), "Figure7-8 ET ~ phenology metrics.jpg", 10, 6.5)
+    fontsize <- 15
+    theme_set(theme_bw(base_size = fontsize, base_family = "TimesSimSun") + 
+        theme(
+            panel.grid.minor = element_blank(),
+            panel.grid.major = element_blank(), 
+            panel.border = element_rect(size = 0.5)
+        ))
 }
 
-## GPP -------------------------------------------------------------------------
-{
-    p <- ggplot(df[variable == "GPP"], aes(x, y)) + 
-        geom_point(aes(shape = region, color = region, size = size)) +
-        geom_smooth(method = "lm") +
-        # stat_cor(aes(label = paste(..adj.rr.label.., ..adj.rr.label..))) +
-        # stat_regline_equation(label.y.npc = 0.9) +
-        stat_fit_tidy(
-            method = "lm",
-            label.x = "left", label.y = 0.02,
-            geom = "label_npc", label.size = NA,
-            method.args = list(formula = y ~ x), parse = TRUE,
-            mapping = aes(label = sprintf(
-                'Slope~"="~%.2f ~ gC ~ m^-2 ~ a^-1 ~ d^-1',
-                stat(x_estimate),
-                stat(x_p.value)
-            ))
-        ) +
-        stat_fit_glance(
-            method = "lm",
-            # label.y = "bottom",
-            label.y = 0.15,
-            geom = "label_npc", label.size = NA,
-            method.args = list(formula = y ~ x),
-            mapping = aes(label = sprintf('italic(p)~"="~%.3f', stat(p.value))), parse = TRUE
-        ) +
-        # mapping = aes(label = sprintf('italic(R^2)~"="~%.3f*","~italic(p)~"="~%.3f',
-        #                               stat(r.squared), stat(p.value))), parse = TRUE) +
-        scale_shape_manual(values = 0:18) +
-        scale_size_manual(values = seq(1, 10, 0.7)) +
-        labs(
-            size = expression("面积 (" * 10^3 ~ km * ")"),
-            shape = "植被分区", color = "植被分区", fill = "植被分区",
-            x = "植被物候变化 (天)", y = expression("总初级生产力GPP变化 ("*gC~m^-2~a^-1*")")
-        ) +
-        facet_grid(metric ~ source, scales = "free", labeller = label_parsed) +
-        theme(strip.text = element_text(family = "Times"))
-    write_fig(tag_facet(p, size = 5, vjust = 2), "Figure7-7 GPP ~ phenology metrics.jpg", 10, 6.5)
+{    
+    devices = c("emf", "pdf")[1]
+    show = FALSE
+    plot_region_mean(df, "Ec", ylab = expression("植被蒸腾 (mm" ~ a^-1*")"), 
+        devices = devices, show = show)
+    plot_region_mean(df, "Es", ylab = expression("土壤蒸发 (mm" ~ a^-1*")"),
+        devices = devices, show = show)
+    plot_region_mean(df, "ET", ylab = expression("蒸发变化 (mm" ~ a^-1*")"),
+        devices = devices, show = show)
+    plot_region_mean(df, "GPP", ylab = expression("总初级生产力变化 (" * gC ~ m^-2 ~ a^-1 * ")"),
+        devices = devices, show = show)
 }
-
-# ggplot(df, aes(x= new_price, y= carat, color = cut)) +
-#     geom_point(alpha = 0.3) +
-#     facet_wrap(~clarity, scales = "free_y") +
-#     geom_smooth(method = "lm", formula = formula, se = F) +

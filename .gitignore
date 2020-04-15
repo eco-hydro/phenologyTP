@@ -16,8 +16,9 @@ TSF/
 *.tif
 *.svg
 *.png
-*.html
 *.jpg
+*.emf
+*.html
 
 # TEMP
 test/temp/

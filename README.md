@@ -24,5 +24,17 @@ devtools:install.packages("kongdd/phenology_TP")
 
 ## Findings
 
-认为VIPpheno质量比较差，结果不可信。
+## Tasklists
 
+新方法鉴定植被物候的影响
+
+1. 剔除LC变化率大于5%的区域，以控制LC变化的影响
+going on
+
+2. 通过dynamic_veg - static_veg，剔除因素的影响，剥离出植被变化的影响（植被变化包括植被物候变化和植被覆盖度变化）。
+植被物候通过生长季开始时间和生长季结束时间来反映；植被覆盖度通过年最大LAI来反映。
+
+delta_GPP = dynamic_veg - static_veg (in PML-V2 model)
+detla_GPP ~ SOS + EOS + LAI_yearlyMaxe
+
+The same method for ET

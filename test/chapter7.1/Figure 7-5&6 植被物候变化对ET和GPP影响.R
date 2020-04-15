@@ -32,125 +32,37 @@ temp <- foreach(l = lst_pheno, i = icount()) %do% {
     # summary(as.numeric(LOS))
     l_PML <- map(df_dynamic, ~.[ind, info$I_y])    
 
-    pcor_gpp <- corr_pheno(l_PML$GPP, SOS, EOS)
     ET <- abind(l_PML[-1], along = 3) %>% apply_3d(FUN = rowSums2)
-    pcor_ET <- corr_pheno(ET, SOS, EOS)
-    list(GPP = pcor_gpp, ET = pcor_ET)
+    INPUT <- c(list(ET = ET), l_PML[-4])[c(2, 1, 3, 4)]
+    res_pcor <- foreach(data = INPUT) %do% {
+        corr_pheno(data, SOS, EOS)
+    }
 }
 # chapter 7-1 ------------------------------------------------------------------
-
 lst_pcor <- transpose(temp) %>% map(transpose)
 save(lst_pcor, file = "chp7_GPP&ET_pcor.rda")
 
+# load("data-raw/chp7_GPP&ET_pcor.rda")
 {
     grid <- grid_010.TP_cliped
     ngrid <- length(grid)
-
-    stat = list(show = TRUE, name = "均值", loc = c(84.5, 25.7), digit = 1, include.sd = TRUE, FUN = weightedMean)
-    stat_sign = list(loc1 = c(78, 41.5), loc2 = c(78, 41.5 - 2))
-    pars = list(
-        title = list(x = 74, y = 41, cex = 1.5),
-        hist = list(
-            origin.x = 77, origin.y = 28, A = 12, by = 0.5, box.width = 0.48, ylab.offset = 3,
-            tick = seq(0, 0.3, 0.1)
-        )
-    )
+    
     # grid <- grid_010.TP_cliped
     # grid <- grid_010.TP_cliped
     SpatialPixel = grid_010.TP_cliped
 }
 
 # figure1 -----------------------------------------------------------------
-df_GPP <- tidy_list(lst_pcor$GPP, ngrid)
-df_ET <- tidy_list(lst_pcor$ET, ngrid)
+lst_pcor2 <- map(lst_pcor, tidy_list, ngrid = ngrid)
+# df_GPP <- tidy_list(lst_pcor$GPP, ngrid)
+# df_ET <- tidy_list(lst_pcor$ET, ngrid)
 
-Figure7_5 = TRUE
-Figure7_6 = TRUE
+devices = c("jpg", "pdf")[2]
+show = TRUE
+plot_pcor_spatial(lst_pcor2$GPP, outfile = "Figure7-5 GPP pcor with phenology.pdf", devices = devices, show = show)
+plot_pcor_spatial(lst_pcor2$ET , outfile = "Figure7-5 ET pcor with phenology.pdf", devices = devices, show = show)
+plot_pcor_spatial(lst_pcor2$Ec , outfile = "Figure7-5 Ec pcor with phenology.pdf", devices = devices, show = show)
+plot_pcor_spatial(lst_pcor2$Es , outfile = "Figure7-5 Es pcor with phenology.pdf", devices = devices, show = show)
 
-if (Figure7_5) {
-    df = df_GPP
-    # brks = .brks$SOS
-    brks = c(0.2, 0.6, 1) %>% c(-rev(.), 0, .)
-    # cols = get_color("MPL_RdYlGn") %>% rev()
-    cols = RColorBrewer::brewer.pal(11, "RdYlBu") #%>% rev()
-    p <- levelplot2(value ~ s1 + s2 | type_source * variable, 
-                    df, SpatialPixel, 
-                    # df,
-                    # df.mask[type_trend == "MK" & variable %in% varnames],
-                    sp.layout = sp_layout,
-                    # layout = c(2, 4),
-                    ylim = c(25.5, 43),
-                    xlim = c(73.2, 104.98),
-                    colors = cols,
-                    stat = stat, pars = pars,
-                    stat_sign = stat_sign, 
-                    brks = brks,
-                    strip = TRUE,
-                    # strip.factors = sources_labels,
-                    panel.titles_full = label_tag(rep("", 6)),
-                    density = 0.5,
-                    par.shade = list(lwd = 0.5),
-                    border = "white", border.lwd = 0.01,
-                    legend.space = "right",
-                    legend.num2factor = TRUE,
-                    par.settings2 = list(strip.background = list(alpha = 0)),
-                    par.strip.text = list(cex = 1.5, font = 2, fontfamily = "Times", lineheight = 2),
-                    # par.settings = opt_trellis_strip,
-                    interpolate = FALSE,
-                    aspect = .7) +
-        theme_lattice(
-            # key.margin = c(0, 1, 0, 0),
-            plot.margin = c(0.2, 2.5, -1.5, 0.2))
-    p %<>% useOuterStrips(
-        strip = strip.custom(factor.levels = sources_labels[5:7]), # %>% label_tag()
-        # strip.left = strip.custom(factor.levels = varnames_zh),
-        strip.lines = 1.1)
-    scale = 1
-    write_fig(p, "Figure7-5 GPP pcor with phenology.pdf", 10, 4.7, devices = c("jpg", "pdf"), show = TRUE) # clear and small file size
-}
+# delta_GPP ~ SOS, EOS, LOS, LAI_max
 
-# figure2 ----------------------------------------------------------------------
-if (Figure7_6) {
-    df = df_ET
-    # brks = .brks$SOS
-    brks <- c(0.2, 0.6, 1) %>% c(-rev(.), 0, .)
-    # cols = get_color("MPL_RdYlGn") %>% rev()
-    cols <- RColorBrewer::brewer.pal(11, "RdYlBu") # %>% rev()
-    p <- levelplot2(value ~ s1 + s2 | type_source * variable,
-        df, SpatialPixel,
-        # df,
-        # df.mask[type_trend == "MK" & variable %in% varnames],
-        sp.layout = sp_layout,
-        # layout = c(2, 4),
-        ylim = c(25.5, 43),
-        xlim = c(73.2, 104.98),
-        colors = cols,
-        stat = stat, pars = pars,
-        stat_sign = stat_sign,
-        brks = brks,
-        strip = TRUE,
-        # strip.factors = sources_labels,
-        panel.titles_full = label_tag(rep("", 6)),
-        density = 0.5,
-        par.shade = list(lwd = 0.5),
-        border = "white", border.lwd = 0.01,
-        legend.space = "right",
-        legend.num2factor = TRUE,
-        par.settings2 = list(strip.background = list(alpha = 0)),
-        par.strip.text = list(cex = 1.5, font = 2, fontfamily = "Times", lineheight = 2),
-        # par.settings = opt_trellis_strip,
-        interpolate = FALSE,
-        aspect = .7
-    ) +
-        theme_lattice(
-            # key.margin = c(0, 1, 0, 0),
-            plot.margin = c(0.2, 2.5, -1.5, 0.2)
-        )
-    p %<>% useOuterStrips(
-        strip = strip.custom(factor.levels = sources_labels[5:7]), # %>% label_tag()
-        # strip.left = strip.custom(factor.levels = varnames_zh),
-        strip.lines = 1.1
-    )
-    scale <- 1
-    write_fig(p, "Figure7-6 ET pcor with phenology.pdf", 10, 4.7, devices = c("jpg", "pdf"), show = TRUE) # clear and small file size
-}

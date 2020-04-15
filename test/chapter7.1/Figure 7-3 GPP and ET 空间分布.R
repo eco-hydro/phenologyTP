@@ -40,6 +40,7 @@ if (!file.exists(file_PML)){
     load(file_PML)
 }
 
+# save(df_dynamic, df_static, file = "data-raw/PML")
 # mean annual change during 2004-2018
 df_diff2 <- foreach(mat_d = df_dynamic, mat_s = df_static, i = icount()) %do% {
     diff = mat_d - mat_s
@@ -49,6 +50,7 @@ df_diff2 <- foreach(mat_d = df_dynamic, mat_s = df_static, i = icount()) %do% {
     add_ETsum()
 df_diff2[value == 0, value := 0]
 
+grid <- grid_010.TP
 df_mean <- df_dynamic %>% map(rowMeans2) %>% as.data.table() %>% 
     cbind(I = 1:nrow(grid), .) %>% melt("I", variable.name = "band") %>% 
     add_ETsum()

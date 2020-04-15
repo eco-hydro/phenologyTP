@@ -8,7 +8,7 @@ source("test/main_pkgs.R")
 # system.time(obj <- sp2:::clipbasins(shp, obj_global))
 # PML result in 0.1 deg
 # id_grid_010.TP_in_global <- raster::extract(raster(grid), grid_010.TP)
-use_data(id_grid_010.TP_in_global, overwrite = TRUE)
+# use_data(id_grid_010.TP_in_global, overwrite = TRUE)
 
 # v2: cliped
 # grid <- grid_010.TP
@@ -25,12 +25,37 @@ d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
     d_diff_major <- aggregate_lc(d_diff[id_grid_010.TP_in_global, ] %>% as.matrix)[, ]
     d_major <- melt_lc(d_diff_major)
     
+    d_sum <- d <- d_major[, .(LC = "ALL", value = sum(abs(value), na.rm = TRUE)), .(I)]
+    d_major %<>% rbind(d_sum)
     r <- grid_010.TP
     # r@data <- d[, -1] 
     # df = resample_grid(grid, d_diff, fact = 5)@data %>% add_column_id() %>% melt('I', variable.name = "LC")
     # df_major = resample_grid(grid, d_diff_major, fact = 1)@data %>% data.table() %>% melt_lc()
 }
 
+d2 <- d_sum %>% mutate(mask = value >= 2)
+I_left <- which(!d2$mask)
+grid_010.TP_cliped2 <- grid_010.TP_cliped[I_left, ] # mask LC % > 2%
+grid_010.TP_cliped2$id_cliped <- I_left
+use_data(grid_010.TP_cliped2, overwrite = TRUE)
+
+brks <- c(-Inf, seq(0.5, 5, 0.5), Inf)
+
+write_fig(
+    levelplot2(value ~ s1+s2 | LC, d2, grid, 
+               sp.layout = sp_layout,
+               brks = brks, 
+               ylim = c(26, 40),
+               xlim = c(73.2, 104.98),
+               stat_sign = NULL,
+               aspect = 0.55,
+               par.settings2 = list(axis.line = list(col = "transparent")),
+               # xlim = xlim, ylim = ylim,
+               colors = RColorBrewer::brewer.pal(9, "Blues")) + 
+        theme_lattice(
+            # key.margin = c(0, 1, 0, 0),
+            plot.margin = c(0.2, 2.5, -1.5, 0.2)), 
+          "Figure7-2 植被类型变化之和.jpg")
 {
     sp_layout2 <- c(list(sp_layout), list(list("sp.polygons", TP_poly, fill = alpha("white", 0.5), first = TRUE)))
     max = 4
