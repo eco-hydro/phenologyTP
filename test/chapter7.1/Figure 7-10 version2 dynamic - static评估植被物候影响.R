@@ -1,3 +1,4 @@
+# lai应该保留小数点后两位数字
 source("test/main_pkgs.R")
 
 read_tiff <- function(files){
@@ -28,10 +29,23 @@ if (!file.exists(file_LAI)) {
     load(file_LAI)
 }
 
+{
+    grid <- grid_010.TP_cliped2
+    ngrid <- length(grid)
+    pheno_LAI <- readRDS("data-raw/pheno_smoothed_LAI (2003-2017).RDS")
+    pheno_LAI <- pheno_LAI[, .(meth, I, flag, origin, SOS = TRS2.sos, POP = DER.pop, EOS = TRS6.eos)] 
+    d <- pheno_LAI[, lapply(.SD, mean, na.rm = TRUE), .(I, year = year(origin)), .SDcols = c("SOS", "POP", "EOS")]
+    d <- expand.grid(I = 1:ngrid, year = 2003:2017) %>% data.table() %>% merge(d, all.x = TRUE, sort = FALSE)
+    
+    pheno_LAI <- foreach(metric = c("SOS", "POP", "EOS") %>% set_names(., .)) %do% {
+        dcast(d, I ~ year, value.var = "SOS")[, -1] %>% as.matrix()
+    }
+    pheno_LAI$year  <- 2003:2017
+    lst_pheno <- list("smoothed_LAI" = pheno_LAI)
+}
 ## -----------------------------------------------------------------------------
 load(file_PML)
-
-lst_pheno <- readRDS(file_pheno)
+# lst_pheno <- readRDS(file_pheno)
 years_gpp <- 2003:2017
 # %% ---------------------------------------------------------------------------
 
@@ -50,7 +64,7 @@ d_id <- map(lst_id[-c(7, 10)], ~data.table(I = .x)) %>% melt_list("region")
 
 {
     InitCluster(12)
-    temp <- foreach(l = lst_pheno[5:7], i = icount()) %do% {
+    temp <- foreach(l = lst_pheno, i = icount()) %do% {
         info <- match2(l$year, years_gpp)
         l_pheno <- map(l[c(1,3)] %>% rm_empty, ~.[, info$I_x])
 
@@ -62,7 +76,7 @@ d_id <- map(lst_id[-c(7, 10)], ~data.table(I = .x)) %>% melt_list("region")
             
         l_LAI <- map_depth(lst_LAI2, 2, ~.x[, info$I_y])
         res = foreach(LAI = l_LAI) %do% {
-            X = c(list(SOS = SOS[ind_lcMask, ], EOS = EOS[ind_lcMask, ]), LAI)
+            X = c(list(SOS = SOS, EOS = EOS), LAI)
             foreach(j = seq_along(Y) %>% set_names(names(Y))) %do% {
                 lst_data <- c(Y[j], X)
                 ans <- foreach(k = indexes, icount()) %dopar%
@@ -78,16 +92,21 @@ d_id <- map(lst_id[-c(7, 10)], ~data.table(I = .x)) %>% melt_list("region")
         l_pvalue <- map_depth(res, 3, "p.value") %>% map_depth(2, melt_cbind)
         list(pcor = l_pcor, pvalue = l_pvalue)
     }
-
+    
+    responsors <- c("SOS", "EOS", "gsMean", "yearMax")
     lst_pcor <- transpose(temp) %>% map(
-        function(l) melt_tree(l, c("type_source", "type_LAI", "response"))
+        function(l) {
+            ans <- melt_tree(l, c("type_source", "type_LAI", "response"))
+            names(ans)[5:8] <- responsors
+            ans
+        }
     )
-    save(lst_pcor, file = "chp7_dynamic-static_GPP&ET_pcor.rda")
+    save(lst_pcor, file = "chp7_version2_dynamic-static_GPP&ET_pcor.rda")
 }
 
 # grid@data <- l_PML$GPP %>% as.data.table()
 # plot(grid)
-load("chp7_dynamic-static_GPP&ET_pcor.rda")
+load("chp7_version2_dynamic-static_GPP&ET_pcor.rda")
 {    
     bands = c("GPP", "ET", "Ec", "Es", "Ei")
     bands_zh = c("总初级生产力", "蒸散发", "植被蒸腾", "土壤蒸发", "顶冠截流")
@@ -97,20 +116,20 @@ load("chp7_dynamic-static_GPP&ET_pcor.rda")
     df <- lst$pcor %>% cbind(pvalue = lst$pvalue$value) %>% plyr::mutate(mask = pvalue <= 0.1)
     df$variable %<>% as.character() %>% factor(c("SOS", "EOS", "yearMax", "gsMean"), indicator)
     df$response %<>% factor(bands, bands)
+    
 }
 
 ## 2.0 另一种制图方法卫星的平均
 {
-    df2 <- df[type_source %in% sources[5:7] & type_LAI == "raw", ] %>% 
-        plyr::mutate(type_source = factor(type_source, sources[5:7]))
+    df2 <- df[type_LAI != "raw", ]
     SpatialPixel <- grid_010.TP_cliped2
-    d <- df2[, .(value = mean(value), mask = sum(mask) >= 2), .(response, I, variable)]
+    d <- df2[, .(value = mean(value), mask), .(response, I, variable)]
     ngrid <- length(SpatialPixel)
     d_temp <- expand.grid(I = 1:ngrid, response = bands, variable = indicator) %>% data.table()
     d <- merge(d_temp, d, all.x = TRUE, sort = FALSE)
     d$response %<>% factor(bands, bands_zh)
     devices = c("jpg", "pdf")[2]
-    plot_pcor_spatial3(d, SpatialPixel, devices, TRUE, prefix = "", 10)
+    plot_pcor_spatial3(d, SpatialPixel, devices, TRUE, prefix = "version2", 10)
 }
 
 tbl <- get_regional_sign(d, d_id, by = c("response", "region", "variable"))

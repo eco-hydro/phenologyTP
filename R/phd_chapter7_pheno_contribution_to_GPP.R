@@ -29,3 +29,19 @@ sign_perc <- function(x, mask){
     neg <- sum(sign < 0 & mask)/n
     listk(pos, neg)
 }
+
+get_regional_sign <- function(d, d_id, by, to_dt = TRUE) {
+    if (!is.character(by)) by <- names(by)
+    # nvar = length(by)
+    data <- merge(d, d_id)
+    d_val  <- data[is.finite(value), mean(value), by] %>% dcast2("variable", "V1")
+    d_sign <- data[is.finite(value), sign_perc(value, mask), by]
+    ncol <- ncol(d_sign)
+
+    pos <- dcast2(d_sign[, .SD, .SDcols = setdiff(1:ncol, ncol)], "variable", "pos")
+    neg <- dcast2(d_sign[, .SD, .SDcols = setdiff(1:ncol, ncol-1)], "variable", "neg")
+    ans = listk(value = d_val, pos, neg)
+    
+    if (to_dt) ans <- do.call(cbind, ans)
+    ans
+}

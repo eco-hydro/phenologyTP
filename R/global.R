@@ -8,15 +8,17 @@ IGBP006_codes <- IGBP006_names %>% set_names(seq_along(.), .)
 
 # note that: UNC and BSV not included
 LCs <- c(
-    NA, "Forest", "Forest", "Forest", "Forest", "Forest", "Shrubland",
+    "Others", "Forest", "Forest", "Forest", "Forest", "Forest", "Shrubland",
     "Shrubland", "Shrubland", "Shrubland", "Grassland", "Water", "Cropland",
-    "Urban", "Cropland", "Water", NA, "Water"
+    "Others", "Cropland", "Water", "Others", "Water"
 )
-LCs_types = c("Forest", "Shrubland", "Grassland", "Cropland", "Urban", "Water")
+# Others: UNC, URB, BAV
+# Water: Water, SNO, WET
+
+LCs_types = c("Forest", "Shrubland", "Grassland", "Cropland", "Water", "Others")
 LCs_types_label = LCs_types %>% sprintf("(%s) %s", letters[seq_along(.)], .)
 
 I_lc = seq_along(LCs)[-c(1, 17)]
-
 years <- 2001:2018
 
 info_LC = cbind(IGBP006_names, LCs) %>% data.table::data.table()

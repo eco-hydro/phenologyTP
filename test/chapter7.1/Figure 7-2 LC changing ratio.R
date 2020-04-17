@@ -37,53 +37,54 @@ d2 <- d_sum %>% mutate(mask = value >= 2)
 I_left <- which(!d2$mask)
 grid_010.TP_cliped2 <- grid_010.TP_cliped[I_left, ] # mask LC % > 2%
 grid_010.TP_cliped2$id_cliped <- I_left
-use_data(grid_010.TP_cliped2, overwrite = TRUE)
+# use_data(grid_010.TP_cliped2, overwrite = TRUE)
 
 brks <- c(-Inf, seq(0.5, 5, 0.5), Inf)
 
 write_fig(
-    levelplot2(value ~ s1+s2 | LC, d2, grid, 
+    levelplot2(value ~ s1+s2 | LC, d2, grid,
                sp.layout = sp_layout,
-               brks = brks, 
+               brks = brks,
                ylim = c(26, 40),
                xlim = c(73.2, 104.98),
                stat_sign = NULL,
                aspect = 0.55,
                par.settings2 = list(axis.line = list(col = "transparent")),
                # xlim = xlim, ylim = ylim,
-               colors = RColorBrewer::brewer.pal(9, "Blues")) + 
+               colors = RColorBrewer::brewer.pal(9, "Blues")) +
         theme_lattice(
             # key.margin = c(0, 1, 0, 0),
-            plot.margin = c(0.2, 2.5, -1.5, 0.2)), 
+            plot.margin = c(0.2, 2.5, -1.5, 0.2)),
           "Figure7-2 植被类型变化之和.jpg")
 {
     sp_layout2 <- c(list(sp_layout), list(list("sp.polygons", TP_poly, fill = alpha("white", 0.5), first = TRUE)))
     max = 4
     # brks <-  c(-Inf, seq(-2, 2, 0.2), Inf) # perc
     # brks <-  c(-Inf, seq(-max, max, 0.4), Inf) # km^2, 3600 in total
-    brks <- c(0.1, 0.2, 0.5, 1, 2, 5) %>% c(-Inf, -rev(.), 0, ., Inf)
+    brks <- c(1, 2, 5, 10) %>% c(-Inf, -rev(.), 0, ., Inf)
     ncol <- length(brks) - 1
     cols <- colorRampPalette(c("red", "white", "green"))(ncol)
     # cols <- get_color("GMT_red2green", ncol*2) %>% rev()
 
     stat = list(show = FALSE, name = "RC", loc = c(80, 26.5), digit = 1, include.sd =
                     FALSE, FUN = weightedMedian)
-    hist = list(origin.x = -150,
-                origin.y = -20, A = 90, by = 5,
-                tck = 2,
-                ylab.offset = 25)
+    # hist = list(origin.x = -150,
+    #             origin.y = -20, A = 90, by = 5,
+    #             tck = 2, 
+    #             ntick = 3,
+    #             ylab.offset = 25)
     pars = list(title = list(x=77, y=39, cex=1.5),
-                hist = list(origin.x=77, origin.y=28, A=15, by = 0.4))
+                hist = list(origin.x=77, origin.y=27, A=15, by = 0.4))
     # stat = list(show = TRUE, name="mean", loc = c(82.5, 26.5), digit = 1, include.sd = TRUE)
 
     # par.strip.text = list(cex = 1.5, font = 2, fontfamily = "Times", lineheight = 2),
     # # par.settings = opt_trellis_strip,
     # interpolate = FALSE,
     # aspect = .6)
-    levels = c("森林", "灌木", "草地", "耕地", "城市", "水体")
+    levels = c("森林", "灌木", "草地", "耕地", "水体", "其他")
     p <- levelplot2(value ~ s1+s2 | LC,
                     # df,
-                    d_major,
+                    d_major[LC != "ALL"],
                     # df[!(LC %in% c("UNC", "water"))], # blank
                     # df[LC %in% IGBP006_names[1:4]],
                     grid,

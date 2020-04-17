@@ -43,7 +43,7 @@ indexes <- 1:nrow %>% set_names(., .)
         l_LAI <- map_depth(lst_LAI2, 2, ~.x[, info$I_y])
         res = foreach(LAI = l_LAI) %do% {
             X = c(list(SOS = SOS[ind_lcMask, ], EOS = EOS[ind_lcMask, ]), LAI)
-            foreach(k = seq_along(Y) %>% set_names(names(Y))) %do% {
+            foreach(k = seq_along(Y) %>% set_names(names(Y))) %dopar% {
                 lst_data <- c(Y[k], X)
                 ans <- foreach(i = indexes, icount()) %dopar%
                     {
