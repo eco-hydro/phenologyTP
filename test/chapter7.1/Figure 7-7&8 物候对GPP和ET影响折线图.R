@@ -31,7 +31,7 @@ df <- foreach(l = lst_pheno[5:7], i = icount()) %do% {
     EOS <- l_pheno$EOS %>% clamp(lims = c(100, 365), fill.na = TRUE)
     LOS <- (EOS - SOS) %>% clamp(lims = c(0, 300), fill.na = TRUE)
     
-    l_PML <- map(df_dynamic, ~.[inds, info$I_y])    
+    l_PML <- map(lst_dynamic, ~.[inds, info$I_y])    
     GPP <- l_PML$GPP
     ET  <- abind(l_PML[-1], along = 3) %>% apply_3d(FUN = rowSums2)
     

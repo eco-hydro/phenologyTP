@@ -1,35 +1,8 @@
 source("test/main_pkgs.R")
-
-read_tiff <- function(files){
-    lst <- map(files, ~ readGDAL(.)@data[, 1][id] / 10)
-    ind <- 1:15
-    years = 2003:2017
-    lst_raw <- lst[ind] %>% set_names(years)
-    lst_smoothed <- lst[-ind] %>% set_names(years)
-    list(raw = lst_raw, smoothed = lst_smoothed)
-}
-
-file_LAI = "data-raw/lst_LAI.rda"
-if (!file.exists(file_LAI)) {
-    grid <- grid_010.TP_cliped2
-    id <- grid_010.TP_cliped2$id
-
-    files <- dir("INPUT/Annual_LAI_max", full.names = TRUE)
-    lst_yearMax = read_tiff(files)
-
-    files <- dir("INPUT/Annual_gs_mean", full.names = TRUE)
-    lst_gsMean = read_tiff(files)
-
-    lst_LAI <- list(gsMean = lst_gsMean, yearMax = lst_yearMax) %>% transpose()
-    
-    mat <- lst_yearMax$raw %>% do.call(cbind, .) %>% rowMeans2()
-    save(lst_LAI, file = file_LAI)
-} else {
-    load(file_LAI)
-}
-
 ## -----------------------------------------------------------------------------
+load(file_LAI) # tidy_GEE_data
 load(file_PML)
+delta_PML <- map2(lst_dynamic, lst_static, `-`)
 
 lst_pheno <- readRDS(file_pheno)
 years_gpp <- 2003:2017
@@ -56,7 +29,7 @@ d_id <- map(lst_id[-c(7, 10)], ~data.table(I = .x)) %>% melt_list("region")
 
         SOS <- l_pheno$SOS
         EOS <- l_pheno$EOS
-        l_PML <- map(df_dynamic, ~.[ind_full, info$I_y][ind_lcMask, ])
+        l_PML <- map(delta_PML, ~.[ind_full, info$I_y][ind_lcMask, ])
         ET <- abind(l_PML[-1], along = 3) %>% apply_3d(FUN = rowSums2)
         Y <- c(list(ET = ET), l_PML)[c(2, 1, 3, 4, 5)]
             
@@ -149,6 +122,5 @@ tbl <- get_regional_sign(d, d_id, by = c("response", "region", "variable"))
     plot_pcor_spatial2(df2, "Ec", SpatialPixel, devices, TRUE, prefix)
     plot_pcor_spatial2(df2, "Es", SpatialPixel, devices, TRUE, prefix)
 }
-
 # grid <- grid_010.TP_cliped2
 # overlap_id(grid, TP_poly_veg)

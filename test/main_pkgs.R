@@ -40,6 +40,7 @@ suppressMessages({
     # library(phenology)
     library(phenofit)
     library(CMIP5tools)
+    library(rPML)
 
     library(sp)
     # library(oce)
@@ -49,7 +50,7 @@ suppressMessages({
     library(plsdepot)
 })
 
-file_PML <- "data-raw/PMLV2_TP_010deg.rda"
+file_PML <- "data-raw/PMLV2_TP_010deg_v016.rda"
 
 range_global <- c(-180, 180, -60, 90)
 grid_global  <- get_grid(range_global, cellsize = 0.1, type = "vec")

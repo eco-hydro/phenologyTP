@@ -12,8 +12,8 @@ lst_dynamic <- llply(files_dynamic, readGDAL, band = 1:4)
 lst_static  <- llply(files_static , readGDAL, band = 1:4)
 
 bandNames = c("GPP", "Ec", "Es", "Ei", "ET_water")
-df_dynamic <- tidy_PML(lst_dynamic, grid)
-df_static  <- tidy_PML(lst_static, grid)
+lst_dynamic <- tidy_PML(lst_dynamic, grid)
+lst_static  <- tidy_PML(lst_static, grid)
 
 file = files_dynamic[1]
 x = readGDAL(file)
@@ -25,7 +25,7 @@ x = readGDAL(file)
 # ETrs from the two PML-V2 experiments (Dynamic – Static, in Eq. (1)).
 
 # mean annual change during 2004-2018
-df_diff <- foreach(mat_d = df_dynamic, mat_s = df_static, i = icount()) %do% {
+df_diff <- foreach(mat_d = lst_dynamic, mat_s = lst_static, i = icount()) %do% {
     diff = mat_d - mat_s
     rowMeans2(diff, na.rm = TRUE)
 } %>% do.call(cbind, .) %>% data.table() %>%

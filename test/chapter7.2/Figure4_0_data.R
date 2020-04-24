@@ -54,8 +54,8 @@ lst_static  <- llply(files_static , readGDAL, band = 1:4)
 lst_lai <- llply(files_lai, readGDAL)
 
 df_lai      <- get_anorm(lst_lai)
-df_dynamic  <- get_anorm(lst_dynamic)
-df_static   <- get_anorm(lst_static)
+lst_dynamic  <- get_anorm(lst_dynamic)
+lst_static   <- get_anorm(lst_static)
 
 lst    <- llply(files_lc, readGDAL, silent = FALSE, .progress = "text")
 lst_lc <- llply(lst, aggregate_major, .progress = "text")
@@ -68,11 +68,11 @@ if (is_test_grid) {
     spplot(grid2)
 }
 
-df <- cbind(df_dynamic[, 1:2],
+df <- cbind(lst_dynamic[, 1:2],
             d_mete,
             lai = df_lai$band1,
             df_lc[, -(1:2)],
-            set_colnames(df_dynamic[, -(1:2)] - df_static[, -(1:2)], c("GPP", "Ec", "Es", "Ei")))
+            set_colnames(lst_dynamic[, -(1:2)] - lst_static[, -(1:2)], c("GPP", "Ec", "Es", "Ei")))
 df_sm <- df[!is.na(lai)]
 
 file_dat_figure4 = "INPUT/dat_Figure4_df_sm.csv"
@@ -88,5 +88,5 @@ df_sm <- fread(file_dat_figure4)
 
 # p <- ggplot(df_sm, aes(lai, GPP)) + geom_density_2d()
 # bandNames = c("GPP", "Ec", "Es", "Ei", "ET_water")
-# df_dynamic <- tidy_PML(lst_dynamic, grid)
-# df_static  <- tidy_PML(lst_static, grid)
+# lst_dynamic <- tidy_PML(lst_dynamic, grid)
+# lst_static  <- tidy_PML(lst_static, grid)

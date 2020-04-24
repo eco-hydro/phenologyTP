@@ -82,7 +82,7 @@ plsr_gof_figure <- function(df, outfile = "Figure2_PLSR_model_performance.png", 
 }
 
 
-func_Figure2.diff <- function(df, lst_brks, outfile = "Figure2_PLSR_model_performance.png", FUN = weightedMean){
+script_Figure2.diff <- function(df, lst_brks, outfile = "Figure2_PLSR_model_performance.png", FUN = weightedMean){
     labels = c(
         expression(bold("GIMMS"[3*g])), 
         expression(bold("MODIS")), 

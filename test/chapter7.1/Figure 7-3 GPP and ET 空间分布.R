@@ -5,44 +5,23 @@ add_ETsum <- function(d) {
     rbind(d, d_ET)
 }
 
-## -----------------------------------------------------------------------------
-if (!file.exists(file_PML)){
-    indir = "INPUT/tif/v015/"
-    files_dynamic <- dir(indir, "PML2_yearly_dynamic", full.names = TRUE) %>%
-        set_year_names()
-    files_static  <- dir(indir, "PML2_yearly_static", full.names = TRUE) %>%
-        set_year_names()
-    files_lai <- dir(indir, "LAI", full.names = TRUE) %>%
-        set_year_names()
-    files_lc <- dir("INPUT/tif/", "MCD12Q1_land_perc_010", full.names = TRUE) %>%
-        set_year_names()
-
-    lst_dynamic <- llply(files_dynamic, readGDAL, band = 1:4)
-    lst_static  <- llply(files_static , readGDAL, band = 1:4)
-    lst_lai     <- llply(files_lai, readGDAL)
-    # grouped into: Forest, Shrubland, Grassland, Cropland (CNV and CRO), Urban and Water and others
-    bandNames = c("GPP", "Ec", "Es", "Ei", "ET_water")
-    
-    tidy_PML2 <- function(lst, id) {
-        lst %>% map(~.x@data[id, ] %>% set_names(bandNames[1:4])) %>%
-            # resample_lst(., grid) %>%
-            transpose() %>% map(~do.call(cbind, .))
-    }
-    grid <- grid_010.TP
-    # grid <- grid_010.TP_cliped
-    id_grid_010.TP_in_global <- raster::extract(raster(grid_global), grid)
-    df_dynamic <- tidy_PML2(lst_dynamic, id_grid_010.TP_in_global)
-    df_static  <- tidy_PML2(lst_static, id_grid_010.TP_in_global)
-    mat_LAI <- lst_lai %>% map(~.x@data[id_grid_010.TP_in_global, ]) %>% do.call(cbind, .)
-                
-    save(df_dynamic, df_static, mat_LAI, file = file_PML)
-} else {
-    load(file_PML)
+{
+    grid_full <- get_grid(range = c(73, 105, 25, 40), cellsize=0.1, type = "vec")
+    ind_TP <- raster::extract(raster(grid_full), grid_010.TP)
+    bands <- c("GPP", "ET", "Ec", "Es", "Ei")
+    lst_dynamic <- ncread("INPUT/PML_V2-yearly-TP_010deg (2003-2017) veg_dynamic.nc", -1, convertTo2d = TRUE, grid_type = "vec")$data %>% 
+        .[c(1, 2, 10, 3)] %>% set_names(bands[-2]) %>% 
+        map(~.[ind_TP, ])
+    lst_static <- ncread("INPUT/PML_V2-yearly-TP_010deg (2003-2017) veg_static.nc", -1, convertTo2d = TRUE, grid_type = "vec")$data %>% 
+        .[c(1, 2, 10, 3)] %>% set_names(bands[-2]) %>% 
+        map(~.[ind_TP, ])
 }
 
-# save(df_dynamic, df_static, file = "data-raw/PML")
+## -----------------------------------------------------------------------------
+load(file_PML)
+
 # mean annual change during 2004-2018
-df_diff2 <- foreach(mat_d = df_dynamic, mat_s = df_static, i = icount()) %do% {
+df_diff2 <- foreach(mat_d = lst_dynamic, mat_s = lst_static, i = icount()) %do% {
     diff = mat_d - mat_s
     rowMeans2(diff, na.rm = TRUE)
 } %>% do.call(cbind, .) %>% data.table() %>%
@@ -51,9 +30,16 @@ df_diff2 <- foreach(mat_d = df_dynamic, mat_s = df_static, i = icount()) %do% {
 df_diff2[value == 0, value := 0]
 
 grid <- grid_010.TP
-df_mean <- df_dynamic %>% map(rowMeans2) %>% as.data.table() %>% 
+df_mean <- lst_dynamic %>% map(rowMeans2) %>% as.data.table() %>% 
     cbind(I = 1:nrow(grid), .) %>% melt("I", variable.name = "band") %>% 
     add_ETsum()
+
+# grid_full <- get_grid(range = c(73, 105, 25, 40), cellsize = 0.1, type = "vec")
+# ind2 <- raster::extract(raster(grid_full), grid_010.TP)
+# l <- l_diff[c(1, 11, 2, 10, 3)] %>% map(~rowMeans2(.x)) %>% as.data.table()
+# grid2 <- grid_010.TP
+# df2 <- l[ind2, ]
+# grid2@data <- df2
 
 # poly <- readOGR("data-raw/ArcGIS/shp/representative_poly.shp", verbose = FALSE)
 # sp_poly <- list("sp.polygons", poly, first = FALSE, col = "black")
@@ -84,7 +70,6 @@ df_mean <- df_dynamic %>% map(rowMeans2) %>% as.data.table() %>%
 
 
 id_veg_010deg <- overlap_id(grid_010.TP, poly_veg)
-
 res <- foreach(ind = id_veg_010deg) %do% {
     df_mean[I %in% ind, .(value = mean(value, na.rm = TRUE)), .(band)]
 }
@@ -161,8 +146,9 @@ d <- res %>% melt_list("veg_type") %>% dcast(veg_type~band)
         }
 
         d <- df_diff2[band == bandName]
-        d %<>% plyr::mutate(lev = cut(value, brks))
-        tbl_perc <- na.omit(d$lev) %>% table() %>% {./sum(.)*100}
+        # d <- df2[, ..i] %>% set_colnames("value") %>% cbind(band = bandName, .)
+        # d %<>% plyr::mutate(lev = cut(value, brks))
+        # tbl_perc <- na.omit(d$lev) %>% table() %>% {./sum(.)*100}
 
         p <- levelplot2(value ~ s1+s2 | band,
                     # df,
@@ -201,7 +187,7 @@ d <- res %>% melt_list("veg_type") %>% dcast(veg_type~band)
     # tbl2 <- do.call(rbind, ps) %>% data.table() %>% cbind(band = bandNames[1:4], .)
     # write_list2xlsx(list(tbl2 = tbl2), "dat2_LUCC_induced x changes.xlsx")
     g = arrangeGrob(grobs = ps, nrow = 3)
-    write_fig(g, "Figure7-4 GPP_ET_dynamic-static (2004-2017).jpg", 9.4, 7)
+    write_fig(g, "Figure7-4 GPP_ET_dynamic-static (2004-2017) V2.jpg", 9.4, 7)
 }
 
 

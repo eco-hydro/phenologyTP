@@ -328,3 +328,98 @@ plot_pcor_spatial3 <- function(d, SpatialPixel, devices = c("jpg", "pdf"), show 
     scale = 1
     write_fig(p, outfile, 12, height, devices = devices, show = show, use.cairo_pdf = TRUE) # clear and small file size
 }
+
+
+label_tag <- function(labels, tag = TRUE, pool = NULL) {
+    if (is.null(pool)) pool <- c(letters, LETTERS)
+    n <- length(labels)
+    
+    foreach(name = labels, i = icount(), .combine = c) %do% {
+        data <- list(tag = pool[i], x = name)
+        if (tag) {
+            eval(substitute(expression(bold("(" * tag * ")" ~ x)), data))
+        } else {
+            eval(substitute(expression(bold(x)), data))
+        }
+    }
+    # sprintf("(%s) %s", letters[1:n], labels)
+}
+
+
+plot_phenoImpact_spatial <- function(d, SpatialPixel, devices = c("jpg", "pdf"), show = show, 
+    prefix = "", height = 10, 
+    brks = c(0.5, 1, 2, 5, 10, Inf)
+    ) 
+{
+    brks %<>% c(-rev(.), 0, .)
+    ngrid <- length(SpatialPixel)
+    # d <- df2[response == responsor, -(2:3)]
+    # c("SOS", "EOS", "yearMax", "gsMean")
+    # d$variable %<>% as.character() %>% factor(c("SOS", "EOS", "yearMax", "gsMean"), 
+    #     c("生长季开始时间", "生长季结束时间", "年LAI最大值", "生长季LAI均值"))
+    # browser()
+    # indicators <- d$variable %>% unique()
+    # d_temp <- expand.grid(I = 1:ngrid, type_source = sources[5:7], variable = indicators) %>% data.table()
+    # d <- merge(d_temp, d, all.x = TRUE, sort = FALSE) #%>% summary()
+
+    outfile = glue("Figure7-5 {prefix} phenology impacts.pdf")
+    # df$variable %<>% factor(c("SOS", "EOS", "LOS"), c("生长季开始时间", "生长季结束时间", "生长季长度")) #%>% label_tag(tag = FALSE))
+    # browser()
+    stat = list(show = TRUE, name = "u", loc = c(84, 25.7), digit = 2, include.sd = TRUE, FUN = weightedMean)
+    stat_sign = list(loc1 = c(78, 41.5), loc2 = c(78, 41.5 - 2))
+    pars = list(
+        title = list(x = 74, y = 41, cex = 1.5),
+        hist = list(
+            origin.x = 78, origin.y = 28, A = 12, by = 0.5, box.width = 0.48, ylab.offset = 3.5,
+            tick = seq(0, 0.3, 0.1)
+        )
+    )
+    # df = df_GPP
+    # brks = .brks$SOS
+    # brks = c(0.2, 0.6, 1) %>% c(-rev(.), 0, .)
+    # brks = c(0.5, 1, 2, 5, 10, Inf) %>% c(-rev(.), 0, .)
+
+    # browser()
+    # cols = get_color("MPL_RdYlGn") %>% rev()
+    cols = RColorBrewer::brewer.pal(11, "RdYlBu") #%>% rev()
+    # p <- levelplot2(value ~ s1 + s2 | variable * response , 
+    #                 d, SpatialPixel, 
+    #                 # df,
+    #                 # df.mask[type_trend == "MK" & variable %in% varnames],
+    #                 sp.layout = sp_layout)
+    p <- levelplot2(value ~ s1 + s2 | scenario * response ,
+                    d, SpatialPixel,
+                    # df,
+                    # df.mask[type_trend == "MK" & variable %in% varnames],
+                    sp.layout = sp_layout,
+                    # layout = c(2, 4),
+                    ylim = c(25.5, 43),
+                    xlim = c(73.2, 104.98),
+                    colors = cols,
+                    stat = stat, pars = pars,
+                    stat_sign = stat_sign,
+                    brks = brks,
+                    strip = TRUE,
+                    # strip.factors = sources_labels,
+                    panel.titles_full = label_tag(rep("", 30), 
+                                                  pool = paste(rep(letters[1:5], each = 6), 1:6, sep = "")),
+                    density = 0.5,
+                    par.shade = list(lwd = 0.5),
+                    border = "white", border.lwd = 0.01,
+                    legend.space = "right",
+                    legend.num2factor = TRUE,
+                    par.settings2 = list(strip.background = list(alpha = 0)),
+                    par.strip.text = list(cex = 1.5, font = 2, fontfamily = "TimesSimSun", lineheight = 2),
+                    # par.settings = opt_trellis_strip,
+                    interpolate = FALSE,
+                    aspect = .7) +
+        theme_lattice(
+            # key.margin = c(0, 1, 0, 0),
+            plot.margin = c(0.2, 2.5, -1.5, 0.5))
+    p %<>% useOuterStrips(
+        # strip = strip.custom(factor.levels = sources_labels[5:7]), # %>% label_tag()
+        # strip.left = strip.custom(factor.levels = varnames_zh),
+        strip.lines = 1.1)
+    scale = 1
+    write_fig(p, outfile, 15, height, devices = devices, show = show, use.cairo_pdf = TRUE) # clear and small file size
+}

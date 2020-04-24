@@ -36,7 +36,7 @@ indexes <- 1:nrow %>% set_names(., .)
         SOS <- l_pheno$SOS
         EOS <- l_pheno$EOS
         
-        l_PML <- map(df_dynamic, ~.[ind_full, info$I_y][ind_lcMask, ])
+        l_PML <- map(lst_dynamic, ~.[ind_full, info$I_y][ind_lcMask, ])
         ET <- abind(l_PML[-1], along = 3) %>% apply_3d(FUN = rowSums2)
         Y <- c(list(ET = ET), l_PML)[c(2, 1, 3, 4, 5)] # add Ei
         

@@ -30,7 +30,7 @@ temp <- foreach(l = lst_pheno, i = icount()) %do% {
     # summary(as.numeric(LOS))
     # LOS[LOS <= 0] <- NA
     # summary(as.numeric(LOS))
-    l_PML <- map(df_dynamic, ~.[ind, info$I_y])    
+    l_PML <- map(lst_dynamic, ~.[ind, info$I_y])    
 
     ET <- abind(l_PML[-1], along = 3) %>% apply_3d(FUN = rowSums2)
     INPUT <- c(list(ET = ET), l_PML[-4])[c(2, 1, 3, 4)]

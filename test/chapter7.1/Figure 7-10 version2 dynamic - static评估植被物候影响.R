@@ -1,33 +1,10 @@
 # lai应该保留小数点后两位数字
 source("test/main_pkgs.R")
 
-read_tiff <- function(files){
-    lst <- map(files, ~ readGDAL(.)@data[, 1][id] / 10)
-    ind <- 1:15
-    years = 2003:2017
-    lst_raw <- lst[ind] %>% set_names(years)
-    lst_smoothed <- lst[-ind] %>% set_names(years)
-    list(raw = lst_raw, smoothed = lst_smoothed)
-}
-
 file_LAI = "data-raw/lst_LAI.rda"
-if (!file.exists(file_LAI)) {
-    grid <- grid_010.TP_cliped2
-    id <- grid_010.TP_cliped2$id
-
-    files <- dir("INPUT/Annual_LAI_max", full.names = TRUE)
-    lst_yearMax = read_tiff(files)
-
-    files <- dir("INPUT/Annual_gs_mean", full.names = TRUE)
-    lst_gsMean = read_tiff(files)
-
-    lst_LAI <- list(gsMean = lst_gsMean, yearMax = lst_yearMax) %>% transpose()
-    
-    mat <- lst_yearMax$raw %>% do.call(cbind, .) %>% rowMeans2()
-    save(lst_LAI, file = file_LAI)
-} else {
-    load(file_LAI)
-}
+grid <- grid_010.TP_cliped2
+id <- grid_010.TP_cliped2$id
+load(file_LAI)
 
 {
     grid <- grid_010.TP_cliped2
@@ -38,13 +15,25 @@ if (!file.exists(file_LAI)) {
     d <- expand.grid(I = 1:ngrid, year = 2003:2017) %>% data.table() %>% merge(d, all.x = TRUE, sort = FALSE)
     
     pheno_LAI <- foreach(metric = c("SOS", "POP", "EOS") %>% set_names(., .)) %do% {
-        dcast(d, I ~ year, value.var = "SOS")[, -1] %>% as.matrix()
+        dcast(d, I ~ year, value.var = metric)[, -1] %>% as.matrix()
     }
     pheno_LAI$year  <- 2003:2017
     lst_pheno <- list("smoothed_LAI" = pheno_LAI)
 }
+
 ## -----------------------------------------------------------------------------
 load(file_PML)
+{
+    grid_full <- get_grid(range = c(73, 105, 25, 40), cellsize=0.1, type = "vec")
+    ind_TP <- raster::extract(raster(grid_full), grid_010.TP)
+    
+    lst_dynamic <- ncread("INPUT/PML_V2-yearly-TP_010deg (2003-2017) veg_dynamic.nc", -1, convertTo2d = TRUE, grid_type = "vec")$data %>% 
+        .[c(1, 2, 10, 3)] %>% set_names(bands[-2]) %>% 
+        map(~.[ind_TP, ])
+    lst_static <- ncread("INPUT/PML_V2-yearly-TP_010deg (2003-2017) veg_static.nc", -1, convertTo2d = TRUE, grid_type = "vec")$data %>% 
+        .[c(1, 2, 10, 3)] %>% set_names(bands[-2]) %>% 
+        map(~.[ind_TP, ])
+}
 # lst_pheno <- readRDS(file_pheno)
 years_gpp <- 2003:2017
 # %% ---------------------------------------------------------------------------
@@ -61,6 +50,7 @@ indexes <- 1:nrow %>% set_names(., .)
 
 lst_id <- overlap_id(grid_010.TP_cliped2, TP_poly_veg)
 d_id <- map(lst_id[-c(7, 10)], ~data.table(I = .x)) %>% melt_list("region")
+delta_PML <- map2(lst_dynamic, lst_static, `-`)
 
 {
     InitCluster(12)
@@ -70,7 +60,7 @@ d_id <- map(lst_id[-c(7, 10)], ~data.table(I = .x)) %>% melt_list("region")
 
         SOS <- l_pheno$SOS
         EOS <- l_pheno$EOS
-        l_PML <- map(df_dynamic, ~.[ind_full, info$I_y][ind_lcMask, ])
+        l_PML <- map(delta_PML, ~.[ind_full, info$I_y][ind_lcMask, ])
         ET <- abind(l_PML[-1], along = 3) %>% apply_3d(FUN = rowSums2)
         Y <- c(list(ET = ET), l_PML)[c(2, 1, 3, 4, 5)]
             
@@ -79,7 +69,7 @@ d_id <- map(lst_id[-c(7, 10)], ~data.table(I = .x)) %>% melt_list("region")
             X = c(list(SOS = SOS, EOS = EOS), LAI)
             foreach(j = seq_along(Y) %>% set_names(names(Y))) %do% {
                 lst_data <- c(Y[j], X)
-                ans <- foreach(k = indexes, icount()) %dopar%
+                ans <- foreach(k = indexes, icount()) %do%
                     {
                         runningId(k, 1000)
                         d <- map(lst_data, ~ .x[k, ]) %>% as.data.table()
@@ -101,12 +91,12 @@ d_id <- map(lst_id[-c(7, 10)], ~data.table(I = .x)) %>% melt_list("region")
             ans
         }
     )
-    save(lst_pcor, file = "chp7_version2_dynamic-static_GPP&ET_pcor.rda")
+    save(lst_pcor, file = "chp7_version4_dynamic-static_GPP&ET_pcor.rda")
 }
 
 # grid@data <- l_PML$GPP %>% as.data.table()
 # plot(grid)
-load("chp7_version2_dynamic-static_GPP&ET_pcor.rda")
+load("chp7_version3_dynamic-static_GPP&ET_pcor.rda")
 {    
     bands = c("GPP", "ET", "Ec", "Es", "Ei")
     bands_zh = c("总初级生产力", "蒸散发", "植被蒸腾", "土壤蒸发", "顶冠截流")
@@ -116,7 +106,6 @@ load("chp7_version2_dynamic-static_GPP&ET_pcor.rda")
     df <- lst$pcor %>% cbind(pvalue = lst$pvalue$value) %>% plyr::mutate(mask = pvalue <= 0.1)
     df$variable %<>% as.character() %>% factor(c("SOS", "EOS", "yearMax", "gsMean"), indicator)
     df$response %<>% factor(bands, bands)
-    
 }
 
 ## 2.0 另一种制图方法卫星的平均
@@ -129,10 +118,14 @@ load("chp7_version2_dynamic-static_GPP&ET_pcor.rda")
     d <- merge(d_temp, d, all.x = TRUE, sort = FALSE)
     d$response %<>% factor(bands, bands_zh)
     devices = c("jpg", "pdf")[2]
-    plot_pcor_spatial3(d, SpatialPixel, devices, TRUE, prefix = "version2", 10)
+    plot_pcor_spatial3(d, SpatialPixel, devices, TRUE, prefix = "version4", 10)
 }
 
 tbl <- get_regional_sign(d, d_id, by = c("response", "region", "variable"))
+
+
+
+### Abandoned ------------------------------------------------------------------
 ## 2.1 raw LAI -----------------------------------------------------------------
 {
     df2 <- df[type_source %in% sources[5:7] & type_LAI == "raw", ] %>% 
@@ -168,6 +161,5 @@ tbl <- get_regional_sign(d, d_id, by = c("response", "region", "variable"))
     plot_pcor_spatial2(df2, "Ec", SpatialPixel, devices, TRUE, prefix)
     plot_pcor_spatial2(df2, "Es", SpatialPixel, devices, TRUE, prefix)
 }
-
 # grid <- grid_010.TP_cliped2
 # overlap_id(grid, TP_poly_veg)

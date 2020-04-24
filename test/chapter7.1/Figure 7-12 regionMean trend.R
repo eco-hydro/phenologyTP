@@ -45,7 +45,7 @@ get_regional_mean <- function(l, lst_id) {
         SOS <- l_pheno$SOS
         EOS <- l_pheno$EOS
         
-        l_PML <- map(df_dynamic, ~.[ind_full, info$I_y][ind_lcMask, ])
+        l_PML <- map(lst_dynamic, ~.[ind_full, info$I_y][ind_lcMask, ])
         ET <- abind(l_PML[-1], along = 3) %>% apply_3d(FUN = rowSums2)
         Y <- c(list(ET = ET), l_PML[-4])[c(2, 1, 3, 4)]
             
