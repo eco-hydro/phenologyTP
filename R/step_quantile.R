@@ -16,7 +16,7 @@ step_quantile <- function(df, xname = "lai", lims = c(-4.5, 4.5), by = 0.1) {
         d = df[I, ]
         if (nrow(d) > 0) {
             d[, sapply(.SD, quantile, probs = probs, na.rm = TRUE),
-                .SDcols = c("GPP", "Ec", "Es", "Ei")] %>%
+                .SDcols = c("GPP", "Ec", "Es", "Ei", "ET")] %>%
                 cbind(prob = probs, .) %>% data.table()
         } else NULL
     } %>% rm_empty()
@@ -26,8 +26,7 @@ step_quantile <- function(df, xname = "lai", lims = c(-4.5, 4.5), by = 0.1) {
     res
 }
 
-plot_quantile <- function(d, xname, i = 1){
-    xlab = ifelse(xname == "D", "Prcp - PET", xname)
+plot_quantile <- function(d, xname, i = 1, fontsize= 14, xlab){
     p <- ggplot(d[is.na(alpha)], aes_string(xname, "mid")) +
         geom_ribbon(
             data = d[!is.na(alpha), ],
@@ -37,19 +36,16 @@ plot_quantile <- function(d, xname, i = 1){
         facet_wrap(~variable, scale = "free_y", labeller = label_parsed,
             strip.position = "left", ncol = 1) +
         scale_fill_manual(values = cols) +
-        # geom_smooth() +
-        # geom_abline(slope = 1) +
         labs(x = xlab, y = NULL) +
-        scale_x_continuous(position = "top", sec.axis = sec_axis(~ .)) +
-        # geom_vline(xintercept = 0.76, col = "red", lty = 2) +
-        # geom_vline(xintercept = 1.35, col = "blue", lty = 2) +
+        scale_x_continuous(position = "top", sec.axis = sec_axis(~ .)) + 
         theme(
+            axis.text = element_text(color = "black"),
             legend.position = "bottom", # c(0, 1), "none"
             # legend.justification = c(0, 1),
             legend.title = element_blank(),
-            legend.margin = margin(l = 5, t = -1, r = 5),
+            legend.margin = margin(l = 1, t = -1, r = 2),
             axis.title.y = element_blank(),
-            strip.text = element_text(face = 2, size = 12, lineheight = 1)
+            strip.text = element_text(face = 2, size = fontsize, lineheight = 1)
         )
     if (i == 1) {
     } else {

@@ -24,7 +24,7 @@ df <- list(dynamic = map(files_d, get_json) %>% melt_list("year"),
     static = map(files_s, get_json) %>% melt_list("year")) %>% melt_list("type") %>%
     IGBP_code2name()
 d <- df[type == "dynamic", .(area = sum(ET_count)/1e6), .(type, year, IGBP)] %>% dcast2("IGBP", "area")
-write_list2xlsx(list(), )
+# write_list2xlsx(list(), )
 df_lai <- map(files_lai, get_json) %>% melt_list("year") %>%
     set_colnames(c("year", "IGBP", "count", "mean", "sd")) %>%
     IGBP_code2name()
@@ -55,20 +55,23 @@ if (Figure3_1) {
 }
 
 
+
 {
+    load_all()
     d = df[!is.na(IGBP),
            .(ET = sum(ET_count*ET_mean)/1e9,
              GPP = sum(GPP_count*GPP_mean)/1e9), .(type, year, IGBP)] %>%
         plyr::mutate(WUE = GPP/ET)
-    d$IGBP %<>% factor(LCs_types, LCs_types_label)
-    d_lai$IGBP %<>% factor(LCs_types, LCs_types_label)
-
+    d$IGBP %<>% factor(LCs_types, LCs_types_label_zh)
+    d_lai$IGBP %<>% factor(LCs_types, LCs_types_label_zh)
+    
+    theme_set(theme_gray(base_size = 17))
     g <- plot_differ(d, "ET", d_lai, width = 3)
-    write_fig(g, "Figure3_ET.pdf", 12, 5)
+    write_fig(g, "Figure3_ET.pdf", 15, 6)
 
-    g <- plot_differ(d, "GPP", width = 3)
-    write_fig(g, "Figure3_GPP.pdf", 12, 5)
-    write_list2xlsx(list(tbl3 = d), "dat3_dynamic and static annual variation.xlsx")
+    # g <- plot_differ(d, "GPP", width = 3)
+    # write_fig(g, "Figure3_GPP.pdf", 12, 5)
+    # write_list2xlsx(list(tbl3 = d), "dat3_dynamic and static annual variation.xlsx")
 }
 
 tag_facet <- function (p, open = "(", close = ")", tag_pool = letters,

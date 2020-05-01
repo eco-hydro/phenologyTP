@@ -31,6 +31,7 @@ resample_grid <- function(grid, data = NULL, fact=5, fun=mean) {
     if (fact > 1) {
         r <- aggregate(r, fact, fun) # 0.5 deg
     }
+    # r
     as_SpatialGridDataFrame(r)
 }
 
@@ -49,7 +50,6 @@ resample_lst <- function(lst, grid, scale = 1) {
             d = resample_grid(grid2)@data
         }
     }
-    ans
 }
 
 

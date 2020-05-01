@@ -55,7 +55,7 @@ file_PML <- "data-raw/PMLV2_TP_010deg_v016.rda"
 range_global <- c(-180, 180, -60, 90)
 grid_global  <- get_grid(range_global, cellsize = 0.1, type = "vec")
 
-prj_TP               <- path.mnt("n:/Research/phenology/phenology_TP/")
+prj_TP               <- path.mnt("n:/Research/phenology/phenologyTP/")
 file_pheno_012       <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit.rda")
 
 # file_pheno_010      <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda")

@@ -32,7 +32,7 @@ transpose <- purrr::transpose
 #' @examples
 #' lst_dynamic <- llply(files_dynamic, readGDAL, band = 1:4)
 tidy_PML <- function(lst, grid) {
-    lst %>% map(~.x@data %>% set_names(bandNames[1:4])) %>%
+    ans <- lst %>% map(~.x@data %>% set_names(bandNames[1:4])) %>%
         resample_lst(., grid) %>%
         transpose() %>% map(~do.call(cbind, .))
 }

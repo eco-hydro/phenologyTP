@@ -38,3 +38,7 @@ delta_GPP = dynamic_veg - static_veg (in PML-V2 model)
 detla_GPP ~ SOS + EOS + LAI_yearlyMaxe
 
 The same method for ET
+
+
+## 通量站上验证的植被物候变化的生态水文效应在此处：
+https://github.com/kongdd/PhenoAsync/blob/e4db6dcc7b64f5df1a423d0c1c1123189dad6e31/test/figure_phd/Figure7-10 物候变化生态水文效应 通量站验证 绿度物候.R

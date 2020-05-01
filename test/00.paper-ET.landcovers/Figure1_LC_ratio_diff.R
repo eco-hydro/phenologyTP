@@ -3,6 +3,8 @@
 # grid2 <- as(grid, "SpatialPixelsDataFrame")
 source("test/main_pkgs.R")
 
+shp <- readOGR("data-raw/shp/world_poly.shp")
+sp_layout <- list("sp.polygons", shp, lwd = 0.2)
 d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
 # d_diff       <- fread("INPUT/lc_diff (2008-2018)-(2003-2007).csv")
 # d_diff       <- fread("INPUT/lc_diff (2018)-(2008-2017).csv")
@@ -10,10 +12,13 @@ d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
     d_diff_major <- aggregate_lc(d_diff %>% as.matrix)[, ]
 
     # df = resample_grid(grid, d_diff, fact = 5)@data %>% add_column_id() %>% melt('I', variable.name = "LC")
-    df_major = resample_grid(grid, d_diff_major, fact = 5)@data %>% data.table() %>% melt_lc()
+    df_major = resample_grid(grid_global, d_diff_major, fact = 5)@data %>% data.table() %>% melt_lc()
     df_major$LC %<>% factor(LCs_types)
     df_major[value == 0, value := NA_real_]
 }
+
+grid5  <- get_grid(range_global, cellsize = 0.5, type = "vec")
+
 
 {
     max = 4
@@ -30,7 +35,7 @@ d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
                 origin.y = -20, A = 90, by = 5,
                 tck = 2,
                 ylab.offset = 25)
-    pars = list(title = list(x = -180, y = 85, cex = 1.4),
+    pars = list(title = list(x = -180, y = 87, cex = 1.6),
                 hist = hist)
     p <- levelplot2(value ~ s1+s2 | LC,
                     # df,
@@ -38,23 +43,26 @@ d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
                     # df[!(LC %in% c("UNC", "water"))], # blank
                     # df[LC %in% IGBP006_names[1:4]],
                     grid5,
+                    panel.titles_full = label_tag(LCs_types_zh),
                     # df.mask = df[, .(LC, mask = pval <= 0.05)],
                     colors = cols, brks = brks,
-                    layout = c(2, 3),
+                    layout = c(2, 4),
                     pars = pars,
-                    ylim = c(-60, 92),
+                    par.strip.text = list(cex = 1.5, font = 2, fontfamily = "TimesSimSun", lineheight = 2),
+                    ylim = c(-60, 95),
                     aspect = 0.5,
                     # unit = "km2", unit.adj = 0.5,
                     sub.hist = TRUE,
                     legend.num2factor = TRUE,
                     sp.layout = sp_layout,
-                    interpolate = FALSE
+                    colorkey = list(space = "right", height  = 0.95),
+                    interpolate = TRUE
                     # stat = NULL,
                     # xlim = xlim, ylim = ylim
     ) +
         theme_lattice(key.margin = c(1, 1.5, 0, 0),
-                      plot.margin = c(0, 4, 0, 1))
-    write_fig(p, "Figure1_LC_changes_major_(2008-2017)-(2003-2007).pdf", 10, 7)
+                      plot.margin = c(0, 4, -1, 1))
+    write_fig(p, "Figure1_LC_changes_major_(2008-2017)-(2003-2007).pdf", 10, 9)
 }
 
 d <- na.omit(df_major)
