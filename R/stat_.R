@@ -18,7 +18,7 @@ label_median <- function(x){
 }
 
 #' @export
-stat_sd <- function(x){
+stat_sd2 <- function(x){
     x <- x[!is.na(x)]
     y <- mean(x)
     sd <- sd(x)
@@ -35,7 +35,6 @@ stat_5p <- function(x) {
         set_names(c("ymin", "lower", "middle", "upper", "ymax")) %>%
         as.list()
 }
-
 
 stat_errorbar2 <- function (mapping = NULL, data = NULL, geom = "errorbar", 
     position = "identity", ..., fun.data = NULL, fun.y = NULL, 

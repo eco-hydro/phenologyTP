@@ -34,11 +34,13 @@ melt_list2 <- function(res){
     cbind(I = 1:ngrid, perc)
   })
   # dorm
-  res.dorm = map_depth(res, 2, function(d){
+  res.dorm = map_depth(res[2], 2, function(d){
     d = d[, -(1:2)] %>% abs()
-    dorm = apply(d, 1, which.max) %>% map_int(first)
+    # browser()
+    dorm = apply(d, 1, which.max) %>% map_int(dplyr::first)
     # browser()
     cbind(I = 1:ngrid, dorm) %>% as.data.table()
+    # print(ans)
   })
   
   varnames = colnames(res[[1]][[1]])[-(1:2)]
@@ -74,9 +76,10 @@ if (Figure3) {
       hjust <- switch(i, 2, 2, 3, 3)
       vjust = switch(i, 1.5, 1.5, 2.5, 2.5)
       
-      outfile <- glue("Figures/Figure4_PLSR_{varname}_{type}.pdf")
+      # Figures/
+      outfile <- glue("Figure4_PLSR_{varname}_{type}.pdf")
       p <- pls_show(obj, nyear = 1, hjust, vjust)
-      write_fig(p, gsub(".pdf$", ".pdf", outfile), 11, 6.6)
+      write_fig(p, gsub(".pdf$", ".pdf", outfile), 11, 6.6, use.cairo_pdf = TRUE)
     }
     # g = arrangeGrob(grobs = gs, nrow = 1)
     # write_fig(g, "a.pdf", 10, 7)

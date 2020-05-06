@@ -58,7 +58,7 @@ grid_global  <- get_grid(range_global, cellsize = 0.1, type = "vec")
 prj_TP               <- path.mnt("n:/Research/phenology/phenologyTP/")
 file_pheno_012       <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit.rda")
 
-# file_pheno_010      <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda")
+file_pheno_010       <- paste0(prj_TP, "OUTPUT/phenology_TP_AVHRR_phenofit_010deg.rda")
 file_pheno_010_3s    <- paste0(prj_TP, "OUTPUT/phenology_TP_phenology_010deg_3s.rda")
 file_pheno_010_3s_V2 <- paste0(prj_TP, "OUTPUT/phenology_TP_phenology_010deg_3s_V2.rda")
 

@@ -64,8 +64,12 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
     color_zero = "black"
     # 2. std coef
     d <- pls_obj$std.coefs %>% melt_index()
+    style = "zh"
+    
+    ylab <- if (style == "en") "Standardized coefficients" else "标准化回归系数"
+    
     p_coef <- {ggplot(d, aes(variable, value, fill = variable)) %>% add_boxplot()} + 
-        labs(y = "Standardized coefficients", x = NULL) + 
+        labs(y = ylab, x = NULL) + 
         geom_hline(yintercept = 0, color = color_zero, linetype = 2)
     p_coef %<>% add_fig_No("(b)")
     # geom_hline(yintercept = 1, color = "red", linetype = 2)
@@ -85,22 +89,28 @@ pls_show <- function(pls_obj, nyear = 34, hjust = 2, vjust = -2, base_size = 16)
     d[variable != "EOS", perc := abs(value)/sum(abs(value), na.rm = TRUE)*100, .(row)] # not y    
     # d[is.na(value), value:= 0]
     # browser()
-    d[!is.na(value), .(mean = mean(value), median = median(value), sd = sd(value)), .(variable)] %>% 
+    cat("绝对变化-----\n")
+    d[!is.na(value), stat_sd(value), .(variable)] %>% 
+        print()
+    cat("相对变化-----\n")
+    d[!is.na(value), stat_sd(perc, 1), .(variable)] %>% 
         print()
     
-    
     colors <- hue_pal()(5) %>% c("grey", .)
+    ylab <- if (style == "en") "Attributable changes (days)" else "绝对贡献 (天)"
+    
     p_delta <- {ggplot(d, aes(variable, value*nyear, fill = variable)) %>% add_boxplot()} + 
         # stat_summary(fun.data = FUN_lab, colour = "black", size = fontsize_statistic, geom = "text", vjust = -0.5) + 
-        labs(y = "Attributable changes (days)", x = NULL) + 
+        labs(y = ylab, x = NULL) + 
         scale_fill_manual(values = colors) + 
         geom_hline(yintercept = 0, color = color_zero, linetype = 2)
     obs.mean <- d[variable == "EOS", .(value = mean(value, na.rm = TRUE)), .(variable)]
     p_delta <- p_delta + geom_point(data = obs.mean, aes(variable, value), size = 2, show.legend = FALSE)
     
+    ylab <- if (style == "en") "Relative contributions (%)" else "相对贡献 (%)"
     p_attribute <- {ggplot(d[variable != "EOS"], aes(variable, perc, fill = variable)) %>% add_boxplot()} + 
         stat_summary(fun.data = FUN_lab, colour = "black", size = fontsize_statistic, geom = "text", vjust = -0.5) +
-        labs(y = "Relative contributions (%)", x = NULL)
+        labs(y = ylab, x = NULL)
         # scale_fill_manual(values = colors)
     
     # 考虑正负的贡献率
