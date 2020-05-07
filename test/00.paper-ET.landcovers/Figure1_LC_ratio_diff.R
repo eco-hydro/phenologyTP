@@ -4,7 +4,7 @@
 source("test/main_pkgs.R")
 
 shp <- readOGR("data-raw/shp/world_poly.shp")
-sp_layout <- list("sp.polygons", shp, lwd = 0.2)
+sp_layout <- list("sp.polygons", shp, lwd = 0.1, first = FALSE)
 d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
 # d_diff       <- fread("INPUT/lc_diff (2008-2018)-(2003-2007).csv")
 # d_diff       <- fread("INPUT/lc_diff (2018)-(2008-2017).csv")
@@ -21,22 +21,18 @@ grid5  <- get_grid(range_global, cellsize = 0.5, type = "vec")
 
 
 {
+    load_all("../latticeGrob")
     max = 4
     # brks <-  c(-Inf, seq(-2, 2, 0.2), Inf) # perc
     # brks <-  c(-Inf, seq(-max, max, 0.4), Inf) # km^2, 3600 in total
-    brks <- c(0.1, 0.2, 0.5, 1, 2, 5) %>% c(-Inf, -rev(.), 0, ., Inf)
+    brks <- c(0.5, 1, 2, 5) %>% c(-Inf, -rev(.), 0, ., Inf) # 
     ncol <- length(brks) - 1
     cols <- colorRampPalette(c("red", "white", "green"))(ncol)
     # cols <- get_color("GMT_red2green", ncol*2) %>% rev()
 
     stat = list(show = FALSE, name = "RC", loc = c(80, 26.5), digit = 1, include.sd =
                     FALSE, FUN = weightedMedian)
-    hist = list(origin.x = -150,
-                origin.y = -20, A = 90, by = 5,
-                tck = 2,
-                ylab.offset = 25)
-    pars = list(title = list(x = -180, y = 87, cex = 1.6),
-                hist = hist)
+    pars = list(title = list(x = -180, y = 87, cex = 1.6))
     p <- levelplot2(value ~ s1+s2 | LC,
                     # df,
                     df_major,
@@ -49,10 +45,10 @@ grid5  <- get_grid(range_global, cellsize = 0.5, type = "vec")
                     layout = c(2, 4),
                     pars = pars,
                     par.strip.text = list(cex = 1.5, font = 2, fontfamily = "TimesSimSun", lineheight = 2),
-                    ylim = c(-60, 95),
+                    ylim = c(-72, 95),
+                    xlim = c(-190, 240),
                     aspect = 0.5,
                     # unit = "km2", unit.adj = 0.5,
-                    sub.hist = TRUE,
                     legend.num2factor = TRUE,
                     sp.layout = sp_layout,
                     colorkey = list(space = "right", height  = 0.95),
@@ -62,7 +58,7 @@ grid5  <- get_grid(range_global, cellsize = 0.5, type = "vec")
     ) +
         theme_lattice(key.margin = c(1, 1.5, 0, 0),
                       plot.margin = c(0, 4, -1, 1))
-    write_fig(p, "Figure1_LC_changes_major_(2008-2017)-(2003-2007).pdf", 10, 9)
+    write_fig(p, "Figure1_LC_changes_major_(2008-2017)-(2003-2007)_V2.pdf", 12, 11, show = TRUE)
 }
 
 d <- na.omit(df_major)

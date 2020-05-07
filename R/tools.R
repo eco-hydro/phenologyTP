@@ -9,13 +9,6 @@ as_SpatialGridDataFrame <- function(x) {
     as(x, "SpatialGridDataFrame")
 }
 
-# load draw.colorkey
-#' @importFrom Ipaper draw.colorkey flipud
-suppressWarnings({
-    environment(draw.colorkey) <- environment(lattice::xyplot)
-    assignInNamespace("draw.colorkey", draw.colorkey, ns = "lattice")
-})
-
 # load_all("E:/Research/cmip5/Ipaper")
 add_column_id <- function(d) {
     if (!("I" %in% colnames(d))) {

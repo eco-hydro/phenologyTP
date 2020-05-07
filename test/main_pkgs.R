@@ -6,9 +6,10 @@ suppressMessages({
     library(grid)
     library(lattice)
     library(latticeExtra)
+    library(latticeGrob) # should behind of latticeExtra
     library(Cairo)
     library(scales)
-    library(ggpmisc)
+    # library(ggpmisc)
 
     library(plyr)
     library(tidyverse)
@@ -48,6 +49,8 @@ suppressMessages({
     library(raster)
     library(rgdal)
     library(plsdepot)
+
+    library(rPML)
 })
 
 file_PML <- "data-raw/PMLV2_TP_010deg_v016.rda"

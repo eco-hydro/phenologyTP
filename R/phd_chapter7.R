@@ -6,7 +6,7 @@ sources_labels <- c(
     expression("VIPpheno"[NDVI]),
     "MOD13C1", "SPOT",
     expression("GIMMS"[3 * g])
-) %>% Ipaper::char2expr()
+) %>% char2expr()
 
 overlap_id <- function(grid, poly_veg) {
     veg_names <- c("常绿阔叶林", "高寒草甸", "高寒草原", "高寒灌木草甸", "荒漠", "落叶阔叶林", "热带雨林", "温带草原", "温性草原")

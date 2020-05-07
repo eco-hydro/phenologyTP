@@ -51,13 +51,6 @@ check_file <- function(path){
     path
 }
 
-# load draw.colorkey
-suppressWarnings({
-    environment(draw.colorkey) <- environment(lattice::xyplot)
-    assignInNamespace("draw.colorkey", draw.colorkey, ns="lattice")  
-})
-
-
 slope_p <- function (y, x) {
     if (!is.matrix(y)) 
         y <- as.matrix(y)
