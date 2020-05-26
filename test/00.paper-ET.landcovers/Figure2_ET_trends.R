@@ -50,44 +50,169 @@ if (rewrite) {
 # averaged for 2004-2017, and LUCC-driven mean annual change in (c) GPPrs and (d)
 # ETrs from the two PML-V2 experiments (Dynamic – Static, in Eq. (1)).
 
+bands_en = c("ET", "Ec", "Es", "Ei")
+bands_zh = c("蒸散发 (mm)", "植被蒸腾 (mm)", "土壤蒸发 (mm)", "冠层截留蒸发 (mm)")
+bands_zh_perc = c("蒸散发 (%)", "植被蒸腾 (%)", "土壤蒸发 (%)", "冠层截留蒸发 (%)")
+
+d_mean  <- lst_dynamic2[-1] %>% map(rowMeans2) %>% 
+    do.call(cbind, .) %>% data.table()
+d_perc  <- {d_mean[, 1:3]/d_mean$ET*100} %>% 
+    add_column_id() %>% melt("I", variable.name = "band") %>% {
+        .$band %<>% factor(bands_en[-1], bands_zh_perc[-1]); . }
+
+df_mean <- lst_dynamic2[-1] %>% map(rowMeans2) %>% 
+    do.call(cbind, .) %>% data.table() %>%
+    add_column_id() %>% melt("I", variable.name = "band") %>% {
+        .$band %<>% factor(bands_en, bands_zh); . } %>%
+    data.table()
+
 # mean annual change during 2004-2018
 df_diff <- map2(lst_dynamic2, lst_static2, ~rowMeans2(.x - .y, na.rm = TRUE))[-1] %>% 
     do.call(cbind, .) %>% data.table() %>%
-    add_column_id() %>% melt("I", variable.name = "band")
-df_diff[value ==0, value := 0]
+    add_column_id() %>% melt("I", variable.name = "band")  %>% {
+        .$band %<>% factor(bands_en, bands_zh); . } %>% 
+    data.table()
+df_diff[value == 0, value := 0]
 
-bands_en = c("ET", "Ec", "Es", "Ei")
-bands_zh = c("蒸散发 (mm)", "植被蒸腾 (mm)", "土壤蒸发 (mm)", "冠层截留蒸发 (mm)")
-df_diff$band %<>% factor(bands_en, bands_zh)
 
-{
+stat = list(show = FALSE)
+pars = list(title = list(x = -180, y = 90, cex = 1.4))
+
+df <- merge(df_mean[, .(I, band, mean = value)], df_diff, sort = FALSE)
+df %<>% mutate(perc = value/mean*100)
+
+Figure2 = TRUE
+if (Figure2) {
     load_all("../latticeGrob")
-    max = 4
-    stat = list(show = FALSE, name = "RC", loc = c(80, 26.5), digit = 1, include.sd =
-                    FALSE, FUN = weightedMedian)
-    pars = list(title = list(x = -180, y = 90, cex = 1.4))
+    stat = list(show = TRUE, name = "u", loc = c(-30, -60), digit = 1, include.sd = TRUE, FUN = matrixStats::weightedMean)
     
-    bandNames <- c("ET", "Ec", "Es", "Ei")
-            brks <- {c(2, 5, 10, 20, 50)} %>% c(-Inf, -rev(.), 0, ., Inf)
-            ncol <- length(brks) - 1
-            cols <- get_color("amwg256", ncol) %>% rev()
-        p <- levelplot2(value ~ s1+s2 | band,
-            df_diff,
-            grid5,
-            colors = cols, brks = brks,
-            # layout = c(2, 2),
-            pars = pars,
-            yticks = seq(0, 0.2, 0.1),
-            ylim = c(-72, 97),
-            xlim = c(-190, 240),
-            aspect = 0.5,
-            # unit = "km2", unit.adj = 0.5,
-            legend.num2factor = TRUE,
-            colorkey = list(width = 1.4, height = 0.96, labels = list(cex = 1)),
-            sp.layout = list(sp_layout, sp_poly),
-            interpolate = FALSE
-        ) +
-            theme_lattice(key.margin = c(0, 1, 0, 0),
-                          plot.margin = c(0, 1, -1.5, 0))
-    write_fig(p, "Figure2_GPP_ET_dynamic-static (2004-2017)_rep_poly_20200430.pdf", 11.1, 5.2)
+    brks <- c(-Inf, 10, 20, 50, 100, 150, 200, 300, 400, 500, 800, 1000, 1500, Inf)
+    # brks <- {c(2, 5, 10, 20, 50)} %>% c(-Inf, -rev(.), 0, ., Inf)
+    ncol <- length(brks) - 1
+    cols <- get_color("amwg256", ncol) %>% rev()
+    
+    p <- levelplot2(mean ~ s1+s2 | band,
+                    df,
+                    grid5,
+                    colors = cols, brks = brks,
+                    layout = c(2, 2),
+                    pars = pars,
+                    stat = stat, 
+                    unit = "(mm)", unit.adj = 0.5,
+                    yticks = seq(0, 0.2, 0.1),
+                    ylim = c(-72, 99),
+                    xlim = c(-190, 240),
+                    aspect = 0.5,
+                    show_signPerc = FALSE,
+                    prob_z = 0.98, 
+                    # unit = "km2", unit.adj = 0.5,
+                    legend.num2factor = TRUE,
+                    colorkey = list(width = 1.4, height = 0.96, labels = list(cex = 1)),
+                    sp.layout = list(sp_layout), # , sp_poly
+                    interpolate = FALSE
+    ) + 
+        theme_lattice(key.margin = c(0, 1.5, 0, 0),
+                      plot.margin = c(0, 3, -1.5, 1))
+    write_fig(p, "Figure2_ET_multi-annual average (2003-2017).pdf", 11.4, 5.2)
+}
+
+{c(268.6, 303.2, 161.4, 103.4, 46.6, 77.2)/476.7*100} %>% round(1)
+
+Figure3 = TRUE
+if (Figure3) {
+    load_all("../latticeGrob")
+
+    brks <- {c(2, 5, 10, 20, 50)} %>% c(-Inf, -rev(.), 0, ., Inf)
+    ncol <- length(brks) - 1
+    cols <- get_color("amwg256", ncol) %>% rev()
+    
+    p <- levelplot2(value ~ s1+s2 | band,
+        df_diff,
+        grid5,
+        colors = cols, brks = brks,
+        # layout = c(2, 2),
+        pars = pars,
+        stat = stat,
+        yticks = seq(0, 0.2, 0.1),
+        ylim = c(-72, 99),
+        xlim = c(-190, 240),
+        aspect = 0.5,
+        unit = "(mm)", unit.adj = 0.5,
+        legend.num2factor = TRUE,
+        colorkey = list(width = 1.4, height = 0.96, labels = list(cex = 1)),
+        sp.layout = list(sp_layout, sp_poly),
+        interpolate = FALSE
+    ) + 
+        theme_lattice(key.margin = c(0, 1.5, 0, 0),
+                      plot.margin = c(0, 3, -1.5, 1))
+    write_fig(p, "Figure3_GPP_ET_dynamic-static (2004-2017)_rep_poly_20200430.pdf", 11.4, 5.2)
+}
+
+Figure4 = TRUE
+if (Figure4) {
+    load_all("../latticeGrob")
+    
+    brks <- {c(2, 5, 10, 15, 20)} %>% c(-Inf, -rev(.), 0, ., Inf)
+    ncol <- length(brks) - 1
+    cols <- get_color("amwg256", ncol) %>% rev()
+    
+    p <- levelplot2(perc ~ s1+s2 | band,
+                    df,
+                    # df[band == bands_zh[2], ],
+                    grid5,
+                    colors = cols, brks = brks,
+                    panel.titles_full = bands_zh_perc %>% label_tag(),
+                    # layout = c(2, 2),
+                    pars = pars,
+                    stat = stat,
+                    yticks = seq(0, 0.2, 0.1),
+                    ylim = c(-72, 99),
+                    xlim = c(-190, 240),
+                    aspect = 0.5,
+                    unit = "(%)", unit.adj = 0.5,
+                    legend.num2factor = TRUE,
+                    colorkey = list(width = 1.4, height = 0.96, labels = list(cex = 1)),
+                    sp.layout = list(sp_layout, sp_poly),
+                    interpolate = FALSE
+    ) + 
+        theme_lattice(key.margin = c(0, 1.5, 0, 0),
+                      plot.margin = c(0, 3, -1.5, 1))
+    write_fig(p, "Figure4_ET_dynamic-static change ratio (2004-2017).pdf", 11.4, 5.2)
+}
+
+# 三层蒸发的比例
+Figure5 = TRUE
+if (Figure5) {
+    load_all("../latticeGrob")
+    
+    brks <- {c(2, 5, seq(10, 90, 10), 95)} %>% c(-Inf, ., Inf)
+    ncol <- length(brks) - 1
+    cols <- get_color("amwg256", ncol) %>% rev()
+    stat = list(show = TRUE, name = "u", loc = c(-30, -60), digit = 1, include.sd = TRUE, FUN = matrixStats::weightedMean)
+    
+    p <- levelplot2(value ~ s1+s2 | band,
+                    d_perc,
+                    # d_perc[band == bands_zh_perc[4], ],
+                    grid5,
+                    colors = cols, brks = brks,
+                    panel.titles_full = bands_zh_perc[-1] %>% label_tag(),
+                    # layout = c(2, 2),
+                    pars = pars,
+                    stat = stat,
+                    unit = "(%)", unit.adj = 0.5,
+                    yticks = seq(0, 0.2, 0.1),
+                    ylim = c(-72, 99),
+                    xlim = c(-190, 240),
+                    aspect = 0.5,
+                    show_signPerc = FALSE, 
+                    prob_z = 0.98, 
+                    # unit = "km2", unit.adj = 0.5,
+                    legend.num2factor = TRUE,
+                    colorkey = list(width = 1.4, height = 0.96, labels = list(cex = 1)),
+                    sp.layout = list(sp_layout, sp_poly),
+                    interpolate = FALSE
+    ) + 
+        theme_lattice(key.margin = c(0, 1.5, 0, 0),
+                      plot.margin = c(0, 3, -1.5, 1))
+    write_fig(p, "Figure5_ET component ratio (2003-2017).pdf", 11.3, 5.2)
 }

@@ -1,4 +1,5 @@
 source("test/main_pkgs.R")
+library(jsonlite)
 
 files_d <- dir("INPUT/json/PMLV2_v015/", "PMLV2_d", full.names = TRUE)[-16] %>% set_year_names()
 files_s <- dir("INPUT/json/PMLV2_v015/", "PMLV2_s", full.names = TRUE)[-16] %>% set_year_names()
@@ -73,6 +74,13 @@ if (Figure3_1) {
     # write_fig(g, "Figure3_GPP.pdf", 12, 5)
     # write_list2xlsx(list(tbl3 = d), "dat3_dynamic and static annual variation.xlsx")
 }
+
+
+tbl <- dcast(d, year + IGBP ~ type, value.var = "ET") %>% 
+    plyr::mutate(diff = dynamic - static, perc = diff/dynamic*100)
+tbl[, map(.SD, ~mean(.x) %>% round(2)), .(year > 2012, IGBP)]
+
+
 
 tag_facet <- function (p, open = "(", close = ")", tag_pool = letters,
           x = -Inf, y = Inf, hjust = -0.5, vjust = 1.5, fontface = 2,

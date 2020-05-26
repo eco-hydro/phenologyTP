@@ -48,7 +48,7 @@ suppressMessages({
     library(sp2)
     library(raster)
     library(rgdal)
-    library(plsdepot)
+    #library(plsdepot)
 
     library(rPML)
 })

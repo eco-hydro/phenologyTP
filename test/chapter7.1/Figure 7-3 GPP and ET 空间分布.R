@@ -9,10 +9,10 @@ add_ETsum <- function(d) {
     grid_full <- get_grid(range = c(73, 105, 25, 40), cellsize=0.1, type = "vec")
     ind_TP <- raster::extract(raster(grid_full), grid_010.TP)
     bands <- c("GPP", "ET", "Ec", "Es", "Ei")
-    lst_dynamic <- ncread("INPUT/PML_V2-yearly-TP_010deg (2003-2017) veg_dynamic.nc", -1, convertTo2d = TRUE, grid_type = "vec")$data %>% 
+    lst_dynamic <- ncread("INPUT/PML_V2-yearly-TP_010deg (2003-2017) veg_dynamic.nc", -1, grid_type = "vec")$data %>% 
         .[c(1, 2, 10, 3)] %>% set_names(bands[-2]) %>% 
         map(~.[ind_TP, ])
-    lst_static <- ncread("INPUT/PML_V2-yearly-TP_010deg (2003-2017) veg_static.nc", -1, convertTo2d = TRUE, grid_type = "vec")$data %>% 
+    lst_static <- ncread("INPUT/PML_V2-yearly-TP_010deg (2003-2017) veg_static.nc", -1, grid_type = "vec")$data %>% 
         .[c(1, 2, 10, 3)] %>% set_names(bands[-2]) %>% 
         map(~.[ind_TP, ])
 }
