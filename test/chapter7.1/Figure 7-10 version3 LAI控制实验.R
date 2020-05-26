@@ -1,7 +1,8 @@
 # lai应该保留小数点后两位数字
 source("test/main_pkgs.R")
 
-bands <- c("GPP", "ET", "Ec", "Es", "Ei")
+bands = c("GPP", "ET", "Ec", "Es", "Ei")
+bands_zh = c("总初级生产力", "蒸散发", "植被蒸腾", "土壤蒸发", "冠层截留蒸发")
 
 ## 多年平均情况-----------------------------------------------------------------
 files <- dir("../rPML/OUTPUT/yearly", "原序列", full.names = TRUE) %>% 
@@ -9,7 +10,7 @@ files <- dir("../rPML/OUTPUT/yearly", "原序列", full.names = TRUE) %>%
 l_mean <- foreach(file = files, i = icount()) %do% {
     l <- ncread(file, -1)$data %>% rPML:::add_ETsum() %>% .[bands] %>% 
         map(rowMeans2, na.rm = TRUE) %>% as.data.table()
-}
+} %>% set_names(names(files))
 d_mean <- {(l_mean$Beck + l_mean$Elmore)/2} %>% cbind(I = 1:nrow(.), .) %>% 
     melt("I", value.name = "mean", variable.name = "response")
 
@@ -55,11 +56,11 @@ df_pvalue$response %<>% factor(bands, bands_zh)
 data_eos <- map(data, ~.x[, scenarios_eos_id] %>% set_colnames(scenarios_eos) %>% 
                     as.data.table() %>% cbind(I = 1:nrow(.), .)) %>% 
     melt_list("response") %>% 
-    melt(c("response", "I"), variable.name = "scenario")
+    data.table::melt(c("response", "I"), variable.name = "scenario")
 data_sos <- map(data, ~.x[, scenarios_sos_id] %>% set_colnames(scenarios_sos) %>% 
                     as.data.table() %>% cbind(I = 1:nrow(.), .)) %>% 
     melt_list("response") %>% 
-    melt(c("response", "I"), variable.name = "scenario")
+    data.table::melt(c("response", "I"), variable.name = "scenario")
 
 df = list(SOS = data_sos, EOS = data_eos) %>% melt_list("metric") %>% 
     merge(d_mean, sort = FALSE, all.x = TRUE)
@@ -68,25 +69,29 @@ df$response %<>% factor(bands, bands_zh)
 df_perc <- df %>% plyr::mutate(value = value / mean * 100)
 ## -----------------------------------------------------------------------------
 # %% ---------------------------------------------------------------------------
-grid <- grid_010.TP_cliped2
+# grid <- grid_010.TP_cliped2
 # grid@data <- l_PML$GPP %>% as.data.table()
 # plot(grid)
 
+stat = list(show = FALSE, name = "RC", loc = c(80, 26.5), digit = 1, include.sd =
+                FALSE, FUN = weightedMedian)
+pars = list(title = list(x=76, y=40.4, cex=1.5))
+
 {    
     bands = c("GPP", "ET", "Ec", "Es", "Ei")
-    bands_zh = c("总初级生产力", "蒸散发", "植被蒸腾", "土壤蒸发", "顶冠截流")
+    bands_zh = c("总初级生产力", "蒸散发", "植被蒸腾", "土壤蒸发", "冠层截留蒸发")
     indicator = c("生长季开始时间", "生长季结束时间", "年LAI最大值", "生长季LAI均值")
     
     # df$variable %<>% as.character() %>% factor(c("SOS", "EOS", "yearMax", "gsMean"), indicator)
-    devices = c("jpg", "pdf")[1]
+    devices = c("jpg", "pdf")[2]
     
     ## 2. Start of growing season ----------------------------------------------
-    show = FALSE
+    show = TRUE
     plot_phenoImpact_spatial(df[metric == "SOS"], grid, devices, show, prefix = "SOS scenarios", 8.6)
-    plot_phenoImpact_spatial(df[metric == "EOS"], grid, devices, show, prefix = "EOS scenarios", 8.6)
-    
-    plot_phenoImpact_spatial(df_perc[metric == "SOS"], grid, devices, show, prefix = "SOS scenarios percentage", 8.6, brks = c(0.2, 0.5, 1, 2, 5, Inf))
-    plot_phenoImpact_spatial(df_perc[metric == "EOS"], grid, devices, show, prefix = "EOS scenarios percentage", 8.6, brks = c(0.2, 0.5, 1, 2, 5, Inf))
+    # plot_phenoImpact_spatial(df[metric == "EOS"], grid, devices, show, prefix = "EOS scenarios", 8.6)
+    # 
+    # plot_phenoImpact_spatial(df_perc[metric == "SOS"], grid, devices, show, prefix = "SOS scenarios percentage", 8.6, brks = c(0.2, 0.5, 1, 2, 5, Inf))
+    # plot_phenoImpact_spatial(df_perc[metric == "EOS"], grid, devices, show, prefix = "EOS scenarios percentage", 8.6, brks = c(0.2, 0.5, 1, 2, 5, Inf))
 }
 
 

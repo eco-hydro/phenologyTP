@@ -135,13 +135,7 @@ plot_pcor_spatial <- function(df,
     # browser()
     stat = list(show = TRUE, name = "均值", loc = c(84.5, 25.7), digit = 1, include.sd = TRUE, FUN = weightedMean)
     stat_sign = list(loc1 = c(78, 41.5), loc2 = c(78, 41.5 - 2))
-    pars = list(
-        title = list(x = 74, y = 41, cex = 1.5),
-        hist = list(
-            origin.x = 77, origin.y = 28, A = 12, by = 0.5, box.width = 0.48, ylab.offset = 3,
-            tick = seq(0, 0.3, 0.1)
-        )
-    )
+    pars = list( title = list(x = 74, y = 41, cex = 1.5) )
 
     # df = df_GPP
     # brks = .brks$SOS
@@ -157,7 +151,10 @@ plot_pcor_spatial <- function(df,
                     ylim = c(25.5, 43),
                     xlim = c(73.2, 104.98),
                     colors = cols,
-                    stat = stat, pars = pars,
+                    stat = stat, 
+                    pars = pars,
+                    bbox_barchartFreq = c(0.08, 0.3, 0.15, 0.4),
+                    yticks = seq(0, 0.3, 0.1),
                     stat_sign = stat_sign, 
                     brks = brks,
                     strip = TRUE,
@@ -204,13 +201,7 @@ plot_pcor_spatial2 <- function(df2, responsor, SpatialPixel, devices = c("jpg", 
     # browser()
     stat = list(show = TRUE, name = "均值", loc = c(84.5, 25.7), digit = 2, include.sd = TRUE, FUN = weightedMean)
     stat_sign = list(loc1 = c(78, 41.5), loc2 = c(78, 41.5 - 2))
-    pars = list(
-        title = list(x = 74, y = 41, cex = 1.5),
-        hist = list(
-            origin.x = 78, origin.y = 28, A = 12, by = 0.5, box.width = 0.48, ylab.offset = 3.5,
-            tick = seq(0, 0.3, 0.1)
-        )
-    )
+    pars = list( title = list(x = 74, y = 41, cex = 1.5))
 
     # df = df_GPP
     # brks = .brks$SOS
@@ -227,7 +218,10 @@ plot_pcor_spatial2 <- function(df2, responsor, SpatialPixel, devices = c("jpg", 
                     ylim = c(25.5, 43),
                     xlim = c(73.2, 104.98),
                     colors = cols,
-                    stat = stat, pars = pars,
+                    stat = stat, 
+                    pars = pars,
+                    bbox_barchartFreq = c(0.08, 0.3, 0.15, 0.4),
+                    yticks = seq(0, 0.3, 0.1),
                     stat_sign = stat_sign, 
                     brks = brks,
                     strip = TRUE,
@@ -329,7 +323,6 @@ plot_pcor_spatial3 <- function(d, SpatialPixel, devices = c("jpg", "pdf"), show 
     write_fig(p, outfile, 12, height, devices = devices, show = show, use.cairo_pdf = TRUE) # clear and small file size
 }
 
-
 label_tag <- function(labels, tag = TRUE, pool = NULL) {
     if (is.null(pool)) pool <- c(letters, LETTERS)
     n <- length(labels)
@@ -346,10 +339,9 @@ label_tag <- function(labels, tag = TRUE, pool = NULL) {
 }
 
 
-plot_phenoImpact_spatial <- function(d, SpatialPixel, devices = c("jpg", "pdf"), show = show, 
+plot_phenoImpact_spatial <- function(d, SpatialPixel, devices = c("jpg", "pdf"), show = TRUE, 
     prefix = "", height = 10, 
-    brks = c(0.5, 1, 2, 5, 10, Inf)
-    ) 
+    brks = c(0.5, 1, 2, 5, 10, Inf)) 
 {
     brks %<>% c(-rev(.), 0, .)
     ngrid <- length(SpatialPixel)
@@ -368,12 +360,8 @@ plot_phenoImpact_spatial <- function(d, SpatialPixel, devices = c("jpg", "pdf"),
     stat = list(show = TRUE, name = "u", loc = c(84, 25.7), digit = 2, include.sd = TRUE, FUN = weightedMean)
     stat_sign = list(loc1 = c(78, 41.5), loc2 = c(78, 41.5 - 2))
     pars = list(
-        title = list(x = 74, y = 41, cex = 1.5),
-        hist = list(
-            origin.x = 78, origin.y = 28, A = 12, by = 0.5, box.width = 0.48, ylab.offset = 3.5,
-            tick = seq(0, 0.3, 0.1)
-        )
-    )
+        title = list(x = 74, y = 41, cex = 1.4),
+        hist = list( tick = seq(0, 0.3, 0.1) ) )
     # df = df_GPP
     # brks = .brks$SOS
     # brks = c(0.2, 0.6, 1) %>% c(-rev(.), 0, .)
@@ -389,17 +377,20 @@ plot_phenoImpact_spatial <- function(d, SpatialPixel, devices = c("jpg", "pdf"),
     #                 sp.layout = sp_layout)
     p <- levelplot2(value ~ s1 + s2 | scenario * response ,
                     d, SpatialPixel,
-                    # df,
                     # df.mask[type_trend == "MK" & variable %in% varnames],
                     sp.layout = sp_layout,
                     # layout = c(2, 4),
                     ylim = c(25.5, 43),
                     xlim = c(73.2, 104.98),
                     colors = cols,
-                    stat = stat, pars = pars,
+                    stat = stat, 
+                    pars = pars,
+                    bbox_barchartFreq = c(0.2, 0.3, 0.15, 0.4),
+                    yticks = seq(0, 0.3, 0.1),
                     stat_sign = stat_sign,
                     brks = brks,
                     strip = TRUE,
+                    show_signPerc = FALSE,
                     # strip.factors = sources_labels,
                     panel.titles_full = label_tag(rep("", 30), 
                                                   pool = paste(rep(letters[1:5], each = 6), 1:6, sep = "")),
@@ -423,3 +414,4 @@ plot_phenoImpact_spatial <- function(d, SpatialPixel, devices = c("jpg", "pdf"),
     scale = 1
     write_fig(p, outfile, 15, height, devices = devices, show = show, use.cairo_pdf = TRUE) # clear and small file size
 }
+

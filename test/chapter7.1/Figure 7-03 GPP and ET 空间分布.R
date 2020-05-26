@@ -47,22 +47,12 @@ df_mean <- lst_dynamic %>% map(rowMeans2) %>% as.data.table() %>%
     max = 4
     stat = list(show = FALSE, name = "RC", loc = c(80, 26.5), digit = 1, include.sd =
                     FALSE, FUN = weightedMedian)
-    # hist = list(origin.x = -150,
-    #             origin.y = -20, A = 90, by = 5,
-    #             tck = 2,
-    #             ylab.offset = 25)
-    # pars = list(title = list(x = -180, y = 85, cex = 1.4),
-    #             hist = hist)
-    hist = list(origin.x = -150,
-                origin.y = -20, A = 90, by = 5,
-                tck = 2,
-                ylab.offset = 25)
-    pars = list(title = list(x=77, y=39, cex=1.5),
-                hist = list(origin.x=77, origin.y=28, A=15, by = 0.4))
+    pars = list(title = list(x=76, y=40.4, cex=1.5))
+    # pars = list(title = list(x = -180, y = 85, cex = 1.4))
     
     bandNames = c("GPP", "ET", "Ec", "Es", "Ei")
     bandNames_zh = c(expression("总初级生产力 (g C" ~ m^-2 * a^-1 * ")"), 
-                     "蒸散发 (mm)", "植被蒸腾 (mm)", "土壤蒸发 (mm)", "顶冠截流 (mm)")
+                     "蒸散发 (mm)", "植被蒸腾 (mm)", "土壤蒸发 (mm)", "冠层截留蒸发 (mm)")
     names <- label_tag(bandNames_zh)
     names[1] <- expression("(a) 总初级生产力 (g C" ~ m^-2 * a^-1 * ")")
     names %<>% char2expr()
@@ -75,8 +65,12 @@ res <- foreach(ind = id_veg_010deg) %do% {
 }
 d <- res %>% melt_list("veg_type") %>% dcast(veg_type~band)
 
+set_font()
+
+
 ## Figure 7-3 spatial distribution of simulations ------------------------------
 {
+    # load_all("../latticeGrob")
     ps = foreach(bandName = bandNames, i = icount()) %do% {
         if (i == 1) {
             brks <- {c(1, 5, 10, 20, 50, 100, 200, 500, 1000)} %>% c(-Inf, ., Inf)
@@ -102,13 +96,18 @@ d <- res %>% melt_list("veg_type") %>% dcast(veg_type~band)
                     colors = cols, brks = brks,
                     # layout = c(2, 2),
                     pars = pars,
+                    panel = panel.spatial,
+                    show_signPerc = FALSE,
+                    show_horizontalFreq = FALSE, 
+                    bbox_barchartFreq = c(0.1, 0.35, 0.15, 0.45),
                     # ylim = c(-60, 92),
                     strip = FALSE,
-                    ylim = c(25, 40),
+                    ylim = c(25, 41.5),
                     xlim = c(73, 105),
                     par.settings2 = list(strip.background = list(alpha = 0), axis.line = list(col = "transparent")),
                     par.strip.text = list(cex = 1.5, font = 2, fontfamily = "Times", lineheight = 2),
-                    aspect = 0.55,
+                    aspect = 0.6,
+                    yticks = seq(0, 0.4, 0.1),
                     panel.title = names[i],
                     # unit = "km2", unit.adj = 0.5,
                     sub.hist = TRUE,
@@ -123,13 +122,14 @@ d <- res %>% melt_list("veg_type") %>% dcast(veg_type~band)
                     # xlim = xlim, ylim = ylim
         ) +
             theme_lattice(key.margin = c(0, 1, 0, 0),
-                          plot.margin = c(0.5, 0.5, -1.5, -1.5))
+                          plot.margin = c(0.5, -1.5, -1.5, -2.5))
+        # p
     }
     # "no applicable method for 'as.layer' applied to an object of class "list""
     # tbl2 <- do.call(rbind, ps) %>% data.table() %>% cbind(band = bandNames[1:4], .)
     # write_list2xlsx(list(tbl2 = tbl2), "dat2_LUCC_induced x changes.xlsx")
     g = arrangeGrob(grobs = ps, nrow = 3)
-    write_fig(g, "Figure7-3 GPP_ET spatial dist (2003-2017).jpg", 9.4, 7)
+    write_fig(g, "Figure7-3 GPP_ET spatial dist (2003-2017).jpg", 8.7, 7)
 }
 
 # Figure4: dynamic - static ----------------------------------------------------
