@@ -66,10 +66,16 @@ res <- foreach(ind = id_veg_010deg) %do% {
 d <- res %>% melt_list("veg_type") %>% dcast(veg_type~band)
 
 set_font()
-
+# latticeGrob::init_lattice()
 
 ## Figure 7-3 spatial distribution of simulations ------------------------------
 {
+    load_all("../latticeGrob")
+    # suppressWarnings({
+    #     environment(draw.colorkey) <- environment(lattice::xyplot)
+    #     assignInNamespace("draw.colorkey", draw.colorkey, ns="lattice")
+    # })
+
     # load_all("../latticeGrob")
     ps = foreach(bandName = bandNames, i = icount()) %do% {
         if (i == 1) {
@@ -122,14 +128,14 @@ set_font()
                     # xlim = xlim, ylim = ylim
         ) +
             theme_lattice(key.margin = c(0, 1, 0, 0),
-                          plot.margin = c(0.5, -1.5, -1.5, -2.5))
+                          plot.margin = c(0.5, 1, -1.5, -1.5))
         # p
     }
     # "no applicable method for 'as.layer' applied to an object of class "list""
     # tbl2 <- do.call(rbind, ps) %>% data.table() %>% cbind(band = bandNames[1:4], .)
     # write_list2xlsx(list(tbl2 = tbl2), "dat2_LUCC_induced x changes.xlsx")
     g = arrangeGrob(grobs = ps, nrow = 3)
-    write_fig(g, "Figure7-3 GPP_ET spatial dist (2003-2017).jpg", 8.7, 7)
+    write_fig(g, "Figure7-3 GPP_ET spatial dist (2003-2017).jpg", 8.8, 7)
 }
 
 # Figure4: dynamic - static ----------------------------------------------------
