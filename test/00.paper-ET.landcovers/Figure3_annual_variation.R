@@ -13,8 +13,8 @@ get_json <- function(file) {
     # d[IGBP == 0, IGBP := 17]
     d
 }
-# rfluxnet:::IGBPnames_006
 
+# rfluxnet:::IGBPnames_006
 IGBP_code2name <- function(df) {
     df$IGBP %<>% mapvalues(1:17, LCs[-1])
     df$year %<>% as.numeric()

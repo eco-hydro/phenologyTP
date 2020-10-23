@@ -83,7 +83,9 @@ df %<>% mutate(perc = value/mean*100)
 
 Figure2 = TRUE
 if (Figure2) {
-    load_all("../latticeGrob")
+    # load_all("../latticeGrob")
+    set_options(list(style = "CH"))
+    # get_options() %>% str()
     stat = list(show = TRUE, name = "u", loc = c(-30, -60), digit = 1, include.sd = TRUE, FUN = matrixStats::weightedMean)
     
     brks <- c(-Inf, 10, 20, 50, 100, 150, 200, 300, 400, 500, 800, 1000, 1500, Inf)
@@ -105,6 +107,9 @@ if (Figure2) {
                     aspect = 0.5,
                     show_signPerc = FALSE,
                     prob_z = 0.98, 
+                    bbox_barchartFreq = c(0.05, 0.26, 0.15, 0.4),
+                    show_horizontalFreq = TRUE, 
+                    zlim_ratio = c(0, 1),
                     # unit = "km2", unit.adj = 0.5,
                     legend.num2factor = TRUE,
                     colorkey = list(width = 1.4, height = 0.96, labels = list(cex = 1)),
@@ -115,13 +120,12 @@ if (Figure2) {
                       plot.margin = c(0, 3, -1.5, 1))
     write_fig(p, "Figure2_ET_multi-annual average (2003-2017).pdf", 11.4, 5.2)
 }
-
-{c(268.6, 303.2, 161.4, 103.4, 46.6, 77.2)/476.7*100} %>% round(1)
+# {c(268.6, 303.2, 161.4, 103.4, 46.6, 77.2)/476.7*100} %>% round(1)
 
 Figure3 = TRUE
 if (Figure3) {
-    load_all("../latticeGrob")
-
+    set_options(list(style = "CH"))
+    # load_all("../latticeGrob")
     brks <- {c(2, 5, 10, 20, 50)} %>% c(-Inf, -rev(.), 0, ., Inf)
     ncol <- length(brks) - 1
     cols <- get_color("amwg256", ncol) %>% rev()
@@ -139,6 +143,7 @@ if (Figure3) {
         aspect = 0.5,
         unit = "(mm)", unit.adj = 0.5,
         legend.num2factor = TRUE,
+        show_horizontalFreq = TRUE,
         colorkey = list(width = 1.4, height = 0.96, labels = list(cex = 1)),
         sp.layout = list(sp_layout, sp_poly),
         interpolate = FALSE

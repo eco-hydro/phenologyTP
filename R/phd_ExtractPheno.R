@@ -109,7 +109,7 @@ get_modis_date <- function(dates, dn = 8) {
     date_begin = dates[1]
     date_end   = dates[length(dates)]
     
-    year = unique(year(dates))
+    year = year(date_begin):year(date_end)
     nptperyear = ceiling(366/dn)
     year = rep(year, each = nptperyear)
     days = seq(1, 366, dn)
