@@ -8,7 +8,6 @@ files_lai <- dir("INPUT/json/PMLV2_v015/", "LAI", full.names = TRUE)[-16] %>% se
 # no that 0 is water, other than UNF
 get_json <- function(file) {
     x <- read_json(file)$features
-    # browser()
     d = map(x, "properties")[-1] %>% map(as.data.table) %>% do.call(rbind, .)
     # d[IGBP == 0, IGBP := 17]
     d
@@ -24,6 +23,23 @@ IGBP_code2name <- function(df) {
 df <- list(dynamic = map(files_d, get_json) %>% melt_list("year"),
     static = map(files_s, get_json) %>% melt_list("year")) %>% melt_list("type") %>%
     IGBP_code2name()
+
+
+rename_gsub <- function(d, pattern, replacement = "") {
+    rename_with(d, ~gsub(pattern, replacement, .))
+}
+
+{
+    d_mean  = df %>% dplyr::select(ends_with(c("mean"))) %>%
+        rename_gsub("_mean")
+    d_count = df %>% dplyr::select(ends_with(c("count")))
+    d = cbind(df[, .(year, type, IGBP)], d_mean * d_count /1e9)
+    fwrite(d, "PMLV2_global_IGBP_statistics-(2003-2017)_V15.csv")
+        # .[, lapply(.SD, sum), .(year, type), .SDcols = colnames(d_mean)]
+    
+}
+
+
 d <- df[type == "dynamic", .(area = sum(ET_count)/1e6), .(type, year, IGBP)] %>% dcast2("IGBP", "area")
 # write_list2xlsx(list(), )
 df_lai <- map(files_lai, get_json) %>% melt_list("year") %>%

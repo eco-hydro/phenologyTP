@@ -29,9 +29,8 @@ resample_grid <- function(grid, data = NULL, fact=5, fun=mean) {
 
     r <- brick(grid)
     if (fact > 1) {
-        r <- aggregate(r, fact, fun) # 0.5 deg
+        r <- raster::aggregate(r, fact, fun) # 0.5 deg
     }
-    # r
     as_SpatialGridDataFrame(r)
 }
 

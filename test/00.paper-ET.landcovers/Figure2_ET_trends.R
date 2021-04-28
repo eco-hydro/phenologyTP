@@ -2,8 +2,9 @@
 source("test/main_pkgs.R")
 
 {
-    shp <- readOGR("data-raw/shp/world_poly.shp")
-    sp_layout <- list("sp.polygons", shp, lwd = 0.2, first = FALSE)
+    # shp <- readOGR("data-raw/shp/world_poly.shp")
+    shp <- readOGR("data-raw/shp/continent.shp")
+    sp_layout <- list("sp.polygons", shp, lwd = 0.5, first = FALSE)
     
     poly <- readOGR("data-raw/ArcGIS/shp/representative_poly.shp", verbose = FALSE)
     sp_poly <- list("sp.polygons", poly, first = FALSE, col = "black")
@@ -93,6 +94,12 @@ if (Figure2) {
     ncol <- length(brks) - 1
     cols <- get_color("amwg256", ncol) %>% rev()
     
+    bar <- list("SpatialPolygonsRescale", layout.scale.bar(height=0.1), 
+                offset = c(40, -40), scale = 45, fill=c("white", "black"), first = FALSE)
+    delta = 12
+    l1 = list("sp.text", c(40, -40+delta), "0", fontfamily = "Times")
+    l2 = list("sp.text", c(90, -40+delta), "5000 km", fontfamily = "Times")
+    
     p <- levelplot2(mean ~ s1+s2 | band,
                     df,
                     grid5,
@@ -103,17 +110,17 @@ if (Figure2) {
                     unit = "(mm)", unit.adj = 0.5,
                     yticks = seq(0, 0.2, 0.1),
                     ylim = c(-72, 99),
-                    xlim = c(-190, 240),
+                    xlim = c(-190, 190),
                     aspect = 0.5,
                     show_signPerc = FALSE,
                     prob_z = 0.98, 
                     bbox_barchartFreq = c(0.05, 0.26, 0.15, 0.4),
-                    show_horizontalFreq = TRUE, 
+                    # show_horizontalFreq = FALSE, 
                     zlim_ratio = c(0, 1),
                     # unit = "km2", unit.adj = 0.5,
                     legend.num2factor = TRUE,
                     colorkey = list(width = 1.4, height = 0.96, labels = list(cex = 1)),
-                    sp.layout = list(sp_layout), # , sp_poly
+                    sp.layout = list(bar, l1, l2), # , sp_poly, sp_layout
                     interpolate = FALSE
     ) + 
         theme_lattice(key.margin = c(0, 1.5, 0, 0),
@@ -122,9 +129,13 @@ if (Figure2) {
 }
 # {c(268.6, 303.2, 161.4, 103.4, 46.6, 77.2)/476.7*100} %>% round(1)
 
+# lat = 0; rdist.earth(matrix(c(0, lat), nrow = 1), matrix(c(67.4, lat), nrow = 1), miles = FALSE)
+lon = 0; rdist.earth(matrix(c(0, 0), nrow = 1), matrix(c(0, 45), nrow = 1), miles = FALSE)
+
+
 Figure3 = TRUE
 if (Figure3) {
-    set_options(list(style = "CH"))
+    # set_options(list(style = "CH"))
     # load_all("../latticeGrob")
     brks <- {c(2, 5, 10, 20, 50)} %>% c(-Inf, -rev(.), 0, ., Inf)
     ncol <- length(brks) - 1
@@ -139,13 +150,13 @@ if (Figure3) {
         stat = stat,
         yticks = seq(0, 0.2, 0.1),
         ylim = c(-72, 99),
-        xlim = c(-190, 240),
+        xlim = c(-190, 190),
         aspect = 0.5,
         unit = "(mm)", unit.adj = 0.5,
         legend.num2factor = TRUE,
-        show_horizontalFreq = TRUE,
+        show_horizontalFreq = FALSE,
         colorkey = list(width = 1.4, height = 0.96, labels = list(cex = 1)),
-        sp.layout = list(sp_layout, sp_poly),
+        sp.layout = list(bar, l1, l2, sp_poly),
         interpolate = FALSE
     ) + 
         theme_lattice(key.margin = c(0, 1.5, 0, 0),
@@ -155,7 +166,7 @@ if (Figure3) {
 
 Figure4 = TRUE
 if (Figure4) {
-    load_all("../latticeGrob")
+    # load_all("../latticeGrob")
     
     brks <- {c(2, 5, 10, 15, 20)} %>% c(-Inf, -rev(.), 0, ., Inf)
     ncol <- length(brks) - 1
@@ -172,12 +183,12 @@ if (Figure4) {
                     stat = stat,
                     yticks = seq(0, 0.2, 0.1),
                     ylim = c(-72, 99),
-                    xlim = c(-190, 240),
+                    xlim = c(-190, 190),
                     aspect = 0.5,
                     unit = "(%)", unit.adj = 0.5,
                     legend.num2factor = TRUE,
                     colorkey = list(width = 1.4, height = 0.96, labels = list(cex = 1)),
-                    sp.layout = list(sp_layout, sp_poly),
+                    sp.layout = list(bar, l1, l2, sp_poly),
                     interpolate = FALSE
     ) + 
         theme_lattice(key.margin = c(0, 1.5, 0, 0),
@@ -188,7 +199,7 @@ if (Figure4) {
 # 三层蒸发的比例
 Figure5 = TRUE
 if (Figure5) {
-    load_all("../latticeGrob")
+    # load_all("../latticeGrob")
     
     brks <- {c(2, 5, seq(10, 90, 10), 95)} %>% c(-Inf, ., Inf)
     ncol <- length(brks) - 1

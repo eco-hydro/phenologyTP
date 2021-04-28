@@ -2,26 +2,30 @@
 # visualization
 # grid2 <- as(grid, "SpatialPixelsDataFrame")
 source("test/main_pkgs.R")
+shp <- readOGR("data-raw/shp/continent.shp")
 
-shp <- readOGR("data-raw/shp/world_poly.shp")
+
 sp_layout <- list("sp.polygons", shp, lwd = 0.1, first = FALSE)
 d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
 # d_diff       <- fread("INPUT/lc_diff (2008-2018)-(2003-2007).csv")
 # d_diff       <- fread("INPUT/lc_diff (2018)-(2008-2017).csv")
 {
     d_diff_major <- aggregate_lc(d_diff %>% as.matrix)[, ]
-
     # df = resample_grid(grid, d_diff, fact = 5)@data %>% add_column_id() %>% melt('I', variable.name = "LC")
-    df_major = resample_grid(grid_global, d_diff_major, fact = 5)@data %>% data.table() %>% melt_lc()
+    df_major = resample_grid(grid_global, d_diff_major, fact = 10)@data %>% data.table() %>% melt_lc()
     df_major$LC %<>% factor(LCs_types)
     df_major[value == 0, value := NA_real_]
 }
+# d_bg = df_major[, .(value = sum(value, na.rm = TRUE)), .(I)]
+# d_bg[value == 0, value := NA_real_]
+# grid2 <- grid5
+# grid2@data <- d_bg
 
-grid5  <- get_grid(range_global, cellsize = 0.5, type = "vec")
-
-
+grid5 <- get_grid(range_global, cellsize = 1, type = "vec")
+# df_major$I %>% unique()
 {
     load_all("../latticeGrob")
+    latticeGrob::set_options(list(style = "CH", family_CH = "rTimes"))
     max = 4
     # brks <-  c(-Inf, seq(-2, 2, 0.2), Inf) # perc
     # brks <-  c(-Inf, seq(-max, max, 0.4), Inf) # km^2, 3600 in total
@@ -33,6 +37,7 @@ grid5  <- get_grid(range_global, cellsize = 0.5, type = "vec")
     stat = list(show = FALSE, name = "RC", loc = c(80, 26.5), digit = 1, include.sd =
                     FALSE, FUN = weightedMedian)
     pars = list(title = list(x = -180, y = 87, cex = 1.6))
+    pars$panel.backgroundcol = 'gray'
     p <- levelplot2(value ~ s1+s2 | LC,
                     # df,
                     df_major,
@@ -44,15 +49,15 @@ grid5  <- get_grid(range_global, cellsize = 0.5, type = "vec")
                     colors = cols, brks = brks,
                     layout = c(2, 4),
                     pars = pars,
-                    par.strip.text = list(cex = 1.5, font = 2, fontfamily = "TimesSimSun", lineheight = 2),
+                    par.strip.text = list(cex = 1.5, font = 2, fontfamily = "rTimes", lineheight = 2),
                     ylim = c(-72, 95),
-                    xlim = c(-190, 240),
+                    xlim = c(-190, 190),
                     aspect = 0.5,
                     # unit = "km2", unit.adj = 0.5,
                     legend.num2factor = TRUE,
-                    sp.layout = sp_layout,
+                    sp.layout = list(bar, l1, l2),
                     colorkey = list(space = "right", height  = 0.95),
-                    interpolate = TRUE
+                    interpolate = FALSE
                     # stat = NULL,
                     # xlim = xlim, ylim = ylim
     ) +
