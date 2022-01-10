@@ -68,7 +68,7 @@ df_diff$band %<>% factor(bands_en, bands_zh)
 # df_diff$band %<>% mapvalues(bands_en, bands_zh)
     
 {
-    load_all("../latticeGrob")
+    load_all("../lattice.layers")
     max = 4
     # brks <-  c(-Inf, seq(-2, 2, 0.2), Inf) # perc
     # brks <-  c(-Inf, seq(-max, max, 0.4), Inf) # km^2, 3600 in total

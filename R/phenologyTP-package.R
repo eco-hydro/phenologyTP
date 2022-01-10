@@ -8,7 +8,7 @@
 NULL
 
 
-#' @import latticeGrob
+#' @import lattice.layers
 .onLoad <- function(libname, pkgname) {
     # suppressMessages
     # suppressWarnings
@@ -17,10 +17,10 @@ NULL
     #     # library(lattice)
     #     library(devtools)
     # })
-    library(latticeGrob)
+    library(lattice.layers)
 
-    latticeGrob::init_lattice()
-    latticeGrob::set_font()
+    lattice.layers::init_lattice()
+    lattice.layers::set_font()
     # init_lattice()
     invisible()
 }

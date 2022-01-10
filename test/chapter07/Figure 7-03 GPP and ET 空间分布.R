@@ -66,17 +66,17 @@ res <- foreach(ind = id_veg_010deg) %do% {
 d <- res %>% melt_list("veg_type") %>% dcast(veg_type~band)
 
 set_font()
-# latticeGrob::init_lattice()
+# lattice.layers::init_lattice()
 
 ## Figure 7-3 spatial distribution of simulations ------------------------------
 {
-    load_all("../latticeGrob")
+    load_all("../lattice.layers")
     # suppressWarnings({
     #     environment(draw.colorkey) <- environment(lattice::xyplot)
     #     assignInNamespace("draw.colorkey", draw.colorkey, ns="lattice")
     # })
 
-    # load_all("../latticeGrob")
+    # load_all("../lattice.layers")
     ps = foreach(bandName = bandNames, i = icount()) %do% {
         if (i == 1) {
             brks <- {c(1, 5, 10, 20, 50, 100, 200, 500, 1000)} %>% c(-Inf, ., Inf)

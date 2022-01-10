@@ -44,8 +44,3 @@ seq_date_dn <- function(start, end, dn = 4) {
     ans <- lapply(year_start:year_end, yearly_date, dn) %>% do.call(c, .)
     ans %>% .[. >= start & . <= end]
 }
-
-set_dimnames <- function(x, names) {
-    dimnames(x) <- names
-    x
-}

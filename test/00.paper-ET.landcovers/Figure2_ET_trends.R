@@ -1,16 +1,6 @@
 # grouped into: Forest, Shrubland, Grassland, Cropland (CNV and CRO), Urban and Water and others
 source("test/main_pkgs.R")
 
-{
-    # shp <- readOGR("data-raw/shp/world_poly.shp")
-    shp <- readOGR("data-raw/shp/continent.shp")
-    sp_layout <- list("sp.polygons", shp, lwd = 0.5, first = FALSE)
-    
-    poly <- readOGR("data-raw/ArcGIS/shp/representative_poly.shp", verbose = FALSE)
-    sp_poly <- list("sp.polygons", poly, first = FALSE, col = "black")
-}
-
-grid5  <- get_grid(range_global, cellsize = 0.5, type = "vec")
 
 file_PML_static  = "data-raw/PML-V2_static-2003-2017_G05deg.nc"
 file_PML_dynamic = "data-raw/PML-V2_dynamic-2003-2017_G05deg.nc"
@@ -84,7 +74,7 @@ df %<>% mutate(perc = value/mean*100)
 
 Figure2 = TRUE
 if (Figure2) {
-    # load_all("../latticeGrob")
+    # load_all("../lattice.layers")
     set_options(list(style = "CH"))
     # get_options() %>% str()
     stat = list(show = TRUE, name = "u", loc = c(-30, -60), digit = 1, include.sd = TRUE, FUN = matrixStats::weightedMean)
@@ -136,7 +126,7 @@ lon = 0; rdist.earth(matrix(c(0, 0), nrow = 1), matrix(c(0, 45), nrow = 1), mile
 Figure3 = TRUE
 if (Figure3) {
     # set_options(list(style = "CH"))
-    # load_all("../latticeGrob")
+    # load_all("../lattice.layers")
     brks <- {c(2, 5, 10, 20, 50)} %>% c(-Inf, -rev(.), 0, ., Inf)
     ncol <- length(brks) - 1
     cols <- get_color("amwg256", ncol) %>% rev()
@@ -166,7 +156,7 @@ if (Figure3) {
 
 Figure4 = TRUE
 if (Figure4) {
-    # load_all("../latticeGrob")
+    # load_all("../lattice.layers")
     
     brks <- {c(2, 5, 10, 15, 20)} %>% c(-Inf, -rev(.), 0, ., Inf)
     ncol <- length(brks) - 1
@@ -199,7 +189,7 @@ if (Figure4) {
 # 三层蒸发的比例
 Figure5 = TRUE
 if (Figure5) {
-    # load_all("../latticeGrob")
+    # load_all("../lattice.layers")
     
     brks <- {c(2, 5, seq(10, 90, 10), 95)} %>% c(-Inf, ., Inf)
     ncol <- length(brks) - 1

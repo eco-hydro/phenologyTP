@@ -6,7 +6,7 @@ suppressMessages({
     library(grid)
     library(lattice)
     # library(latticeExtra)
-    library(latticeGrob) # should behind of latticeExtra
+    library(lattice.layers) # should behind of latticeExtra
     library(Cairo)
     library(scales)
     # library(ggpmisc)

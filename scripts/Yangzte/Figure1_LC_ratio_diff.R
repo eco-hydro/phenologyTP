@@ -2,16 +2,20 @@
 # visualization
 # grid2 <- as(grid, "SpatialPixelsDataFrame")
 source("test/main_pkgs.R")
-shp <- readOGR("data-raw/shp/continent.shp")
-sp_continent <- list("sp.polygons", shp, lwd = 0.1, first = FALSE)
+grid5 <- get_grid(range_global, cellsize = 0.1, type = "vec")
+r = over(grid5, shp)
+inds = r$Id %>% which.notna()
 
+library(sf)
 d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
 # d_diff       <- fread("INPUT/lc_diff (2008-2018)-(2003-2007).csv")
 # d_diff       <- fread("INPUT/lc_diff (2018)-(2008-2017).csv")
 {
     d_diff_major <- aggregate_lc(d_diff %>% as.matrix)[, ]
     # df = resample_grid(grid, d_diff, fact = 5)@data %>% add_column_id() %>% melt('I', variable.name = "LC")
-    df_major = resample_grid(grid_global, d_diff_major, fact = 10)@data %>% data.table() %>% melt_lc()
+    df_major = resample_grid(grid_global, d_diff_major, fact = 1)@data %>% 
+        data.table() %>% 
+        .[inds, ] %>% melt_lc()
     df_major$LC %<>% factor(LCs_types)
     df_major[value == 0, value := NA_real_]
 }
@@ -20,9 +24,14 @@ d_diff       <- fread("INPUT/lc_diff (2008-2017)-(2003-2007).csv")
 # grid2 <- grid5
 # grid2@data <- d_bg
 
-grid5 <- get_grid(range_global, cellsize = 1, type = "vec")
+r = grid5[inds, ]
+r@data <- df[, -1]
+writeRaster(brick(r), "yangtze_LC_changeRatio.tif")
+#%>% brick()
 # df_major$I %>% unique()
 {
+    sp_region <- list("sp.polygons", shp, lwd = 1, 
+                      first = F)
     # load_all("../lattice.layers.R")
     lattice.layers::set_options(list(style = "CH", family_CH = "rTimes"))
     max = 4
@@ -32,39 +41,43 @@ grid5 <- get_grid(range_global, cellsize = 1, type = "vec")
     ncol <- length(brks) - 1
     cols <- colorRampPalette(c("red", "white", "green"))(ncol)
     # cols <- get_color("GMT_red2green", ncol*2) %>% rev()
+    # cols <- get_color("BlGrYeOrReVi200", ncol) %>% rev()
 
-    stat = list(show = FALSE, name = "RC", loc = c(80, 26.5), digit = 1, include.sd =
-                    FALSE, FUN = weightedMedian)
-    pars = list(title = list(x = -180, y = 87, cex = 1.6))
+    stat = list(show = TRUE, name = "RC", loc = c(107, 34.8), 
+                digit = 2, include.sd = TRUE, 
+                FUN = weightedMean)
+    pars = list(title = list(x = 98, y = 35+0.5, cex = 1.5))
     pars$panel.backgroundcol = 'gray'
     
-    p <- lattice.layers::sp_plot(formula = value ~ lon+lat | LC,
-                    # df,
-                    df = df_major,
+    # p <- levelplot2(value ~ s1+s2 | LC,
+    #                 # df,
+    #                 df_major,
+    p <- lattice.layers::sp_plot(
                     # df[!(LC %in% c("UNC", "water"))], # blank
                     # df[LC %in% IGBP006_names[1:4]],
-                    SpatialPixel = grid5,
+                    grid5[inds, ], 
+                    formula = value ~ lon+lat | LC, 
+                    df = df_major,
                     panel.titles_full = label_tag(LCs_types_zh),
                     # df.mask = df[, .(LC, mask = pval <= 0.05)],
                     colors = cols, brks = brks,
                     layout = c(2, 4),
                     pars = pars,
                     par.strip.text = list(cex = 1.5, font = 2, fontfamily = "rTimes", lineheight = 2),
-                    ylim = c(-72, 95),
-                    xlim = c(-190, 190),
-                    aspect = 0.5,
-                    # unit = "km2", unit.adj = 0.5,
+                    ylim = c(24, 36) + c(-1, 1)*0.5,
+                    xlim = c(90, 122),
+                    aspect = 0.55,
+                    unit = "(%)", unit.adj = 0.4,
                     legend.num2factor = TRUE,
                     # sp.layout = list(bar, l1, l2),
-                    sp.layout = sp_continent,
+                    sp.layout = list(sp_region, sp_river_L2, sp_river_L1),
                     colorkey = list(space = "right", height  = 0.95),
-                    interpolate = FALSE
-                    # stat = NULL,
-                    # xlim = xlim, ylim = ylim
-    ) + 
-        theme_lattice(key.margin = c(1, 1.5, 0, 0),
+                    interpolate = FALSE,
+                    stat = stat
+    ) +
+        theme_lattice(key.margin  = c(1, 1.5, 0, 0),
                       plot.margin = c(0, 4, -1, 1))
-    write_fig(p, "Figure1_LC_changes_major_(2008-2017)-(2003-2007)_V2.pdf", 12, 11, show = TRUE)
+    write_fig(p, "Figure1_Yangtze_LC_changes_major_(2008-2017)-(2003-2007)_V2.png", 10, 9.8, show = TRUE)
 }
 
 d <- na.omit(df_major)
